@@ -233,6 +233,39 @@
             box-shadow: 0 0 16px rgba(132, 204, 22, 0.55), inset 0 0 10px rgba(250, 204, 21, 0.3);
             transform: translateY(-1px);
         }
+
+        /* ===== Награда за лагерь: плашка «Вы получили сундук» ===== */
+        #chestReward { position: fixed; inset: 0; z-index: 45; pointer-events: none; --chest-color: #fbbf24; --chest-glow: 251,191,36; }
+        #chestReward .chest-bar { position: absolute; left: 0; right: 0; height: 9vh; background: #000; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+        #chestReward .chest-bar-top { top: 0; transform: translateY(-100%); }
+        #chestReward .chest-bar-bottom { bottom: 0; transform: translateY(100%); }
+        #chestReward.chest-in .chest-bar { transform: translateY(0); }
+        #chestReward.chest-out { opacity: 0; transition: opacity .45s; }
+        #chestReward .chest-banner { position: absolute; left: 50%; top: 21%; transform: translateX(-50%); width: min(640px, calc(100vw - 32px)); text-align: center; padding: 18px 16px 20px;
+            background: linear-gradient(90deg, rgba(10,10,16,0) 0%, rgba(10,10,16,.86) 18%, rgba(10,10,16,.86) 82%, rgba(10,10,16,0) 100%);
+            border-top: 1px solid rgba(var(--chest-glow),.6); border-bottom: 1px solid rgba(var(--chest-glow),.6); overflow: hidden; }
+        #chestReward.chest-in .chest-banner { animation: chestBannerIn .55s cubic-bezier(.2,.9,.25,1.2) both; }
+        #chestReward .chest-rays { position: absolute; left: 50%; top: 50%; width: 900px; height: 900px; margin: -450px 0 0 -450px; opacity: .35;
+            background: repeating-conic-gradient(rgba(var(--chest-glow),.55) 0deg 6deg, transparent 6deg 18deg); animation: chestSpin 9s linear infinite;
+            -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 55%); mask-image: radial-gradient(circle, #000 0%, transparent 55%); }
+        #chestReward .chest-kicker { position: relative; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: #e7e5e4; opacity: .85; }
+        #chestReward .chest-title { position: relative; font-family: 'Cinzel', serif; font-weight: 800; font-size: clamp(24px, 4.4vw, 38px); color: #fff;
+            text-shadow: 0 0 18px rgba(var(--chest-glow),.95), 0 0 42px rgba(var(--chest-glow),.6); }
+        #chestReward .chest-stars { position: relative; color: var(--chest-color); font-size: 18px; letter-spacing: 6px; text-shadow: 0 0 10px rgba(var(--chest-glow),.9); }
+        #chestReward .chest-sub { position: relative; font-size: 12px; color: #a8a29e; margin-top: 2px; }
+        #chestReward .chest-cards { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+        #chestReward .chest-card { width: 74px; border-radius: 10px; padding: 6px 4px 5px; background: linear-gradient(180deg, #3f3f46, #18181b); border: 1px solid #52525b;
+            opacity: 0; transform: translateY(14px) scale(.85); animation: chestCardIn .4s cubic-bezier(.2,.9,.3,1.3) forwards; }
+        #chestReward .chest-card.chest-r-rare { background: linear-gradient(180deg, #1d4ed8, #172554); border-color: #60a5fa; }
+        #chestReward .chest-card.chest-r-epic { background: linear-gradient(180deg, #7e22ce, #2e1065); border-color: #c084fc; }
+        #chestReward .chest-card.chest-r-legendary { background: linear-gradient(180deg, #d97706, #451a03); border-color: #fcd34d; box-shadow: 0 0 14px rgba(252,211,77,.6); }
+        #chestReward .chest-card-icon { font-size: 26px; line-height: 1.2; }
+        #chestReward .chest-card-count { font-size: 12px; font-weight: 800; color: #fff; }
+        #chestReward .chest-card-name { font-size: 9px; color: #e7e5e4; line-height: 1.15; min-height: 21px; }
+        @keyframes chestBannerIn { from { opacity: 0; transform: translateX(-50%) scaleY(.2); } to { opacity: 1; transform: translateX(-50%) scaleY(1); } }
+        @keyframes chestCardIn { to { opacity: 1; transform: none; } }
+        @keyframes chestSpin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { #chestReward .chest-rays { animation: none; } }
     </style>
 </head>
 <body class="relative select-none">
@@ -528,7 +561,7 @@
     <div class="fixed top-3 right-3 z-20 flex flex-col items-end gap-2 pointer-events-none">
         <div class="rpg-panel p-2.5 rounded-xl pointer-events-auto flex flex-col items-center">
             <div class="relative rounded-lg overflow-hidden border-2 border-stone-700 bg-stone-950 shadow-2xl">
-                <canvas id="minimapCanvas" width="142" height="142" class="block"></canvas>
+                <canvas id="minimapCanvas" width="142" height="142" class="block cursor-pointer" title="Карта мира (M)" onclick="toggleModal('worldmap')"></canvas>
                 <!-- Угловой мох на мини-карте -->
                 <div class="absolute top-0 left-0 w-7 h-7 pointer-events-none" style="background: radial-gradient(circle at 20% 20%, rgba(77,124,15,0.75), transparent 70%);"></div>
                 <div class="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[10px] text-stone-300 font-mono border border-stone-700" id="hudCoords">14, 15</div>
@@ -806,6 +839,22 @@
     </div>
 
     <!-- Подсказка взаимодействия -->
+    <div id="chestReward" class="hidden" onclick="hideChestReward()"></div>
+
+    <!-- ГЛОБАЛЬНАЯ КАРТА МИРА (M). Ад — скрытый ярус, на ней не отображается -->
+    <div id="modalWorldMap" class="hidden fixed inset-0 z-40 bg-black/80 flex items-center justify-center p-3" onclick="if (event.target === this) toggleModal('worldmap')">
+        <div class="rpg-panel rounded-2xl p-3 w-full max-w-[920px]">
+            <div class="flex items-center justify-between mb-2 relative z-20">
+                <h2 class="font-rpg text-lg font-extrabold text-amber-300">🗺️ The Realm of Oblivion</h2>
+                <div class="flex items-center gap-3 text-[11px] text-stone-300">
+                    <span><span class="text-rose-400">⚔</span> лагерь</span><span><span class="text-amber-300">🎁</span> сундук ждёт</span><span><span class="text-stone-500">✓</span> зачищен</span>
+                    <button onclick="toggleModal('worldmap')" class="rpg-btn px-2 py-1 rounded-lg text-xs">✕ (M)</button>
+                </div>
+            </div>
+            <canvas id="worldMapCanvas" width="1000" height="750" class="w-full h-auto rounded-xl block relative z-20 bg-black"></canvas>
+        </div>
+    </div>
+
     <div id="interactPrompt" class="hidden fixed bottom-40 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
         <div class="rpg-panel px-4 py-1.5 rounded-full text-xs font-bold text-amber-200">
             <span class="relative z-20"><kbd class="bg-stone-800 px-1.5 py-0.5 rounded border border-amber-500 text-amber-300">G</kbd> <span id="interactText"></span></span>
@@ -988,7 +1037,7 @@
         // 1. БАЗОВЫЕ КОНСТАНТЫ МИРА, НАСТРОЙКИ ОПТИМИЗАЦИИ И ЗВУКОВОЙ СИНТЕЗАТОР
         // ============================================================================
         const TILE_SIZE = 48;
-        const MAP_W = 128; // Расширенный мир с Королевством Камелот на северо-востоке
+        let MAP_W = 128; // после генерации — 200: карта «The Realm of Oblivion»
         let MAP_H = 64; // после генерации — 128: наземный мир (ряды 0..91) + скрытый ярус Ада (ряды 92..127)
 
         // Настройки графики, оптимизации и уровня сложности
@@ -1083,6 +1132,31 @@
                     const targetW = this.muted ? 0 : windIntensity * 0.055;
                     this.windGain.gain.setTargetAtTime(targetW, now, 0.4);
                 }
+            },
+            // Короткая фанфара открытия сундука: арпеджио + искры (чем ценнее сундук, тем выше и длиннее)
+            fanfare(stars = 1) {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const t0 = this.ctx.currentTime;
+                    const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568.0].slice(0, 3 + stars);
+                    notes.forEach((f, i) => {
+                        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+                        o.type = 'triangle'; o.frequency.setValueAtTime(f, t0 + i * 0.09);
+                        g.gain.setValueAtTime(0.0001, t0 + i * 0.09);
+                        g.gain.exponentialRampToValueAtTime(0.16, t0 + i * 0.09 + 0.02);
+                        g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.09 + 0.7);
+                        o.connect(g); g.connect(this.ctx.destination);
+                        o.start(t0 + i * 0.09); o.stop(t0 + i * 0.09 + 0.75);
+                    });
+                    for (let i = 0; i < 4 + stars * 3; i++) {
+                        const o = this.ctx.createOscillator(), g = this.ctx.createGain(), at = t0 + 0.3 + i * 0.06;
+                        o.type = 'sine'; o.frequency.setValueAtTime(2000 + Math.random() * 2200, at);
+                        g.gain.setValueAtTime(0.05, at); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.18);
+                        o.connect(g); g.connect(this.ctx.destination); o.start(at); o.stop(at + 0.2);
+                    }
+                } catch (e) {}
             },
             play(type) {
                 if (this.muted) return;
@@ -3372,13 +3446,9 @@
                     }
                 }
 
-                if ((g.kind === 'herb_node' || (g.kind === 'chest' && !g.opened)) && d < closestDist) {
+                if (isLootInteractable(g) && d < closestDist) {
                     closestDist = d;
-                    currentInteractTarget = {
-                        type: g.kind,
-                        data: g,
-                        label: g.kind === 'chest' ? 'Открыть тайник Арканы' : 'Собрать Звездный Лотус'
-                    };
+                    currentInteractTarget = { type: g.kind, data: g, label: lootLabel(g) };
                 }
             }
 
@@ -3719,8 +3789,9 @@
             const shakeX = screenShake > 0 ? (Math.random() - 0.5) * screenShake * 2 : 0;
             const shakeY = screenShake > 0 ? (Math.random() - 0.5) * screenShake * 2 : 0;
 
-            const camX = Math.floor(player.x - canvas.width / 2 + shakeX);
-            const camY = Math.floor(player.y - canvas.height / 2 + shakeY);
+            const cco = chestCamOffset();
+            const camX = Math.floor(player.x + cco.x - canvas.width / 2 + shakeX);
+            const camY = Math.floor(player.y + cco.y - canvas.height / 2 + shakeY);
 
             const startCol = Math.max(0, Math.floor(camX / TILE_SIZE));
             const endCol = Math.min(MAP_W - 1, Math.ceil((camX + canvas.width) / TILE_SIZE));
@@ -3821,7 +3892,7 @@
                         if (rightLand) ctx.fillRect(px + TILE_SIZE - 4, py, 4, TILE_SIZE);
                     } else if (t === 3) {
                         // ВЕКОВЫЕ ИСКРИВЛЕННЫЕ ДЕРЕВЬЯ И СКАЛЫ В СТИЛЕ DARK SOULS / ELDEN RING
-                        if (!tallPass) ctx.drawImage(y >= 34 ? tilePatterns.obsidianFloorVars[varIdx] : tilePatterns.darkForestVars[varIdx], px, py);
+                        if (!tallPass) ctx.drawImage(darkGround(x, y) ? tilePatterns.obsidianFloorVars[varIdx] : tilePatterns.darkForestVars[varIdx], px, py);
 
                         const sway = Math.sin(now * 0.0025 + x * 0.9 + y * 0.6) * 2.4;
 
@@ -3887,7 +3958,7 @@
                         ctx.drawImage(tilePatterns.obsidianFloorVars[varIdx], px, py);
                     } else if (t === 6) {
                         // РАЗРУШЕННЫЙ ГОТИЧЕСКИЙ МОНОЛИТ И СКАЛЬНАЯ ПОРОДА DARK SOULS
-                        if (!tallPass) ctx.drawImage(y >= 34 ? tilePatterns.obsidianFloorVars[varIdx] : tilePatterns.darkForestVars[varIdx], px, py);
+                        if (!tallPass) ctx.drawImage(darkGround(x, y) ? tilePatterns.obsidianFloorVars[varIdx] : tilePatterns.darkForestVars[varIdx], px, py);
 
                         // Тень от скалы
                         ctx.fillStyle = 'rgba(0,0,0,0.8)';
@@ -3919,7 +3990,7 @@
                         ctx.lineTo(px + 39, py + 14);
                         ctx.stroke();
 
-                        if (y < 34) {
+                        if (!darkGround(x, y)) {
                             ctx.fillStyle = '#2d4718';
                             ctx.beginPath();
                             ctx.arc(px + 22, py + 10, 7, 0, Math.PI * 2);
@@ -4986,7 +5057,8 @@
                    !document.getElementById('modalCraft').classList.contains('hidden') ||
                    !document.getElementById('modalNpc').classList.contains('hidden') ||
                    !document.getElementById('modalHelp').classList.contains('hidden') ||
-                   !document.getElementById('modalSpellbook').classList.contains('hidden');
+                   !document.getElementById('modalSpellbook').classList.contains('hidden') ||
+                   !document.getElementById('modalWorldMap').classList.contains('hidden');
         }
 
         function closeAllModals() {
@@ -4995,10 +5067,11 @@
             document.getElementById('modalNpc').classList.add('hidden');
             document.getElementById('modalHelp').classList.add('hidden');
             document.getElementById('modalSpellbook').classList.add('hidden');
+            document.getElementById('modalWorldMap').classList.add('hidden');
         }
 
         function toggleModal(kind) {
-            const map = { char: 'modalChar', craft: 'modalCraft', help: 'modalHelp', spellbook: 'modalSpellbook' };
+            const map = { char: 'modalChar', craft: 'modalCraft', help: 'modalHelp', spellbook: 'modalSpellbook', worldmap: 'modalWorldMap' };
             const el = document.getElementById(map[kind]);
             const wasHidden = el.classList.contains('hidden');
             closeAllModals();
@@ -5006,6 +5079,7 @@
                 el.classList.remove('hidden');
                 if (kind === 'char') renderCharacterModal();
                 if (kind === 'craft') renderCraftModal();
+                if (kind === 'worldmap') renderWorldMap();
                 if (kind === 'spellbook') renderSpellbookModal();
             }
         }
@@ -5228,6 +5302,8 @@
                 addItemToInventory(rewardItem, 1);
                 spawnParticleBurst(t.data.x, t.data.y, '#fbbf24', 25);
                 showToast(`Сундук открыт! Получено ${gold} золота и ${ITEMS_DB[rewardItem].name}!`, 'gold');
+            } else if (t.type === 'camp_chest') {
+                openCampChest(t.data);
             } else if (t.type === 'npc') {
                 openNpcDialog(t.data);
             }
@@ -5446,6 +5522,8 @@
                 toggleModal('spellbook');
             } else if (e.code === 'KeyC') {
                 toggleModal('char');
+            } else if (e.code === 'KeyM') {
+                toggleModal('worldmap');
             } else if (!isAnyModalOpen()) {
                 // Клавиши Сейбер (Q, W, E, R) ИЛИ Инвокера (Q, W, E, R, D, F)
                 if (player.heroType !== 'invoker') {
@@ -5512,6 +5590,9 @@
             return null;
         }
 
+        const isLootInteractable = g => g.kind === 'herb_node' || (g.kind === 'chest' && !g.opened) || (g.kind === 'camp_chest' && !g.sealed && !g.opened && !g.hidden);
+        const lootLabel = g => g.kind === 'chest' ? 'Открыть тайник Арканы' : (g.kind === 'camp_chest' ? `Открыть: ${CAMP_TIERS[g.tier].name}` : 'Собрать Звездный Лотус');
+
         function findInteractableAtPoint(wx, wy, tolerance = 32) {
             for (const npc of npcs) {
                 if (Math.hypot(npc.x - wx, npc.y - wy) <= tolerance) {
@@ -5520,15 +5601,8 @@
             }
             for (const g of groundLoot) {
                 if (g.respawnTimer > 0) continue;
-                if ((g.kind === 'herb_node' || (g.kind === 'chest' && !g.opened)) && Math.hypot(g.x - wx, g.y - wy) <= tolerance) {
-                    return {
-                        x: g.x, y: g.y,
-                        interactObj: {
-                            type: g.kind,
-                            data: g,
-                            label: g.kind === 'chest' ? 'Открыть тайник Арканы' : 'Собрать Звездный Лотус'
-                        }
-                    };
+                if (isLootInteractable(g) && Math.hypot(g.x - wx, g.y - wy) <= tolerance) {
+                    return { x: g.x, y: g.y, interactObj: { type: g.kind, data: g, label: lootLabel(g) } };
                 }
             }
             return null;
@@ -5701,19 +5775,7 @@
             try { fn(); } finally { Math.random = orig; }
         }
 
-        function zoneAt(px, py) {
-            const tx = px / TS, ty = py / TS;
-            // Ярусы мира: верх — цитадель Камелота и высокогорье, середина — лес (слева Святилище, справа Замок Дракулы),
-            // ниже леса — Цитадель Бездны, в самом низу — скрытый ярус Ада (только через порталы)
-            if (ty >= WORLD_TIERS.hellRow) return 'hell';
-            if (tx >= 46 && tx < 70 && ty >= 3 && ty < 28) return 'camelot';
-            if (ty < WORLD_TIERS.midDY) return 'highlands';
-            const oy = ty - WORLD_TIERS.midDY; // координата в среднем ярусе
-            if (tx >= EAST_X0) return 'castle';
-            if (oy >= 34) return 'abyss';
-            if (tx < 25 && oy < 29) return 'sanctuary';
-            return 'forest';
-        }
+        function zoneAt(px, py) { return regionAt(Math.floor(px / TS), Math.floor(py / TS)); }
         const playerZone = () => zoneAt(player.x, player.y);
         function isDarkZone() { const z = playerZone(); return z === 'abyss' || z === 'castle' || z === 'hell'; }
         function isEmberZone() { const z = playerZone(); return z === 'abyss' || z === 'hell'; }
@@ -5725,19 +5787,27 @@
         };
         function zoneWeather() {
             const z = playerZone();
-            if (z === 'abyss') return WEATHER_TYPES[3];
+            if (z === 'abyss' || z === 'dreadlands' || z === 'grimvault') return WEATHER_TYPES[3];
+            if (z === 'crimson_marsh' || z === 'shadowlands' || z === 'forsaken_hills') return WEATHER_TYPES[2];
             if (z === 'castle') return ZONE_WEATHER.crypt;
             if (z === 'hell') return ZONE_WEATHER.inferno;
             return WEATHER_TYPES[currentWeatherIdx];
         }
         const ZONE_INFO = {
-            sanctuary: { label: '🏛️ Руины Святилища (Безопасно)', title: 'РУИНЫ СВЯТИЛИЩА', sub: 'Безопасная зона' },
-            camelot:   { label: '🏰 Королевство Камелот (Безопасно)', title: 'КОРОЛЕВСТВО КАМЕЛОТ', sub: 'Цитадель на вершине мира' },
-            highlands: { label: '⛰️ Высокогорье Камелота', title: 'ВЫСОКОГОРЬЕ КАМЕЛОТА', sub: 'Верхний ярус мира' },
-            forest:    { label: '🌲 Шепчущий Лес', title: 'ШЕПЧУЩИЙ ЛЕС', sub: 'Здесь не любят чужаков' },
-            abyss:     { label: '🌋 Цитадель Бездны (Подземелье)', title: 'ЦИТАДЕЛЬ БЕЗДНЫ', sub: 'Владения Малакора' },
-            castle:    { label: '🦇 Замок Дракулы', title: 'ЗАМОК ДРАКУЛЫ', sub: 'Ловушки, нежить и Граф в тронном зале' },
-            hell:      { label: '🔥 Ад — Преисподняя (скрытый ярус)', title: 'ПРЕИСПОДНЯЯ', sub: 'Ярус под миром. Попасть сюда можно только через портал' }
+            sanctuary:     { label: '🏛️ Руины Голдрона (Безопасно)', title: 'РУИНЫ ГОЛДРОНА', sub: 'Змеиный Берег • безопасная зона' },
+            camelot:       { label: '🏰 Форт Этельгард (Безопасно)', title: 'ФОРТ ЭТЕЛЬГАРД', sub: 'Цитадель Рыцарей Багрового Креста' },
+            aethelgard_plains: { label: '⚔️ Земли Этельгарда', title: 'ЗЕМЛИ ЭТЕЛЬГАРДА', sub: 'Владения Рыцарей Багрового Креста' },
+            forest:        { label: '🌲 Дикий Лес (The Wildwood)', title: 'ДИКИЙ ЛЕС', sub: 'Сердце Королевства Забвения' },
+            clawhold:      { label: '🐺 Клык-Холд — Логово Оборотней', title: 'КЛЫК-ХОЛД', sub: 'Логово оборотней' },
+            dreadlands:    { label: '💀 Земли Ужаса (The Dreadlands)', title: 'ЗЕМЛИ УЖАСА', sub: 'Северные пустоши' },
+            grimvault:     { label: '⛰️ Гора Гримволт', title: 'ГОРА ГРИМВОЛТ', sub: 'Каменные стражи перевала' },
+            serpent_coast: { label: '🌊 Змеиный Берег', title: 'ЗМЕИНЫЙ БЕРЕГ', sub: 'Побережье и болота востока' },
+            crimson_marsh: { label: '🩸 Багровые Топи', title: 'БАГРОВЫЕ ТОПИ', sub: 'Подступы к Сангвинии' },
+            castle:        { label: '🦇 Сангвиния — Владения Лорда Вампиров', title: 'САНГВИНИЯ', sub: 'Замок Графа Дракулы' },
+            shadowlands:   { label: '🌑 Теневые Земли', title: 'ТЕНЕВЫЕ ЗЕМЛИ', sub: 'Юг Королевства Забвения' },
+            forsaken_hills:{ label: '🪦 Забытые Холмы', title: 'ЗАБЫТЫЕ ХОЛМЫ', sub: 'Курганы и склепы' },
+            abyss:         { label: '🌋 Цитадель Бездны (Теневые Земли)', title: 'ЦИТАДЕЛЬ БЕЗДНЫ', sub: 'Владения Малакора' },
+            hell:          { label: '🔥 Ад — Преисподняя (скрытый ярус)', title: 'ПРЕИСПОДНЯЯ', sub: 'Ярус под миром. Попасть сюда можно только через портал' }
         };
         function zoneLabel25(tx, ty) { return ZONE_INFO[zoneAt((tx + 0.5) * TS, (ty + 0.5) * TS)].label; }
 
@@ -5899,93 +5969,202 @@
             for (let tries = 0; tries < 200; tries++) {
                 const tx = Math.floor(minX + Math.random() * (maxX - minX + 1));
                 const ty = Math.floor(minY + Math.random() * (maxY - minY + 1));
-                if (!allowed.includes(worldMap[ty]?.[tx])) continue;
+                if (!allowed.includes(worldMap[ty]?.[tx]) || !isReachable(tx, ty)) continue;
                 if (avoid && avoid.some(([ax, ay, ar]) => Math.hypot(tx - ax, ty - ay) < ar)) continue;
                 return { x: (tx + 0.5) * TS, y: (ty + 0.5) * TS };
             }
             return null;
         }
 
-        // ---------- ВЕРТИКАЛЬНАЯ СТРУКТУРА МИРА ----------
-        // Старый план карты (128x64) генерируется как раньше, затем раскладывается по ярусам:
-        //   ряды 0..27   — ВЕРХНИЙ ярус: цитадель Камелота и высокогорье вокруг неё
-        //   ряды 28..91  — СРЕДНИЙ ярус: Шепчущий Лес по центру, Руины Святилища слева, Замок Дракулы справа,
-        //                  ниже леса — Цитадель Бездны
-        //   ряды 92..127 — СКРЫТЫЙ ярус Ада: отделён сплошной скалой, не виден на общей карте, вход только порталом
-        const WORLD_TIERS = { midDY: 28, hellDY: 64, hellRow: 92, height: 128 };
+        // ---------- КАРТА «THE REALM OF OBLIVION» ----------
+        // Наземный мир 200x150 тайлов, под ним (ряды 150..185) — скрытый ярус Ада.
+        // Готовые постройки старой карты (128x64) вставляются блоками в свои регионы:
+        //   Камелот → Форт Этельгард (запад), Святилище → Руины Голдрона (Змеиный Берег, восток),
+        //   Замок Дракулы → Сангвиния (центр), Цитадель Бездны → Теневые Земли (юг), Ад → нижний ярус.
+        const WORLD = { W: 200, overH: 150, hellRow: 150, H: 186 };
+        const WORLD_TIERS = { hellRow: WORLD.hellRow };
+        const LEGACY_BLOCKS = [
+            { id: 'camelot',   x0: 46, y0: 3,  x1: 69,  y1: 27, nx: 16,  ny: 58 },
+            { id: 'sanctuary', x0: 1,  y0: 1,  x1: 25,  y1: 31, nx: 155, ny: 45 },
+            { id: 'castle',    x0: 73, y0: 1,  x1: 126, y1: 31, nx: 78,  ny: 64 },
+            { id: 'abyss',     x0: 0,  y0: 33, x1: 71,  y1: 63, nx: 52,  ny: 116 },
+            { id: 'hell',      x0: 73, y0: 32, x1: 126, y1: 62, nx: 78,  ny: 152 }
+        ];
+        const WORLD_HUB = { x: 100, y: 50 }; // перекрёсток трактов в Диком Лесу
         let legacyMap = null;
+        let darkMask = null;
+        let reachMask = null;
+        const isReachable = (tx, ty) => !reachMask || !!reachMask[ty * MAP_W + tx];
 
         function legacyToNew(tx, ty) {
-            if (tx >= 46 && tx < 70 && ty >= 3 && ty < 28) return { x: tx, y: ty };       // Камелот остаётся наверху
-            if (tx >= 73 && ty >= 32) return { x: tx, y: ty + WORLD_TIERS.hellDY };        // Ад — на нижний ярус
-            return { x: tx, y: ty + WORLD_TIERS.midDY };                                     // всё остальное — средний ярус
+            const b = LEGACY_BLOCKS.find(b => tx >= b.x0 && tx < b.x1 + 1 && ty >= b.y0 && ty < b.y1 + 1);
+            if (b) return { x: tx - b.x0 + b.nx, y: ty - b.y0 + b.ny };
+            return { x: WORLD_HUB.x, y: WORLD_HUB.y }; // старый лес не переносится
         }
         const remapPt = o => { const n = legacyToNew(o.x, o.y); o.x = n.x; o.y = n.y; return o; };
         const remapPx = o => { const n = legacyToNew(o.x / TS, o.y / TS); o.x = n.x * TS; o.y = n.y * TS; return o; };
+        // Координаты прошлой (ярусной) версии карты → старый план → новая карта (для старых сохранений)
+        function tieredToLegacy(tx, ty) {
+            if (tx >= 46 && tx < 70 && ty >= 3 && ty < 28) return { x: tx, y: ty };
+            if (ty >= 92) return { x: tx, y: ty - 64 };
+            return { x: tx, y: ty - 28 };
+        }
+
+        // Регион по тайлу (новые координаты)
+        function regionAt(tx, ty) {
+            if (ty >= WORLD.hellRow) return 'hell';
+            if (tx >= 16 && tx < 40 && ty >= 58 && ty < 83) return 'camelot';
+            if (tx >= 155 && tx < 180 && ty >= 45 && ty < 76) return 'sanctuary';
+            if (tx >= 78 && tx < 132 && ty >= 64 && ty < 95) return 'castle';
+            if (tx >= 52 && tx < 124 && ty >= 117 && ty < 147) return 'abyss';
+            if (ty >= 102) return tx < 88 ? 'forsaken_hills' : 'shadowlands';
+            if (tx >= 66 && tx < 144 && ty >= 56) return 'crimson_marsh';
+            if (ty < 32) {
+                if (tx >= 180) return 'serpent_coast';
+                if (tx >= 66 && tx < 106 && ty >= 12) return 'clawhold';
+                if (tx >= 116) return 'grimvault';
+                return 'dreadlands';
+            }
+            if (tx >= 150) return 'serpent_coast';
+            if (tx < 58) return 'aethelgard_plains';
+            return 'forest';
+        }
+        const DARK_REGIONS = new Set(['abyss', 'shadowlands', 'forsaken_hills', 'dreadlands', 'grimvault', 'hell']);
+        const darkGround = (x, y) => !!(darkMask && darkMask[y * MAP_W + x]);
 
         function generateWorld() {
-            MAP_H = 64;
+            MAP_W = 128; MAP_H = 64;
             generateLegacyWorld();
             const LM = worldMap, LD = worldDecor;
             legacyMap = LM;
-            MAP_H = WORLD_TIERS.height;
+            MAP_W = WORLD.W; MAP_H = WORLD.H;
+            const R = Math.random;
             const NM = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(3));
             const ND = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(null));
-            tileVariants = Array.from({ length: MAP_H }, () => Array.from({ length: MAP_W }, () => Math.random()));
-            for (let ly = 0; ly < 64; ly++) for (let lx = 0; lx < MAP_W; lx++) {
-                const n = legacyToNew(lx, ly);
-                if (n.y < 0 || n.y >= MAP_H) continue;
-                NM[n.y][n.x] = LM[ly][lx]; ND[n.y][n.x] = LD[ly][lx];
-            }
-            // Бывшее место Камелота в среднем ярусе зарастает лесом
-            for (let y = 31; y <= 55; y++) for (let x = 46; x <= 69; x++) {
-                NM[y][x] = Math.random() < 0.1 ? 3 : 4;
-                const r = Math.random();
-                ND[y][x] = NM[y][x] === 4 ? (r < 0.08 ? 'fern' : (r < 0.12 ? 'tuft' : (r < 0.14 ? 'mushroom' : null))) : null;
-            }
-            // ВЕРХНИЙ ЯРУС: высокогорное плато вокруг цитадели, обрыв над лесом
-            for (let y = 2; y <= 26; y++) for (let x = 24; x <= 100; x++) {
-                if (x >= 46 && x <= 69 && y >= 3 && y <= 27) continue;
-                NM[y][x] = Math.random() < 0.09 ? 3 : 0;
-                const r = Math.random();
-                ND[y][x] = NM[y][x] === 0 ? (r < 0.07 ? 'tuft' : (r < 0.1 ? 'flower' : (r < 0.125 ? 'boulder' : (r < 0.135 ? 'ruin_pillar' : null)))) : null;
-            }
-            // Горная дорога: от южных ворот Камелота вниз, через лес — к тракту на Замок Дракулы
-            for (let y = 27; y <= 58; y++) for (let x = 56; x <= 59; x++) {
-                if (y === 27 && (x < 56 || x > 59)) continue;
-                if ((x === 56 || x === 59) && y > 31) continue;
-                NM[y][x] = 1; ND[y][x] = null;
-            }
-            // Тропа от западных ворот Камелота по плато
-            for (let x = 30; x <= 45; x++) for (let y = 14; y <= 15; y++) { NM[y][x] = 1; ND[y][x] = null; }
-            ND[26][55] = 'torch'; ND[26][60] = 'torch'; ND[30][55] = 'torch'; ND[30][60] = 'torch';
-            worldMap = NM; worldDecor = ND;
+            const pick = (tbl) => { let r = R(); for (const [k, p] of tbl) { if (r < p) return k; r -= p; } return null; };
+            const seaX = y => 186 + Math.sin(y * 0.15) * 3 + Math.sin(y * 0.05) * 4;
 
-            // Ключевые точки, NPC, ловушки и порталы — в новые координаты
+            // 1. Регионы наземного мира
+            for (let y = 1; y < WORLD.overH - 1; y++) for (let x = 1; x < MAP_W - 1; x++) {
+                const z = regionAt(x, y);
+                let t = 4, d = null;
+                if (z === 'forest') {
+                    t = R() < 0.13 ? 3 : 4;
+                    if (t === 4) d = pick([['fern', 0.06], ['tuft', 0.06], ['mushroom', 0.03], ['boulder', 0.02], ['fallen_log', 0.015], ['bones', 0.005]]);
+                } else if (z === 'aethelgard_plains') {
+                    t = R() < 0.05 ? 3 : 0;
+                    if (t === 0) d = pick([['tuft', 0.1], ['flower', 0.05], ['pebbles', 0.02], ['ruin_pillar', 0.004]]);
+                } else if (z === 'clawhold') {
+                    const dl = Math.hypot((x - 86) / 1.3, y - 23);
+                    if (dl < 10) { t = 0; d = pick([['bones', 0.07], ['skull', 0.03], ['tuft', 0.06], ['skull_pile', 0.01]]); }
+                    else { t = R() < 0.22 ? 3 : 4; if (t === 4) d = pick([['bones', 0.03], ['fern', 0.05], ['mushroom', 0.02]]); }
+                } else if (z === 'dreadlands') {
+                    t = R() < 0.08 ? 6 : 5;
+                    if (t === 5) d = pick([['crack', 0.05], ['bones', 0.04], ['skull', 0.02], ['skull_pile', 0.006]]);
+                } else if (z === 'grimvault') {
+                    const m = 1 - Math.hypot((x - 148) / 30, (y - 13) / 13);
+                    t = (m > 0.1 && R() < 0.55 + m * 0.4) ? 6 : (R() < 0.06 ? 6 : 5);
+                    if (t === 5) d = pick([['crack', 0.05], ['pebbles', 0.04], ['bones', 0.02]]);
+                } else if (z === 'serpent_coast') {
+                    const sx = seaX(y);
+                    if (x > sx) t = 2;
+                    else if (x > sx - 9) { t = R() < 0.2 ? 2 : 0; if (t === 0) d = pick([['reeds', 0.2], ['tuft', 0.1], ['pebbles', 0.04]]); }
+                    else { t = R() < 0.07 ? 3 : 0; if (t === 0) d = pick([['tuft', 0.08], ['flower', 0.04], ['ruin_pillar', 0.006], ['boulder', 0.02]]); }
+                } else if (z === 'crimson_marsh') {
+                    const n = Math.sin(x * 0.31) * Math.cos(y * 0.27) + Math.sin((x + y) * 0.13);
+                    t = n > 1.05 ? 2 : (R() < 0.04 ? 3 : T_GRAVE);
+                    if (t === T_GRAVE) d = pick([['dead_tree', 0.03], ['blood', 0.04], ['bones', 0.03], ['tuft', 0.08], ['skull', 0.01]]);
+                } else if (z === 'shadowlands' || z === 'forsaken_hills') {
+                    t = R() < 0.09 ? 6 : 5;
+                    if (t === 5) d = pick([['dead_tree', 0.025], ['bones', 0.04], ['skull_pile', 0.012], ['crack', 0.04], ['skull', 0.02], ['ember_vent', 0.008]]);
+                }
+                NM[y][x] = t; ND[y][x] = d;
+            }
+            // 2. Сумрачная река: с гор Земель Ужаса через лес к Теневым Землям
+            for (let y = 1; y < 104; y++) {
+                const cx = Math.round(60 + Math.sin(y * 0.12) * 5);
+                for (let dx = 0; dx <= 1; dx++) { NM[y][cx + dx] = 2; ND[y][cx + dx] = null; }
+            }
+            // 3. Тракты (поверх воды — мосты)
+            const carve = (pts, w = 1) => {
+                for (let i = 0; i < pts.length - 1; i++) {
+                    const [ax, ay] = pts[i], [bx, by] = pts[i + 1];
+                    const steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 2);
+                    for (let k = 0; k <= steps; k++) {
+                        const cx = ax + (bx - ax) * k / steps, cy = ay + (by - ay) * k / steps;
+                        for (let oy = 0; oy <= w; oy++) for (let ox = 0; ox <= w; ox++) {
+                            const x = Math.floor(cx) + ox, y = Math.floor(cy) + oy;
+                            if (x < 1 || y < 1 || x >= MAP_W - 1 || y >= WORLD.overH - 1) continue;
+                            NM[y][x] = (NM[y][x] === 2 || NM[y][x] === 8) ? 8 : 1; ND[y][x] = null;
+                        }
+                    }
+                }
+            };
+            carve([[40, 69], [58, 69], [76, 56], [100, 50]]);                     // Форт → перекрёсток
+            carve([[27, 83], [27, 98], [56, 99], [70, 93], [78, 92]]);            // Форт → ворота Сангвинии
+            carve([[100, 50], [98, 38], [88, 29]]);                               // → Клык-Холд
+            carve([[98, 38], [112, 30], [130, 22], [150, 14]]);                   // → перевал Гримволта
+            carve([[88, 29], [60, 20], [34, 17]]);                                // → Земли Ужаса
+            carve([[100, 50], [125, 52], [145, 57], [156, 59]]);                  // → Руины Голдрона
+            carve([[168, 76], [160, 96], [140, 108], [112, 112], [109, 116]]);    // Голдрон → восточный мост Бездны
+            carve([[70, 93], [80, 104], [97, 112], [97, 116]]);                   // → западный мост Бездны
+            carve([[56, 99], [30, 112], [20, 130]]);                              // → Забытые Холмы
+            carve([[125, 52], [150, 40], [172, 33]]);                             // → бухта Змеиного Берега
+
+            // 4. Готовые постройки старой карты
+            LEGACY_BLOCKS.forEach(b => {
+                for (let ly = b.y0; ly <= b.y1; ly++) for (let lx = b.x0; lx <= b.x1; lx++) {
+                    const x = lx - b.x0 + b.nx, y = ly - b.y0 + b.ny;
+                    if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) continue;
+                    NM[y][x] = LM[ly][lx]; ND[y][x] = LD[ly][lx];
+                }
+            });
+            const road = (x0, y0, x1, y1, t = 1) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { NM[y][x] = NM[y][x] === 2 ? 9 : t; ND[y][x] = null; } };
+            road(39, 68, 39, 71, 10);      // восточные ворота Форта Этельгард
+            road(40, 69, 44, 70);
+            road(150, 59, 163, 60);        // западный въезд в Руины Голдрона
+            road(167, 69, 168, 76);        // южный выход из руин
+            road(73, 92, 79, 93);          // подъезд к воротам Сангвинии
+            // Обрамление Сангвинии: каменная ограда вокруг замка, кроме ворот
+            for (let x = 77; x <= 132; x++) for (const y of [63, 95]) if (NM[y][x] !== 1) NM[y][x] = 6;
+            for (let y = 63; y <= 95; y++) for (const x of [77, 132]) if (NM[y][x] !== 1 && !(y >= 92 && y <= 93)) NM[y][x] = 6;
+            road(77, 92, 77, 93);
+            // Нижний ярус (Ад) отрезан сплошной скалой: ряды 147..151 и всё вне блока Ада
+            worldMap = NM; worldDecor = ND;
+            tileVariants = Array.from({ length: MAP_H }, () => Array.from({ length: MAP_W }, () => Math.random()));
+
+            // 5. Ключевые точки, NPC, ловушки и порталы — в новые координаты
             Object.values(CASTLE).forEach(remapPt);
             Object.values(HELL).forEach(remapPt);
             Object.values(HERO_DEFS).forEach(d => remapPt(d.home));
-            npcs.forEach(remapPx);
+            npcs.forEach(n => {
+                if (n.id === 'vanhelsing') { n.x = 74.5 * TS; n.y = 90.6 * TS; return; } // охотник у ворот Сангвинии
+                remapPx(n);
+            });
             worldTraps.forEach(tr => { const n = legacyToNew(tr.tx, tr.ty); tr.tx = n.x; tr.ty = n.y; });
             worldPortals.forEach(po => {
                 remapPx(po);
                 const t = legacyToNew(po.tx / TS, po.ty / TS); po.tx = t.x * TS; po.ty = t.y * TS;
             });
+            // Карта достижимости (от перекрёстка и от врат Ада): спавны не попадут в замкнутые скалами карманы
+            reachMask = new Uint8Array(MAP_W * MAP_H);
+            [[WORLD_HUB.x, WORLD_HUB.y], [HELL.arrival.x, HELL.arrival.y]].forEach(([sx, sy]) => {
+                const st = [[Math.floor(sx), Math.floor(sy)]];
+                reachMask[st[0][1] * MAP_W + st[0][0]] = 1;
+                while (st.length) {
+                    const [x, y] = st.pop();
+                    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+                        const nx = x + dx, ny = y + dy, k = ny * MAP_W + nx;
+                        if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || reachMask[k] || isTileBlocked(nx, ny)) continue;
+                        reachMask[k] = 1; st.push([nx, ny]);
+                    }
+                }
+            });
+            darkMask = new Uint8Array(MAP_W * MAP_H);
+            for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) if (DARK_REGIONS.has(regionAt(x, y))) darkMask[y * MAP_W + x] = 1;
             const h = HERO_DEFS.invoker.home;
             player.x = h.x * TS; player.y = h.y * TS;
             R25.minimap = null;
-        }
-
-        // Поиск свободного тайла по старому плану карты (диапазоны в старых координатах), результат — в новых
-        function findFreeTileL(minX, maxX, minY, maxY) {
-            for (let tries = 0; tries < 100; tries++) {
-                const tx = Math.floor(minX + Math.random() * (maxX - minX));
-                const ty = Math.floor(minY + Math.random() * (maxY - minY));
-                const t = legacyMap[ty]?.[tx];
-                if (t === 0 || t === 4 || t === 5) { const n = legacyToNew(tx, ty); return { x: (n.x + 0.5) * TS, y: (n.y + 0.5) * TS }; }
-            }
-            const n = legacyToNew(35, 15);
-            return { x: n.x * TS, y: n.y * TS };
         }
 
         // Ближайший проходимый тайл к точке (в новых тайловых координатах)
@@ -5993,7 +6172,7 @@
             for (let r = 0; r < 8; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
                 if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
                 const tx = Math.floor(x) + dx, ty = Math.floor(y) + dy;
-                if (allowed.includes(worldMap[ty]?.[tx]) && !worldDecor[ty]?.[tx]?.match?.(/pillar|statue|throne/)) return { x: (tx + 0.5) * TS, y: (ty + 0.5) * TS };
+                if (allowed.includes(worldMap[ty]?.[tx]) && isReachable(tx, ty) && !worldDecor[ty]?.[tx]?.match?.(/pillar|statue|throne/)) return { x: (tx + 0.5) * TS, y: (ty + 0.5) * TS };
             }
             return { x: x * TS, y: y * TS };
         }
@@ -6634,6 +6813,10 @@
             // --- Демоны Ада ---
             imp:       { name: 'Огненный Бес', icon: '👿', hp: 380, dmg: 50, armor: 4, mres: 0.3, speed: 150, xp: 220, gold: [40, 70], radius: 13, aggroRange: 380, attackRange: 250, ranged: true, projColor: '#fb923c', projSpeed: 330, color: '#f97316',
                          drops: [{ id: 'hell_ember', chance: 0.25 }, { id: 'mp_pot', chance: 0.3 }] },
+            werewolf:  { name: 'Оборотень Клык-Холда', icon: '🐺', hp: 520, dmg: 46, armor: 5, mres: 0.1, speed: 168, xp: 160, gold: [25, 45], radius: 16, aggroRange: 300, attackRange: 40, leap: true, attackTime: 0.95, color: '#78716c',
+                         drops: [{ id: 'shadow_silk', chance: 0.15 }, { id: 'bone_dust', chance: 0.3 }, { id: 'hp_pot', chance: 0.1 }] },
+            werewolf_alpha: { name: 'Альфа Клык-Холда', icon: '🐺', hp: 1600, dmg: 70, armor: 8, mres: 0.15, speed: 176, xp: 520, gold: [90, 140], radius: 21, aggroRange: 330, attackRange: 46, leap: true, lifesteal: 0.2, attackTime: 0.9, color: '#a8a29e',
+                         drops: [{ id: 'shadow_silk', chance: 1 }, { id: 'demon_horn', chance: 0.3 }] },
             hellhound: { name: 'Адская Гончая', icon: '🐺', hp: 720, dmg: 68, armor: 6, mres: 0.2, speed: 182, xp: 290, gold: [50, 85], radius: 17, aggroRange: 400, attackRange: 40, leap: true, attackTime: 1.0, color: '#ea580c',
                          drops: [{ id: 'hell_ember', chance: 0.35 }, { id: 'demon_horn', chance: 0.25 }, { id: 'hp_pot', chance: 0.2 }] },
             pit_demon: { name: 'Демон-Палач', icon: '😈', hp: 1500, dmg: 104, armor: 14, mres: 0.3, speed: 112, xp: 500, gold: [90, 150], radius: 22, aggroRange: 360, attackRange: 64, slam: true, color: '#b91c1c',
@@ -6669,70 +6852,263 @@
             enemyHazards = [];
             playerFx = [];
             projectiles = [];
-            // L — координаты по старому плану (переводятся в ярусы), E — уже в новых координатах
+            // L — координаты по старому плану (переводятся в новые регионы), E — уже в новых координатах
             const E = (type, x, y) => { const e = createEnemy(type, x * TS, y * TS); enemies.push(e); return e; };
             const L = (type, x, y) => { const n = legacyToNew(x, y); return E(type, n.x, n.y); };
 
-            for (let i = 0; i < 18; i++) {
-                const pos = findFreeTileL(28, 60, 3, 31);
-                groundLoot.push({ uid: Math.random(), x: pos.x, y: pos.y, kind: 'herb_node', itemId: 'herb', count: 1, respawnTimer: 0 });
-            }
-            // Травы и на высокогорье
-            for (let i = 0; i < 6; i++) {
-                const pos = findFreeTileOf(26, 98, 3, 25, [0]);
+            // Травы Звёздного Лотуса — в Диком Лесу и на Змеином Берегу
+            for (let i = 0; i < 24; i++) {
+                const pos = i < 18 ? findFreeTileOf(62, 148, 33, 55, [4]) : findFreeTileOf(150, 180, 78, 100, [0]);
                 if (pos) groundLoot.push({ uid: Math.random(), x: pos.x, y: pos.y, kind: 'herb_node', itemId: 'herb', count: 1, respawnTimer: 0 });
             }
-            [
-                { x: 56, y: 40, tier: 'forest' }, { x: 34, y: 56, tier: 'forest' }, { x: 90, y: 6, tier: 'forest' },
-                { x: 58, y: 84, tier: 'dungeon' }, { x: 10, y: 86, tier: 'dungeon' },
-                { x: 101.5, y: 54.5, tier: 'castle' }, { x: 78.5, y: 32.5, tier: 'castle' },
-                { x: 120.5, y: 102.5, tier: 'hell' }, { x: 78.5, y: 119.5, tier: 'hell' }
-            ].forEach(c => { const p = nearestFreeTile(c.x, c.y, [0, 1, 4, 5, T_CFLOOR, T_GRAVE, T_HELL]); groundLoot.push({ uid: Math.random(), x: p.x, y: p.y, kind: 'chest', tier: c.tier, opened: false }); });
 
-            for (let i = 0; i < 15; i++) {
-                const pos = findFreeTileL(28, 61, 3, 31);
-                enemies.push(createEnemy(i % 2 === 1 ? 'goblin' : 'slime', pos.x, pos.y));
-            }
-            // Высокогорье: гоблины-разведчики на плато
-            for (let i = 0; i < 6; i++) {
-                const pos = findFreeTileOf(26, 98, 3, 25, [0], [[57, 15, 14]]);
-                if (pos) enemies.push(createEnemy('goblin', pos.x, pos.y));
-            }
-            for (let i = 0; i < 15; i++) {
-                const pos = findFreeTileL(28, 60, 36, 61);
-                enemies.push(createEnemy(i % 3 === 0 ? 'dark_mage' : 'skeleton', pos.x, pos.y));
-            }
+            // Все обычные враги живут в лагерях и патрулях (см. CAMP_DEFS)
+            spawnCamps();
+
+            // Боссы и их стражи-мини-боссы
             const malakor = L('boss', 13, 48);
-            // Мини-босс: Привратник Пепла охраняет подход к арене Малакора
-            const g1p = nearestFreeTile(22.5, 76.5, [5]);
-            const ashWarden = E('ash_warden', g1p.x / TS, g1p.y / TS);
-            malakor.guardian = ashWarden;
-
-            // --- Замок Дракулы ---
-            [['ghoul', 80.5, 24.5], ['ghoul', 87.5, 26.5], ['ghoul', 90.5, 23.5], ['bat', 82.5, 22.5], ['bat', 86.5, 29.5], ['bat', 78.5, 25.5],
-             ['blood_knight', 80.5, 15.5], ['blood_knight', 87.5, 15.5], ['ghoul', 82.5, 12.5], ['ghoul', 86.5, 18.5], ['bat', 80.5, 12.5], ['bat', 89.5, 18.5], ['gargoyle', 78.5, 18.5], ['gargoyle', 89.5, 11.5],
-             ['gargoyle', 89.5, 4.5], ['gargoyle', 79.5, 8.5], ['blood_knight', 84.5, 6.5], ['bat', 82.5, 4.5], ['bat', 86.5, 8.5],
-             ['ghoul', 97.5, 24.5], ['ghoul', 100.5, 27.5], ['ghoul', 95.5, 26.5], ['bat', 101.5, 23.5],
-             ['gargoyle', 108.5, 11.5], ['gargoyle', 104.5, 18.5]
-            ].forEach(([t, x, y]) => L(t, x, y));
+            const g1 = legacyToNew(22.5, 48.5), g1p = nearestFreeTile(g1.x, g1.y, [5]);
+            malakor.guardian = E('ash_warden', g1p.x / TS, g1p.y / TS);
             const dracula = E('dracula', CASTLE.dracula.x, CASTLE.dracula.y);
-            // Мини-босс: Кровавый Привратник в преддверии тронного зала
-            const g2p = nearestFreeTile(106.5, 42.5, [T_CFLOOR, T_CARPET]);
+            const g2 = legacyToNew(106.5, 14.5), g2p = nearestFreeTile(g2.x, g2.y, [T_CFLOOR, T_CARPET]);
             dracula.guardian = E('crimson_warden', g2p.x / TS, g2p.y / TS);
+            const lord = E('hell_lord', HELL.boss.x, HELL.boss.y);
+            const g3 = legacyToNew(109.5, 52.5), g3p = nearestFreeTile(g3.x, g3.y, [T_HELL, T_HBRIDGE]);
+            lord.guardian = E('infernal_gatekeeper', g3p.x / TS, g3p.y / TS);
+        }
 
-            // --- Ад (скрытый нижний ярус) ---
-            const hy = WORLD_TIERS.hellDY;
-            const avoid = [[HELL.arrival.x, HELL.arrival.y, 8], [HELL.boss.x, HELL.boss.y, 9]];
-            [['imp', 9], ['hellhound', 8], ['pit_demon', 7]].forEach(([type, n]) => {
-                for (let i = 0; i < n; i++) {
-                    const pos = findFreeTileOf(75, 124, 34 + hy, 60 + hy, [T_HELL], avoid);
-                    if (pos) enemies.push(createEnemy(type, pos.x, pos.y));
+        // ============================================================================
+        // ЛАГЕРЯ ВРАГОВ И СУНДУКИ НАГРАДЫ
+        // ============================================================================
+        // Враги не бродят поодиночке: каждый лагерь — группа у точки интереса (или патруль по маршруту).
+        // Пока жив хоть один враг лагеря, сундук в центре запечатан. Зачистка снимает печать.
+        // legacy: true — координаты по старому плану (комнаты Сангвинии, Цитадель Бездны, Ад).
+        // fixed — точные позиции бойцов; patrol — маршрут патруля (сундук появится там, где пала группа).
+        const CAMP_TIERS = {
+            common:   { name: 'Обычный сундук',     short: 'обычный',     stars: 1, color: '#e2e8f0', glow: '226,232,240', gold: [40, 80],   rolls: 2, gearChance: 0.08, gear: ['bone_mail', 'shadow_cloak', 'ember_loop', 'caliburn_sword', 'elven_longbow', 'mystic_staff', 'camelot_plate'] },
+            rich:     { name: 'Богатый сундук',     short: 'богатый',     stars: 2, color: '#fbbf24', glow: '251,191,36',  gold: [120, 220], rolls: 3, gearChance: 0.3,  gear: ['bone_mail', 'shadow_cloak', 'ember_loop', 'arcane_ring', 'storm_bow', 'octarine_rod', 'caliburn_sword', 'archmage_vestment', 'warden_plate'] },
+            precious: { name: 'Драгоценный сундук', short: 'драгоценный', stars: 3, color: '#d8b4fe', glow: '216,180,254', gold: [300, 520], rolls: 4, gearChance: 0.75, gear: ['ashforged_blade', 'ash_recurve', 'ash_scepter', 'warden_plate', 'bloodweave_mantle', 'malakor_eye', 'vampiric_band', 'archmage_vestment'] }
+        };
+        const CAMP_LOOT = {
+            common: ['herb', 'slime_gel', 'iron_ore', 'hp_pot', 'mp_pot'],
+            rich: ['iron_ore', 'soul_crystal', 'bone_dust', 'shadow_silk', 'star_steel', 'hp_pot', 'mp_pot'],
+            precious: ['soul_crystal', 'star_steel', 'shadow_silk', 'grand_elixir', 'vampire_fang', 'demon_horn']
+        };
+        const CAMP_DEFS = [
+            // --- Дикий Лес ---
+            { id: 'ww_slimes', name: 'Слизни у Сумрачной реки', x: 115, y: 44, tier: 'common', units: [['slime', 4]] },
+            { id: 'ww_goblins', name: 'Гоблинская стоянка', x: 132, y: 40, tier: 'common', units: [['goblin', 3], ['slime', 1]] },
+            { id: 'ww_den', name: 'Логово в чаще', x: 80, y: 43, tier: 'rich', units: [['goblin', 3], ['dark_mage', 1]] },
+            { id: 'ww_patrol', name: 'Патруль гоблинов на тракте', x: 92, y: 49, tier: 'rich', units: [['goblin', 4]], patrol: [[92, 49], [118, 51], [140, 55], [118, 51]] },
+            // --- Земли Этельгарда ---
+            { id: 'ae_ambush', name: 'Засада у Южного тракта', x: 46, y: 95, tier: 'common', units: [['goblin', 4]] },
+            { id: 'ae_ruin', name: 'Нежить у павшей заставы', x: 42, y: 42, tier: 'rich', units: [['skeleton', 3], ['dark_mage', 1]] },
+            // --- Клык-Холд ---
+            { id: 'ch_outer', name: 'Клык-Холд: внешний круг', x: 78, y: 30, tier: 'rich', units: [['werewolf', 3]] },
+            { id: 'ch_alpha', name: 'Клык-Холд: логово Альфы', x: 87, y: 21, tier: 'precious', units: [['werewolf_alpha', 1], ['werewolf', 3]] },
+            // --- Земли Ужаса и Гримволт ---
+            { id: 'dl_undead', name: 'Курган Земель Ужаса', x: 38, y: 14, tier: 'rich', units: [['skeleton', 4], ['dark_mage', 1]] },
+            { id: 'gv_pass', name: 'Горгульи перевала', x: 150, y: 14, tier: 'rich', units: [['gargoyle', 3]] },
+            { id: 'gv_peak', name: 'Вершина Гримволта', x: 166, y: 24, tier: 'precious', units: [['gargoyle', 2], ['werewolf', 2], ['dark_mage', 1]] },
+            // --- Змеиный Берег ---
+            { id: 'sc_slimes', name: 'Слизни прибрежных болот', x: 176, y: 88, tier: 'common', units: [['slime', 5]] },
+            { id: 'sc_cove', name: 'Бухта контрабандистов', x: 172, y: 33, tier: 'rich', units: [['goblin', 4], ['dark_mage', 1]] },
+            // --- Багровые Топи ---
+            { id: 'cm_outpost', name: 'Вампирский аванпост', x: 70, y: 78, tier: 'rich', units: [['ghoul', 3], ['bat', 2]] },
+            { id: 'cm_patrol', name: 'Кровавый дозор топей', x: 72, y: 97, tier: 'rich', units: [['ghoul', 2], ['bat', 2]], patrol: [[72, 97], [100, 99], [136, 99], [100, 99]] },
+            { id: 'cm_bloodguard', name: 'Кровавая застава', x: 138, y: 74, tier: 'precious', units: [['blood_knight', 2], ['ghoul', 2], ['bat', 2]] },
+            // --- Теневые Земли и Забытые Холмы ---
+            { id: 'fh_undead', name: 'Курганы Забытых Холмов', x: 28, y: 122, tier: 'rich', units: [['skeleton', 4], ['dark_mage', 1]] },
+            { id: 'fh_crypt', name: 'Склеп Забытых Холмов', x: 20, y: 139, tier: 'precious', units: [['skeleton', 3], ['dark_mage', 2], ['ghoul', 1]] },
+            { id: 'sl_cult', name: 'Теневой круг культистов', x: 150, y: 118, tier: 'rich', units: [['dark_mage', 3], ['skeleton', 2]] },
+            { id: 'sl_graves', name: 'Теневое кладбище', x: 176, y: 136, tier: 'precious', units: [['ghoul', 3], ['blood_knight', 1]] },
+            // --- Цитадель Бездны ---
+            { id: 'ab_gate', name: 'Цитадель Бездны: врата', legacy: true, x: 50, y: 38, tier: 'rich', units: [['skeleton', 3], ['dark_mage', 1]] },
+            { id: 'ab_halls', name: 'Цитадель Бездны: чертоги', legacy: true, x: 40, y: 52, tier: 'rich', units: [['skeleton', 3], ['dark_mage', 1]] },
+            { id: 'ab_pit', name: 'Цитадель Бездны: огненная яма', legacy: true, x: 30, y: 58, tier: 'precious', units: [['skeleton', 3], ['dark_mage', 2]] },
+            // --- Сангвиния: комнаты замка ---
+            { id: 'cs_graveyard', name: 'Сангвиния: кладбище', legacy: true, x: 84.5, y: 25.5, tier: 'rich', extra: ['vampire_fang'],
+              fixed: [['ghoul', 80.5, 24.5], ['ghoul', 87.5, 26.5], ['ghoul', 90.5, 23.5], ['bat', 82.5, 22.5], ['bat', 86.5, 28.5], ['bat', 78.5, 25.5]] },
+            { id: 'cs_hall', name: 'Сангвиния: Большой зал', legacy: true, x: 84, y: 15, tier: 'precious', extra: ['vampire_fang'],
+              fixed: [['blood_knight', 80.5, 15.5], ['blood_knight', 87.5, 15.5], ['ghoul', 82.5, 12.5], ['ghoul', 86.5, 18.5], ['bat', 80.5, 12.5], ['bat', 89.5, 18.5], ['gargoyle', 78.5, 18.5], ['gargoyle', 89.5, 11.5]] },
+            { id: 'cs_library', name: 'Сангвиния: библиотека-оружейная', legacy: true, x: 84, y: 6, tier: 'rich', extra: ['vampire_fang'],
+              fixed: [['gargoyle', 89.5, 4.5], ['gargoyle', 79.5, 8.5], ['blood_knight', 84.5, 6.5], ['bat', 82.5, 4.5], ['bat', 86.5, 8.5]] },
+            { id: 'cs_crypt', name: 'Сангвиния: склеп', legacy: true, x: 98, y: 25.5, tier: 'rich', extra: ['vampire_fang'],
+              fixed: [['ghoul', 97.5, 24.5], ['ghoul', 100.5, 27.5], ['ghoul', 95.5, 26.5], ['bat', 101.5, 23.5]] },
+            { id: 'cs_ante', name: 'Сангвиния: преддверие', legacy: true, x: 104, y: 14.5, tier: 'rich', extra: ['vampire_fang'],
+              fixed: [['gargoyle', 108.5, 11.5], ['gargoyle', 104.5, 18.5]] },
+            // --- Ад (скрытый ярус) ---
+            { id: 'h_gate', name: 'Ад: стражи Врат', legacy: true, x: 86, y: 38, tier: 'rich', extra: ['hell_ember'], units: [['imp', 2], ['hellhound', 2]] },
+            { id: 'h_ridge', name: 'Ад: огненный гребень', legacy: true, x: 110, y: 37.5, tier: 'precious', extra: ['hell_ember'], units: [['imp', 2], ['pit_demon', 2]] },
+            { id: 'h_pack', name: 'Ад: стая гончих', legacy: true, x: 88, y: 55.5, tier: 'rich', extra: ['hell_ember'], units: [['hellhound', 3], ['imp', 1]] },
+            { id: 'h_forge', name: 'Ад: кузня палачей', legacy: true, x: 95, y: 41, tier: 'precious', extra: ['hell_ember'], units: [['pit_demon', 2], ['hellhound', 2]] }
+        ];
+        const WALKABLE_TILES = [0, 1, 4, 5, 8, 9, 10, 11, T_CFLOOR, T_CARPET, T_GRAVE, T_HELL, T_HBRIDGE];
+        const CAMP_RESET_TIME = 300; // через 5 минут после открытия сундука лагерь заселяется снова
+        let camps = [];
+        let chestCine = null;
+
+        function spawnCamps() {
+            camps = [];
+            CAMP_DEFS.forEach(def => {
+                const c0 = def.legacy ? legacyToNew(def.x, def.y) : { x: def.x, y: def.y };
+                const center = nearestFreeTile(c0.x, c0.y, WALKABLE_TILES);
+                const camp = { def, id: def.id, name: def.name, tier: def.tier, x: center.x, y: center.y, ax: center.x, ay: center.y, members: [], state: 'active', resetTimer: 0, patrolIdx: 1 };
+                const spots = [];
+                if (def.fixed) def.fixed.forEach(([t, x, y]) => { const n = legacyToNew(x, y); spots.push([t, n.x, n.y]); });
+                else {
+                    const list = []; def.units.forEach(([t, n]) => { for (let i = 0; i < n; i++) list.push(t); });
+                    list.forEach((t, i) => {
+                        const a = (i / list.length) * Math.PI * 2 + 0.4, r = 1.8 + (list.length > 4 ? 0.7 : 0);
+                        spots.push([t, center.x / TS - 0.5 + Math.cos(a) * r, center.y / TS - 0.5 + Math.sin(a) * r]);
+                    });
+                }
+                spots.forEach(([t, x, y]) => {
+                    const p = nearestFreeTile(x, y, WALKABLE_TILES);
+                    const en = createEnemy(t, p.x, p.y, { camp });
+                    en.campOff = { x: p.x - center.x, y: p.y - center.y };
+                    camp.members.push(en);
+                    enemies.push(en);
+                });
+                camp.chest = { uid: Math.random(), x: center.x, y: center.y, kind: 'camp_chest', camp, tier: def.tier, sealed: true, opened: false, hidden: !!def.patrol, openAnim: 0 };
+                groundLoot.push(camp.chest);
+                camps.push(camp);
+            });
+        }
+
+        function resetCamp(c) {
+            c.state = 'active';
+            c.ax = c.x; c.ay = c.y; c.patrolIdx = 1;
+            c.members.forEach(m => { m.spawnX = c.ax + m.campOff.x; m.spawnY = c.ay + m.campOff.y; m.deadTimer = 0.01; m.aggro = 0; });
+            Object.assign(c.chest, { x: c.x, y: c.y, sealed: true, opened: false, hidden: !!c.def.patrol, openAnim: 0 });
+        }
+
+        function updateCamps(dt) {
+            for (const c of camps) {
+                if (c.state === 'active') {
+                    const alive = c.members.filter(m => m.deadTimer <= 0);
+                    if (!alive.length) { onCampCleared(c); continue; }
+                    const dAnchor = Math.hypot(player.x - c.ax, player.y - c.ay);
+                    // Группа действует сообща: заметил один — атакуют все. Далеко убежавшего героя бросают.
+                    const spotted = alive.some(m => m.aggro > 0 || Math.hypot(player.x - m.x, player.y - m.y) <= m.aggroRange);
+                    if (dAnchor > 900) alive.forEach(m => { m.aggro = 0; });
+                    else if (spotted) alive.forEach(m => { m.aggro = Math.max(m.aggro, 1.5); });
+                    if (c.def.patrol && !spotted) {
+                        const wp = c.def.patrol[c.patrolIdx], tx = (wp[0] + 0.5) * TS, ty = (wp[1] + 0.5) * TS;
+                        const d = Math.hypot(tx - c.ax, ty - c.ay);
+                        // Строй патруля: точка в строю, а если она в дереве/скале — прямо за ведущим
+                        alive.forEach(m => {
+                            const fx = c.ax + m.campOff.x * 0.6, fy = c.ay + m.campOff.y * 0.6;
+                            const ok = !isTileBlocked(Math.floor(fx / TS), Math.floor(fy / TS));
+                            m.spawnX = ok ? fx : c.ax; m.spawnY = ok ? fy : c.ay;
+                        });
+                        const lagging = alive.some(m => Math.hypot(m.x - m.spawnX, m.y - m.spawnY) > 110);
+                        if (d < 8) c.patrolIdx = (c.patrolIdx + 1) % c.def.patrol.length;
+                        else if (!lagging) { const st = Math.min(d, 42 * dt); c.ax += (tx - c.ax) / d * st; c.ay += (ty - c.ay) / d * st; }
+                    }
+                } else if (c.state === 'opened') {
+                    c.resetTimer -= dt;
+                    if (c.resetTimer <= 0 && Math.hypot(player.x - c.x, player.y - c.y) > 800) resetCamp(c);
+                }
+            }
+            if (chestCine) { chestCine.t += dt; if (chestCine.t >= chestCine.dur) chestCine = null; }
+            groundLoot.forEach(g => { if (g.kind === 'camp_chest' && g.opened && g.openAnim < 1) g.openAnim = Math.min(1, g.openAnim + dt * 1.8); });
+        }
+
+        function onCampCleared(c) {
+            c.state = 'cleared';
+            const ch = c.chest, T = CAMP_TIERS[c.tier];
+            if (c.def.patrol) {
+                const p = nearestFreeTile(c.ax / TS - 0.5, c.ay / TS - 0.5, WALKABLE_TILES);
+                ch.x = p.x; ch.y = p.y;
+            }
+            ch.sealed = false; ch.hidden = false;
+            spawnParticleRing(ch.x, ch.y, 70, T.color, 34);
+            spawnParticleBurst(ch.x, ch.y - 10, T.color, 26);
+            playerFx.push({ type: 'chest_pillar', x: ch.x, y: ch.y, color: T.glow, life: 1.6, maxLife: 1.6 });
+            SoundFX.play('coin');
+            zoneBanner = { title: 'ЛАГЕРЬ ЗАЧИЩЕН', sub: `${c.name} • появился ${T.short} сундук`, life: 3, maxLife: 3, color: T.color };
+        }
+
+        function rollChestLoot(c) {
+            const T = CAMP_TIERS[c.tier], items = {};
+            const add = (id, n = 1) => { items[id] = (items[id] || 0) + n; };
+            const pool = CAMP_LOOT[c.tier].concat(c.def.extra || []);
+            for (let i = 0; i < T.rolls; i++) add(pool[Math.floor(Math.random() * pool.length)], 1 + (Math.random() < 0.35 ? 1 : 0));
+            if (c.def.extra) add(c.def.extra[0], 1);
+            if (Math.random() < T.gearChance) {
+                // Экипировка: оружие — только для класса героя
+                const gear = T.gear.filter(id => { const d = ITEMS_DB[id]; return d && !(d.cls && d.cls !== player.heroType); });
+                if (gear.length) add(gear[Math.floor(Math.random() * gear.length)], 1);
+            }
+            const gold = Math.round((T.gold[0] + Math.random() * (T.gold[1] - T.gold[0])) * diffCfg().rewardMult);
+            return { gold, items: Object.entries(items).map(([id, count]) => ({ id, count })) };
+        }
+
+        function openCampChest(ch) {
+            if (ch.opened || ch.sealed) return;
+            const c = ch.camp, T = CAMP_TIERS[c.tier];
+            ch.opened = true; ch.openAnim = 0;
+            c.state = 'opened'; c.resetTimer = CAMP_RESET_TIME;
+            const loot = rollChestLoot(c);
+            player.gold += loot.gold;
+            loot.items.forEach(it => {
+                if (!addItemToInventory(it.id, it.count)) {
+                    for (let k = 0; k < it.count; k++) groundLoot.push({ uid: Math.random(), x: ch.x + (Math.random() - 0.5) * 40, y: ch.y + 20 + Math.random() * 10, kind: 'item', itemId: it.id, count: 1 });
                 }
             });
-            const lord = E('hell_lord', HELL.boss.x, HELL.boss.y);
-            // Мини-босс: Страж Врат Бездны на тропе к арене Владыки
-            const g3p = nearestFreeTile(109.5, 52.5 + hy, [T_HELL, T_HBRIDGE]);
-            lord.guardian = E('infernal_gatekeeper', g3p.x / TS, g3p.y / TS);
+            chestCine = { t: 0, dur: 2.6, x: ch.x, y: ch.y, tier: c.tier };
+            playerFx.push({ type: 'chest_pillar', x: ch.x, y: ch.y, color: T.glow, life: 2.8, maxLife: 2.8, big: true });
+            spawnParticleBurst(ch.x, ch.y - 12, T.color, 40);
+            spawnParticleRing(ch.x, ch.y, 90, T.color, 40);
+            triggerScreenShake(3);
+            SoundFX.fanfare(T.stars);
+            showChestReward(c, loot);
+            updateHudPotions();
+        }
+
+        // Плашка «Вы получили сундук» в духе Genshin Impact
+        let chestRewardTimer = null;
+        function showChestReward(c, loot) {
+            const T = CAMP_TIERS[c.tier];
+            const el = document.getElementById('chestReward');
+            const cards = [{ icon: '🪙', name: 'Золото', count: loot.gold, rarity: 'rare' }]
+                .concat(loot.items.map(it => ({ icon: ITEMS_DB[it.id].icon, name: ITEMS_DB[it.id].name, count: it.count, rarity: ITEMS_DB[it.id].rarity })));
+            el.style.setProperty('--chest-color', T.color);
+            el.style.setProperty('--chest-glow', T.glow);
+            el.innerHTML = `
+                <div class="chest-bar chest-bar-top"></div><div class="chest-bar chest-bar-bottom"></div>
+                <div class="chest-banner">
+                    <div class="chest-rays"></div>
+                    <div class="chest-kicker">Вы получили сундук!</div>
+                    <div class="chest-title">${T.name}</div>
+                    <div class="chest-stars">${'★'.repeat(T.stars)}</div>
+                    <div class="chest-sub">${c.name}</div>
+                    <div class="chest-cards">${cards.map((cd, i) => `
+                        <div class="chest-card chest-r-${cd.rarity}" style="animation-delay:${0.55 + i * 0.12}s">
+                            <div class="chest-card-icon">${cd.icon}</div>
+                            <div class="chest-card-count">${cd.count}</div>
+                            <div class="chest-card-name">${cd.name}</div>
+                        </div>`).join('')}</div>
+                </div>`;
+            el.classList.remove('hidden', 'chest-out');
+            void el.offsetWidth;
+            el.classList.add('chest-in');
+            clearTimeout(chestRewardTimer);
+            chestRewardTimer = setTimeout(hideChestReward, 4200 + cards.length * 120);
+        }
+        function hideChestReward() {
+            const el = document.getElementById('chestReward');
+            if (!el || el.classList.contains('hidden')) return;
+            el.classList.add('chest-out');
+            setTimeout(() => { el.classList.add('hidden'); el.classList.remove('chest-in', 'chest-out'); }, 450);
+        }
+        // Камера на время открытия сундука плавно смещается к нему
+        function chestCamOffset() {
+            if (!chestCine) return { x: 0, y: 0 };
+            const t = chestCine.t / chestCine.dur;
+            const k = Math.sin(Math.min(1, t) * Math.PI) * 0.6;
+            return { x: (chestCine.x - player.x) * k, y: (chestCine.y - 20 - player.y) * k };
         }
 
         function damageEnemy(en, dmg, isSpell, knockX = 0, knockY = 0, customColor = null, opts) {
@@ -6779,6 +7155,7 @@
         function killEnemy(en) {
             en.hp = 0;
             en.deadTimer = en.tpl.respawn || (en.isBoss ? 90 : 22);
+            if (en.camp) en.deadTimer = 1e9; // бойцы лагеря возвращаются только все вместе (resetCamp)
             en.state = 'chase';
             const goldGain = Math.floor(en.goldRange[0] + Math.random() * (en.goldRange[1] - en.goldRange[0] + 1));
             player.gold += goldGain;
@@ -7432,6 +7809,7 @@
             if (player.leapAnim > 0) player.leapAnim -= dt;
             if (player.bowRecoil > 0) player.bowRecoil -= dt;
             updateArcherState(dt);
+            updateCamps(dt);
             if (player.portalAnim < 1 && player.draculaKilled) player.portalAnim = Math.min(1, (player.portalAnim || 0) + dt * 0.5);
         }
 
@@ -7780,7 +8158,7 @@
                     equipment: player.equipment, inventory: player.inventory,
                     questStage: player.questStage, questKills: player.questKills,
                     bossKilled: player.bossKilled, draculaKilled: !!player.draculaKilled, hellLordKilled: !!player.hellLordKilled,
-                    checkpointZone: player.checkpointZone || null, mapVer: 2,
+                    checkpointZone: player.checkpointZone || null, mapVer: 3,
                     worldTimeHours
                 };
                 localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -7795,10 +8173,16 @@
                 const data = JSON.parse(raw);
                 const diff = data.difficulty;
                 delete data.difficulty;
-                const oldLayout = !data.mapVer;
+                const ver = data.mapVer || 1;
                 delete data.mapVer;
                 Object.assign(player, data);
-                if (oldLayout) remapPx(player); // сохранение со старой картой: переносим героя в новые ярусы
+                if (ver < 3) {
+                    // Сохранение с прежней картой: переводим позицию героя в «The Realm of Oblivion»
+                    let t = { x: player.x / TS, y: player.y / TS };
+                    if (ver === 2) t = tieredToLegacy(t.x, t.y);
+                    const n = legacyToNew(t.x, t.y);
+                    player.x = n.x * TS; player.y = n.y * TS;
+                }
                 if (!HERO_DEFS[player.heroType]) player.heroType = 'invoker';
                 if (typeof data.worldTimeHours === 'number') worldTimeHours = data.worldTimeHours;
                 delete player.worldTimeHours;
@@ -8311,19 +8695,18 @@
 
         const tileHash = (x, y) => ((x * 73856093) ^ (y * 19349663)) >>> 0;
         // Замок и Ад лежат на одной карте друг под другом: соседнюю локацию не показываем (чёрная пустота)
+        // Наземный мир и Ад лежат на одной сетке: соседний ярус не показываем (чёрная пустота)
         function realmHidden(x, y) {
-            if (x < EAST_X0) return false;
-            const z = playerZone();
-            return y >= 32 ? z !== 'hell' : z === 'hell';
+            return (y >= WORLD.hellRow) !== (player.y / TS >= WORLD.hellRow);
         }
 
         // ---------- земля ----------
         function drawGroundTile25(c, x, y, now, wetness, drawLegacyTile) {
             const t = worldMap[y][x], px = x * TS, py = y * TS, v = tileVariants[y][x], vi = Math.floor(v * 4) % 4;
-            if (x >= EAST_X0 && realmHidden(x, y)) { c.fillStyle = '#030305'; c.fillRect(px, py, TS, TS); return; }
+            if (realmHidden(x, y)) { c.fillStyle = '#030305'; c.fillRect(px, py, TS, TS); return; }
             let castleAO = false;
             switch (t) {
-                case 3: case 6: c.drawImage((y >= 34 ? tilePatterns.obsidianFloorVars : tilePatterns.darkForestVars)[vi], px, py); break;
+                case 3: case 6: c.drawImage((darkGround(x, y) ? tilePatterns.obsidianFloorVars : tilePatterns.darkForestVars)[vi], px, py); break;
                 case 12: c.drawImage(tilePatterns.kingdomMarble, px, py); break;
                 case T_CWALL: break; // целиком закрывается объёмной стеной
                 case T_CFLOOR: case T_PILLAR: c.drawImage(R25.tex.cfloor[vi], px, py); castleAO = true; break;
@@ -8348,7 +8731,7 @@
                 case T_GRAVE: case T_TOMB: c.drawImage(R25.tex.grave[vi], px, py); break;
                 case T_HBRIDGE: c.drawImage(R25.tex.hbridge, px, py); break;
                 case 7:
-                    if (x >= EAST_X0) {
+                    if (y >= WORLD.hellRow) {
                         // Текучая лава Ада: прокручиваем текстуру и пульсируем свечением
                         const off = Math.floor((now * 0.012 + x * 7) % TS);
                         c.drawImage(R25.tex.lava, 0, off, TS, TS - off, px, py, TS, TS - off);
@@ -8398,11 +8781,18 @@
 
         // ---------- существа ----------
         // Мини-боссы рисуются на основе существующих тел, крупнее и с аурой своего цвета
-        const MINIBOSS_BODIES = { ash_warden: ['gargoyle', 1.45], crimson_warden: ['blood_knight', 1.35], infernal_gatekeeper: ['pit_demon', 1.4] };
+        const MINIBOSS_BODIES = { ash_warden: ['gargoyle', 1.45], crimson_warden: ['blood_knight', 1.35], infernal_gatekeeper: ['pit_demon', 1.4],
+            werewolf: ['hellhound', 1.15, 'grayscale(0.9) brightness(0.8) contrast(1.2)'], werewolf_alpha: ['hellhound', 1.5, 'grayscale(0.75) brightness(1.05) contrast(1.25)'] };
         function drawEnemyBody25(c, en, now, bob) {
             const tp = en.type;
             const mb = MINIBOSS_BODIES[tp];
             if (mb) {
+                if (mb[2]) {
+                    c.save(); c.scale(mb[1], mb[1]); c.filter = mb[2];
+                    drawEnemyBody25(c, Object.assign({}, en, { type: mb[0] }), now, bob);
+                    c.filter = 'none'; c.restore();
+                    return;
+                }
                 c.save();
                 c.globalCompositeOperation = 'lighter';
                 const ag = c.createRadialGradient(0, 0, 4, 0, 0, 34);
@@ -8542,7 +8932,7 @@
                 c.save();
                 c.translate(en.x, en.y - lift - (flying ? 12 : 0));
                 if (en.type === 'dracula' && en.phase === 3) c.scale(1.15, 1.15);
-                if (player.x < en.x && (en.type === 'hellhound' || en.type === 'blood_knight' || en.type === 'ghoul' || en.type === 'pit_demon')) c.scale(-1, 1);
+                if (player.x < en.x && (en.type === 'hellhound' || en.type === 'werewolf' || en.type === 'werewolf_alpha' || en.type === 'blood_knight' || en.type === 'ghoul' || en.type === 'pit_demon')) c.scale(-1, 1);
                 if (en.invuln > 0 && !hidden) c.globalAlpha = 0.6;
                 const bob = Math.sin(now * 0.008 + en.uid * 10) * 2;
                 drawEnemyBody25(c, en, now, bob);
@@ -8578,7 +8968,53 @@
             }
         }
 
+        function drawCampChest25(c, g, now) {
+            if (g.hidden) return;
+            const T = CAMP_TIERS[g.tier];
+            const trim = { common: '#94a3b8', rich: '#f59e0b', precious: '#e9d5ff' }[g.tier];
+            const body = { common: ['#57351b', '#3b2313'], rich: ['#7c2d12', '#451a03'], precious: ['#4c1d95', '#2e1065'] }[g.tier];
+            const x = g.x, y = g.y, pulse = 0.5 + Math.sin(now * 0.005 + g.uid * 20) * 0.5;
+            castShadow(c, x, y + 13, 19);
+            if (!g.sealed && !g.opened) glow(c, x, y - 6, 46, T.glow, 0.25 + pulse * 0.25);
+            const bg = c.createLinearGradient(x, y - 6, x, y + 13);
+            bg.addColorStop(0, body[0]); bg.addColorStop(1, body[1]);
+            c.fillStyle = bg; c.fillRect(x - 17, y - 6, 34, 19);
+            c.strokeStyle = trim; c.lineWidth = 2; c.strokeRect(x - 17, y - 6, 34, 19);
+            c.fillStyle = trim; c.fillRect(x - 17, y + 2, 34, 2.5); c.fillRect(x - 11, y - 6, 2.5, 19); c.fillRect(x + 8.5, y - 6, 2.5, 19);
+            // Крышка: при открытии откидывается назад, изнутри бьёт свет
+            const oa = g.opened ? g.openAnim : 0;
+            if (oa > 0) {
+                const ig = c.createLinearGradient(x, y - 40, x, y - 4);
+                ig.addColorStop(0, `rgba(${T.glow},0)`); ig.addColorStop(1, `rgba(${T.glow},${0.7 * (1 - oa * 0.5)})`);
+                c.fillStyle = ig; c.beginPath(); c.moveTo(x - 15, y - 5); c.lineTo(x + 15, y - 5); c.lineTo(x + 26, y - 46); c.lineTo(x - 26, y - 46); c.closePath(); c.fill();
+            }
+            c.save(); c.translate(x, y - 6); c.scale(1, Math.max(0.05, Math.cos(oa * 2.2)));
+            c.fillStyle = body[0]; c.beginPath(); c.roundRect(-18, -12, 36, 12, [7, 7, 0, 0]); c.fill();
+            c.strokeStyle = trim; c.lineWidth = 2; c.stroke();
+            c.restore();
+            if (g.tier === 'precious' && !g.opened) { c.fillStyle = '#f0abfc'; c.beginPath(); c.arc(x, y - 12, 2.6, 0, Math.PI * 2); c.fill(); }
+            c.fillStyle = trim; c.fillRect(x - 3.5, y - 7, 7, 8);
+            if (g.sealed) {
+                // Печать лагеря: цепи и вращающийся знак — враги ещё живы
+                c.save(); c.strokeStyle = 'rgba(148,163,184,0.85)'; c.lineWidth = 2; c.setLineDash([3, 2]);
+                c.beginPath(); c.moveTo(x - 18, y - 14); c.lineTo(x + 18, y + 12); c.moveTo(x + 18, y - 14); c.lineTo(x - 18, y + 12); c.stroke();
+                c.setLineDash([]);
+                c.translate(x, y - 30); c.rotate(now * 0.0015);
+                c.strokeStyle = `rgba(248,113,113,${0.5 + pulse * 0.4})`; c.lineWidth = 1.6;
+                c.beginPath(); c.arc(0, 0, 9, 0, Math.PI * 2); c.stroke();
+                for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; c.beginPath(); c.moveTo(Math.cos(a) * 9, Math.sin(a) * 9); c.lineTo(Math.cos(a + 2.1) * 9, Math.sin(a + 2.1) * 9); c.stroke(); }
+                c.restore();
+                c.font = 'bold 9px ui-monospace, Menlo, monospace'; c.textAlign = 'center'; c.fillStyle = '#fca5a5';
+                const alive = g.camp.members.filter(m => m.deadTimer <= 0).length;
+                c.fillText(`🔒 ${alive}/${g.camp.members.length}`, x, y - 44);
+            } else if (!g.opened) {
+                c.font = 'bold 10px ui-monospace, Menlo, monospace'; c.textAlign = 'center'; c.fillStyle = T.color;
+                c.fillText('★'.repeat(T.stars), x, y - 24 - pulse * 3);
+            }
+        }
+
         function drawLoot25(c, g, now) {
+            if (g.kind === 'camp_chest') { drawCampChest25(c, g, now); return; }
             if (g.kind === 'herb_node') {
                 castShadow(c, g.x, g.y + 8, 8);
                 const sw = Math.sin(now * 0.003 + g.x) * 2;
@@ -8730,7 +9166,24 @@
         function drawOverFX25(c, now) {
             c.save(); c.globalCompositeOperation = 'lighter';
             playerFx.forEach(f => {
-                if (f.type === 'excalibur_beam') {
+                if (f.type === 'chest_pillar') {
+                    const p = f.life / f.maxLife, w = (f.big ? 34 : 22) * (0.4 + 0.6 * p), H = f.big ? 420 : 260;
+                    const pg = c.createLinearGradient(f.x - w, 0, f.x + w, 0);
+                    pg.addColorStop(0, `rgba(${f.color},0)`); pg.addColorStop(0.5, `rgba(255,255,255,${0.75 * p})`); pg.addColorStop(1, `rgba(${f.color},0)`);
+                    c.fillStyle = pg; c.fillRect(f.x - w, f.y - H, w * 2, H);
+                    const rg = c.createRadialGradient(f.x, f.y - 8, 2, f.x, f.y - 8, 80);
+                    rg.addColorStop(0, `rgba(${f.color},${0.8 * p})`); rg.addColorStop(1, `rgba(${f.color},0)`);
+                    c.fillStyle = rg; c.beginPath(); c.arc(f.x, f.y - 8, 80, 0, Math.PI * 2); c.fill();
+                    if (f.big) {
+                        c.save(); c.translate(f.x, f.y - 10); c.rotate(now * 0.0012);
+                        for (let k = 0; k < 10; k++) {
+                            c.rotate(Math.PI / 5);
+                            c.fillStyle = `rgba(${f.color},${0.22 * p})`;
+                            c.beginPath(); c.moveTo(0, 0); c.lineTo(-7, -150); c.lineTo(7, -150); c.closePath(); c.fill();
+                        }
+                        c.restore();
+                    }
+                } else if (f.type === 'excalibur_beam') {
                     // Направленный луч Экскалибура
                     const p = f.life / f.maxLife, grow = Math.min(1, (1 - p) * 6);
                     const w = f.width * (0.35 + 0.65 * p), len = f.len * grow;
@@ -8829,7 +9282,7 @@
             for (let y = sr; y <= lastRow; y++) {
                 const row = worldMap[y], decRow = worldDecor[y];
                 for (let x = sc; x <= ec; x++) {
-                    if (x >= EAST_X0 && realmHidden(x, y)) continue;
+                    if (realmHidden(x, y)) continue;
                     const t = row[x];
                     if (TALL_TILES.has(t)) {
                         if (t === 12 || t === T_CWALL) drawTallTile25(c, t, x, y, now, drawLegacyTile); // стены рисуем сразу — существа ряда встают перед ними
@@ -9217,6 +9670,53 @@
         // ---------- мини-карта ----------
         const MINIMAP_COLORS = { 0: '#2e6f40', 1: '#a8a29e', 2: '#0284c7', 3: '#0f172a', 4: '#14532d', 5: '#312e81', 6: '#0f172a', 7: '#ef4444', 8: '#a8a29e', 9: '#0ea5e9',
             10: '#e7e5e4', 11: '#2563eb', 12: '#f59e0b', 13: '#3b3355', 14: '#12101a', 15: '#7f1d1d', 16: '#71717a', 17: '#431407', 18: '#1f4d36', 19: '#64748b', 20: '#57534e', 21: '#1c0a05', 22: '#57534e' };
+        const WORLD_LABELS = [
+            ['Форт Этельгард', 28, 55, '#fcd34d'], ['Земли Этельгарда', 30, 100, '#d6d3d1'], ['Дикий Лес', 112, 47, '#86efac'],
+            ['Клык-Холд', 86, 11, '#d6d3d1'], ['Земли Ужаса', 34, 7, '#a8a29e'], ['Гора Гримволт', 148, 5, '#cbd5e1'],
+            ['Змеиный Берег', 176, 92, '#7dd3fc'], ['Руины Голдрона', 167, 42, '#fde68a'], ['Сангвиния', 105, 80, '#fca5a5'],
+            ['Багровые Топи', 105, 59, '#fda4af'], ['Теневые Земли', 155, 128, '#c4b5fd'], ['Забытые Холмы', 26, 132, '#a8a29e'],
+            ['Цитадель Бездны', 88, 132, '#fdba74']
+        ];
+        function renderWorldMap() {
+            const cv = document.getElementById('worldMapCanvas'), g = cv.getContext('2d');
+            if (!R25.minimap) renderMinimap();
+            const W = cv.width, H = cv.height, rows = WORLD.overH, sc = Math.min(W / MAP_W, H / rows);
+            const ox = (W - MAP_W * sc) / 2, oy = (H - rows * sc) / 2;
+            g.fillStyle = '#05060a'; g.fillRect(0, 0, W, H);
+            g.imageSmoothingEnabled = false;
+            g.drawImage(R25.minimap.over, 0, 0, MAP_W, rows, ox, oy, MAP_W * sc, rows * sc);
+            // Пергаментная тонировка
+            g.fillStyle = 'rgba(40,24,8,0.28)'; g.fillRect(ox, oy, MAP_W * sc, rows * sc);
+            const X = t => ox + t * sc, Y = t => oy + t * sc;
+            g.textAlign = 'center'; g.textBaseline = 'middle';
+            WORLD_LABELS.forEach(([n, x, y, col]) => {
+                g.font = 'bold 15px Cinzel, serif';
+                g.lineWidth = 4; g.strokeStyle = 'rgba(0,0,0,0.85)'; g.strokeText(n, X(x), Y(y));
+                g.fillStyle = col; g.fillText(n, X(x), Y(y));
+            });
+            g.font = '15px sans-serif';
+            camps.forEach(c => {
+                if (c.y / TS >= WORLD.hellRow) return; // лагеря Ада на общей карте не показываются
+                const icon = c.state === 'active' ? '⚔' : (c.state === 'cleared' ? '🎁' : '✓');
+                g.fillStyle = c.state === 'active' ? '#f87171' : (c.state === 'cleared' ? '#fcd34d' : '#78716c');
+                g.fillText(icon, X(c.ax / TS), Y(c.ay / TS));
+            });
+            enemies.forEach(en => { if ((en.isBoss) && en.deadTimer <= 0 && en.y / TS < WORLD.hellRow) { g.fillText(en.tpl.miniBoss ? '☠' : '💀', X(en.x / TS), Y(en.y / TS)); } });
+            npcs.forEach(n => { g.fillStyle = '#38bdf8'; g.beginPath(); g.arc(X(n.x / TS), Y(n.y / TS), 3, 0, Math.PI * 2); g.fill(); });
+            g.font = 'bold 22px Cinzel, serif'; g.fillStyle = 'rgba(253,230,138,0.85)'; g.fillText('THE REALM OF OBLIVION', W / 2, oy + 22);
+            if (playerZone() === 'hell') {
+                g.fillStyle = 'rgba(0,0,0,0.78)'; g.fillRect(0, 0, W, H);
+                g.font = 'bold 26px Cinzel, serif'; g.fillStyle = '#f87171'; g.fillText('Скрытое измерение', W / 2, H / 2 - 16);
+                g.font = '15px sans-serif'; g.fillStyle = '#d6d3d1'; g.fillText('Ад лежит под миром и не отмечен ни на одной карте', W / 2, H / 2 + 16);
+                return;
+            }
+            const px = X(player.x / TS), py = Y(player.y / TS);
+            g.save(); g.translate(px, py); g.rotate(player.facingAngle);
+            g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2;
+            g.beginPath(); g.moveTo(9, 0); g.lineTo(-6, -6); g.lineTo(-3, 0); g.lineTo(-6, 6); g.closePath(); g.stroke(); g.fill();
+            g.restore();
+        }
+
         function renderMinimap() {
             if (!R25.minimap) {
                 // Общая карта показывает только наземный мир. Ад — скрытый ярус: его карта видна, лишь когда герой внутри.
@@ -9246,6 +9746,7 @@
                 const s = en.isBoss ? 4 : 2;
                 miniCtx.fillRect(mx(en.x) - s / 2, my(en.y) - s / 2, s, s);
             });
+            camps.forEach(c => { if (!sameTier(c.ay) || c.state === 'opened') return; miniCtx.fillStyle = c.state === 'active' ? 'rgba(248,113,113,0.8)' : '#fcd34d'; miniCtx.fillRect(mx(c.ax) - 2, my(c.ay) - 2, 4, 4); });
             npcs.forEach(n => { if (!sameTier(n.y)) return; miniCtx.fillStyle = '#38bdf8'; miniCtx.fillRect(mx(n.x) - 1.5, my(n.y) - 1.5, 3, 3); });
             worldPortals.forEach(po => { if (po.isOpen() && sameTier(po.y)) { miniCtx.fillStyle = po.color; miniCtx.beginPath(); miniCtx.arc(mx(po.x), my(po.y), 3, 0, Math.PI * 2); miniCtx.fill(); } });
             miniCtx.fillStyle = '#ffffff';
