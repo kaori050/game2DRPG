@@ -366,7 +366,7 @@
         .menu-curtain.on { opacity: 1; pointer-events: all; }
 
         /* ---- панель администратора в игре ---- */
-        .admin-panel { position: fixed; left: 12px; bottom: 16px; z-index: 35; min-width: 250px; padding: 8px 10px; border-radius: 10px;
+        .admin-panel { position: fixed; left: 12px; top: 46%; z-index: 35; min-width: 250px; padding: 8px 10px; border-radius: 10px;
             background: rgba(35,4,6,.88); border: 1px solid #ef4444; box-shadow: 0 0 22px rgba(239,68,68,.45); color: #fde2e2; font-size: 12px; }
         .admin-panel.hidden { display: none; }
         .admin-panel-head { display: flex; justify-content: space-between; align-items: center; font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: .2em; color: #fca5a5; }
@@ -383,6 +383,144 @@
         @media (max-width: 900px) { .diff-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero-info { width: 88%; } .hero-lore { display: none; } }
         @media (max-width: 560px) { .diff-grid { grid-template-columns: 1fr; } .diff-card { min-height: 0; } .menu-screen-head { padding-right: 16px; grid-template-columns: auto 1fr; } .menu-step { display: none; } }
         @media (prefers-reduced-motion: reduce) { .menu-screen, .hero-card, .diff-card, .menu-btn { transition-duration: .01s !important; animation-duration: .01s !important; } }
+
+        /* ===================== НИЖНЯЯ ПАНЕЛЬ (HUD) ===================== */
+        .bottom-dock { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 20; display: flex; align-items: flex-end; gap: 10px; max-width: calc(100vw - 20px); pointer-events: none; }
+        .bottom-dock > * { pointer-events: auto; }
+        .dock-center { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .dock-vitals { width: 270px; padding: 10px 12px 9px; border-radius: 14px; background: linear-gradient(180deg, rgba(20,16,14,.92), rgba(8,7,9,.94)); border: 1px solid rgba(180,140,80,.35);
+            box-shadow: 0 10px 30px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 6px; }
+        .vital { display: flex; align-items: center; gap: 8px; }
+        .vital-icon { width: 18px; text-align: center; font-size: 14px; filter: drop-shadow(0 0 4px currentColor); }
+        .vital-track { position: relative; flex: 1; height: 22px; border-radius: 6px; background: #0b0a0c; border: 1px solid rgba(255,255,255,.08); overflow: hidden; box-shadow: inset 0 2px 6px rgba(0,0,0,.8); }
+        .vital-fill, .vital-ghost { position: absolute; left: 0; top: 0; bottom: 0; }
+        .vital-fill { transition: width .18s ease-out; }
+        .vital-ghost { background: rgba(255,240,200,.75); }
+        .vital-hp .vital-icon { color: #f87171; }
+        .vital-hp .vital-fill { background: linear-gradient(180deg, #f87171 0%, #dc2626 45%, #7f1d1d 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+        .vital-mp .vital-icon { color: #60a5fa; }
+        .vital-mp .vital-fill { background: linear-gradient(180deg, #7dd3fc 0%, #2563eb 50%, #1e3a8a 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+        .vital-mp .vital-ghost { background: rgba(191,219,254,.55); }
+        .vital-sta .vital-track { height: 11px; } .vital-sta .vital-icon { color: #bef264; font-size: 11px; }
+        .vital-sta .vital-fill { background: linear-gradient(90deg, #4d7c0f, #a3e635, #fde047); }
+        .vital-sta .vital-text { font-size: 8px; }
+        .vital-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; letter-spacing: .02em; text-shadow: 0 1px 2px #000, 0 0 4px #000; white-space: nowrap; }
+        .vital-hp.low .vital-track { animation: hpLow 1s ease-in-out infinite; }
+        .vital-hp.hit .vital-track { box-shadow: 0 0 0 2px rgba(248,113,113,.9), inset 0 2px 6px rgba(0,0,0,.8); }
+        @keyframes hpLow { 50% { box-shadow: 0 0 12px 2px rgba(220,38,38,.75), inset 0 2px 6px rgba(0,0,0,.8); } }
+        .vital-xp { position: relative; height: 6px; border-radius: 3px; background: #0b0a0c; overflow: hidden; margin-left: 26px; }
+        .vital-xp #barXp { height: 100%; background: linear-gradient(90deg, #92400e, #f59e0b, #fde68a); transition: width .3s; }
+        .vital-xp #txtXp { display: none; }
+        .dock-specials { width: 170px; display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+        .dock-special { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 12px; cursor: pointer; text-align: left; font-size: 11px; line-height: 1.2; color: #fde2e2; }
+        .dock-special.hidden { display: none; }
+        .shadow-call { background: radial-gradient(circle at 20% 50%, rgba(127,29,29,.95), rgba(10,4,8,.95)); border: 1px solid #ef4444; box-shadow: 0 0 18px rgba(239,68,68,.55); animation: shadowCall 2s ease-in-out infinite; font-family: 'Cinzel', serif; font-weight: 700; }
+        .shadow-call:hover { box-shadow: 0 0 30px rgba(239,68,68,.95); }
+        .dock-special-icon { font-size: 24px; color: #fecaca; text-shadow: 0 0 10px #ef4444; }
+        @keyframes shadowCall { 50% { box-shadow: 0 0 34px rgba(239,68,68,.9); transform: translateY(-2px); } }
+        .dock-buffs { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+        .dock-buffs span { font-size: 11px; padding: 3px 7px; border-radius: 8px; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.12); color: #e7e5e4; }
+        /* Навыки: радиальная перезарядка, нехватка маны, вспышка готовности */
+        #bottomDock [id^="cdSaber"], #bottomDock [id^="cdArcher"], #bottomDock #cdSpellD, #bottomDock #cdSpellF, #bottomDock #cdInvoke { font-size: 13px !important; text-shadow: 0 1px 2px #000; }
+        #bottomDock button.no-mana { filter: saturate(.25) brightness(.75); }
+        #bottomDock button.no-mana::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 2px rgba(59,130,246,.8); pointer-events: none; }
+        #bottomDock button.cd-ready { animation: cdReady .45s ease-out; }
+        @keyframes cdReady { 0% { box-shadow: 0 0 0 0 rgba(253,230,138,.9); } 100% { box-shadow: 0 0 0 12px rgba(253,230,138,0); } }
+        @media (max-width: 1100px) { .dock-specials { width: auto; } .dock-special-text { display: none; } .dock-vitals { width: 220px; } }
+        @media (max-width: 820px) { .bottom-dock { flex-wrap: wrap; justify-content: center; } .dock-vitals { width: min(360px, 100%); order: -1; } }
+
+        /* ===================== КНОПКА МАГАЗИНА ПОД МИНИ-КАРТОЙ ===================== */
+        .gacha-hud-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; cursor: pointer; color: #fff7e6; font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px;
+            background: linear-gradient(135deg, #3b0764 0%, #1e1b4b 55%, #0c0a1a 100%); border: 1px solid rgba(250,204,21,.65); box-shadow: 0 0 16px rgba(168,85,247,.45); transition: transform .2s, box-shadow .2s; }
+        .gacha-hud-btn:hover { transform: translateY(-1px); box-shadow: 0 0 26px rgba(250,204,21,.6); }
+        .gacha-hud-star { font-size: 18px; color: #fde68a; text-shadow: 0 0 10px #facc15; animation: starSpin 6s linear infinite; display: inline-block; }
+        .gacha-hud-label { flex: 1; text-align: left; }
+        .gacha-hud-dia { font-family: Inter, sans-serif; font-size: 12px; padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,.45); border: 1px solid rgba(125,211,252,.5); }
+        @keyframes starSpin { to { transform: rotate(360deg); } }
+
+        /* ===================== МОДАЛ ГАЧИ ===================== */
+        .gacha-wrap { position: relative; width: min(1040px, 100%); max-height: 94vh; overflow: auto; border-radius: 18px; padding: 16px; color: #ede9fe;
+            background: radial-gradient(ellipse at 70% 0%, rgba(126,34,206,.35), transparent 60%), linear-gradient(180deg, #120d22, #07060c); border: 1px solid rgba(250,204,21,.4); box-shadow: 0 30px 80px rgba(0,0,0,.7); }
+        .gacha-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .gacha-kicker { font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #a5b4fc; }
+        .gacha-head h2 { font-family: 'Cinzel', serif; font-weight: 900; font-size: clamp(22px, 3vw, 32px); margin: 0; color: #fde68a; text-shadow: 0 0 18px rgba(250,204,21,.5); }
+        .gacha-head-right { display: flex; gap: 8px; align-items: center; }
+        .gacha-wallet { padding: 6px 12px; border-radius: 999px; background: rgba(0,0,0,.5); border: 1px solid rgba(125,211,252,.55); font-size: 14px; }
+        .gacha-wallet span { font-size: 11px; color: #a5b4fc; }
+        .gacha-close { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.4); color: #fff; cursor: pointer; }
+        .gacha-tabs { display: flex; gap: 6px; margin: 12px 0; }
+        .gacha-tabs button { padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.35); color: #c7d2fe; cursor: pointer; font-size: 12px; }
+        .gacha-tabs button.on { background: rgba(250,204,21,.15); border-color: rgba(250,204,21,.7); color: #fde68a; }
+        .gacha-page.hidden { display: none; }
+        .gacha-banner { display: grid; grid-template-columns: 1.35fr 1fr; gap: 14px; }
+        .gacha-art { position: relative; min-height: 340px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(250,204,21,.45); background: #0b0716; }
+        .gacha-art canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .gacha-art-info { position: absolute; left: 16px; bottom: 14px; right: 16px; }
+        .gacha-art-info .tag { display: inline-block; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: rgba(250,204,21,.18); border: 1px solid rgba(250,204,21,.6); color: #fde68a; }
+        .gacha-art-info h3 { font-family: 'Cinzel', serif; font-size: clamp(20px, 2.6vw, 30px); margin: 6px 0 2px; color: #fff; text-shadow: 0 0 16px rgba(250,204,21,.6); }
+        .gacha-art-info p { font-size: 12px; color: #e9d5ff; margin: 0; }
+        .gacha-side { display: flex; flex-direction: column; gap: 10px; }
+        .gacha-box { padding: 10px 12px; border-radius: 12px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.08); font-size: 12px; }
+        .gacha-box h4 { margin: 0 0 6px; font-size: 12px; letter-spacing: .15em; text-transform: uppercase; color: #a5b4fc; }
+        .gacha-rate { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 8px; align-items: center; }
+        .gacha-pity { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 4px; }
+        .gacha-pity i { display: block; height: 100%; background: linear-gradient(90deg, #a16207, #facc15); }
+        .gacha-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; }
+        .gacha-pull { padding: 12px 8px; border-radius: 12px; cursor: pointer; border: 1px solid rgba(250,204,21,.7); color: #fff; font-family: 'Cinzel', serif; font-weight: 800; font-size: 14px;
+            background: linear-gradient(180deg, #6d28d9, #3b0764); box-shadow: 0 0 16px rgba(168,85,247,.45); transition: transform .2s, box-shadow .2s; }
+        .gacha-pull small { display: block; font-family: Inter, sans-serif; font-weight: 600; font-size: 11px; color: #bae6fd; margin-top: 2px; }
+        .gacha-pull:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 26px rgba(250,204,21,.6); }
+        .gacha-pull:disabled { opacity: .45; cursor: not-allowed; }
+        .gacha-pool { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+        .gacha-item { padding: 10px; border-radius: 10px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.1); font-size: 12px; }
+        .gacha-item.s5 { border-color: rgba(250,204,21,.6); } .gacha-item.s4 { border-color: rgba(192,132,252,.55); } .gacha-item.s3 { border-color: rgba(96,165,250,.45); }
+        .gacha-item b { color: #fff; } .gacha-item .st { letter-spacing: 2px; }
+        .gacha-item .pas { color: #c4b5fd; margin-top: 4px; }
+        .gacha-hist { font-size: 12px; display: grid; gap: 4px; }
+        .gacha-hist div { display: flex; justify-content: space-between; padding: 5px 8px; border-radius: 6px; background: rgba(0,0,0,.3); }
+        .s5c { color: #fde047; } .s4c { color: #d8b4fe; } .s3c { color: #93c5fd; }
+        /* Анимация молитвы: падающая звезда и карточки */
+        .gacha-reveal { position: absolute; inset: 0; z-index: 5; border-radius: 18px; overflow: hidden; background: radial-gradient(ellipse at 50% 120%, #1e1b4b, #020108 70%); cursor: pointer; }
+        .gacha-reveal.hidden { display: none; }
+        .gacha-meteor { position: absolute; top: -10%; left: 110%; width: 220px; height: 6px; border-radius: 3px; transform: rotate(-32deg);
+            background: linear-gradient(90deg, #fff, var(--met), transparent); box-shadow: 0 0 30px 8px var(--met); animation: meteor 1.5s cubic-bezier(.5,.1,.6,1) forwards; }
+        @keyframes meteor { to { top: 58%; left: 38%; opacity: .9; } }
+        .gacha-burst { position: absolute; left: 50%; top: 60%; width: 20px; height: 20px; margin: -10px; border-radius: 50%; background: var(--met); box-shadow: 0 0 80px 40px var(--met); opacity: 0; animation: burst .7s ease-out 1.35s forwards; }
+        @keyframes burst { 30% { opacity: 1; } 100% { opacity: 0; transform: scale(9); } }
+        .gacha-results { position: absolute; inset: 0; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 10px; padding: 24px; }
+        .gacha-card { width: 130px; min-height: 190px; padding: 10px 8px; border-radius: 12px; text-align: center; color: #fff; opacity: 0; transform: translateY(20px) scale(.85); animation: gcIn .45s cubic-bezier(.2,.9,.3,1.3) forwards;
+            background: linear-gradient(180deg, var(--c1), var(--c2)); border: 1px solid var(--c3); box-shadow: 0 0 20px var(--c3); }
+        .gacha-card .gi { font-size: 44px; margin: 10px 0 6px; filter: drop-shadow(0 0 10px var(--c3)); }
+        .gacha-card .gs { color: #fde68a; letter-spacing: 2px; font-size: 13px; }
+        .gacha-card .gn { font-family: 'Cinzel', serif; font-weight: 700; font-size: 13px; line-height: 1.15; }
+        .gacha-card .gnote { font-size: 10px; color: #e9d5ff; margin-top: 4px; }
+        .gacha-card.r5 { --c1: #a16207; --c2: #3b2005; --c3: rgba(250,204,21,.85); }
+        .gacha-card.r4 { --c1: #7e22ce; --c2: #2e1065; --c3: rgba(192,132,252,.8); }
+        .gacha-card.r3 { --c1: #1d4ed8; --c2: #0c1a44; --c3: rgba(96,165,250,.7); }
+        .gacha-skip { position: absolute; right: 14px; bottom: 12px; font-size: 11px; color: #a5b4fc; }
+        @keyframes gcIn { to { opacity: 1; transform: none; } }
+        @media (max-width: 760px) { .gacha-banner { grid-template-columns: 1fr; } .gacha-art { min-height: 240px; } }
+
+        /* ===================== ДИАЛОГ ТЕНИ ===================== */
+        .shadow-dialog { position: relative; width: min(520px, 100%); padding: 28px 24px 22px; border-radius: 18px; text-align: center; color: #fde2e2; overflow: hidden;
+            background: radial-gradient(circle at 50% -10%, rgba(127,29,29,.75), #07030a 70%); border: 1px solid #ef4444; box-shadow: 0 0 40px rgba(239,68,68,.45); }
+        .shadow-moon { width: 74px; height: 74px; margin: 0 auto 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fecaca, #7f1d1d 60%, #0b0306); box-shadow: 0 0 40px rgba(239,68,68,.8); }
+        .shadow-dialog h2 { font-family: 'Cinzel', serif; font-weight: 900; font-size: 22px; color: #fff; margin: 0 0 8px; text-shadow: 0 0 14px rgba(239,68,68,.8); }
+        .shadow-dialog p { font-size: 13px; line-height: 1.55; color: #f5d0d0; }
+        .shadow-actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+        .shadow-actions button { padding: 10px 18px; border-radius: 10px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: 700; }
+        .shadow-yes { background: linear-gradient(180deg, #b91c1c, #450a0a); color: #fff; border: 1px solid #f87171; box-shadow: 0 0 18px rgba(239,68,68,.6); }
+        .shadow-no { background: rgba(0,0,0,.4); color: #e7e5e4; border: 1px solid rgba(255,255,255,.2); }
+
+        /* ===================== КУЗНЯ: ПАНЕЛЬ ФИЛЬТРОВ ===================== */
+        .craft-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .craft-tabs { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+        .craft-tabs button { padding: 5px 10px; border-radius: 8px; font-size: 12px; border: 1px solid #44403c; background: #1c1917; color: #d6d3d1; cursor: pointer; }
+        .craft-tabs button.on { border-color: #f59e0b; color: #fde68a; background: rgba(245,158,11,.12); }
+        .craft-search { padding: 6px 10px; border-radius: 8px; border: 1px solid #44403c; background: #0c0a09; color: #e7e5e4; font-size: 12px; min-width: 160px; }
+        .craft-only { font-size: 12px; color: #d6d3d1; display: flex; gap: 5px; align-items: center; }
+        .craft-ing { cursor: help; }
+        .craft-n { padding: 6px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
     </style>
 </head>
 <body class="relative select-none">
@@ -471,6 +609,7 @@
                 <button onclick="adminGive('gold')">+5000 🪙</button>
                 <button onclick="adminGive('items')">Предметы</button>
                 <button onclick="adminGive('level')">+5 ур.</button>
+                <button onclick="adminGive('diamonds')">+16000 💎</button>
             </div>
             <div class="admin-row">
                 <button onclick="adminTeleportCursor()">Телепорт (T)</button>
@@ -576,25 +715,6 @@
                 </div>
             </div>
 
-            <!-- Стеклянные сосуды Крови (HP), Арканы (MP) и Опыта (XP) -->
-            <div class="space-y-1.5 text-xs relative z-20">
-                <div class="relative h-4.5 bg-stone-950 rounded overflow-hidden border border-stone-700 shadow-inner">
-                    <div id="barHp" class="h-full liquid-bar-hp transition-all duration-150" style="width: 100%"></div>
-                    <span id="txtHp" class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-stone-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]">140 / 140 КРОВЬ (+3.0/с)</span>
-                </div>
-                <div class="relative h-4.5 bg-stone-950 rounded overflow-hidden border border-stone-700 shadow-inner">
-                    <div id="barMp" class="h-full liquid-bar-mp transition-all duration-150" style="width: 100%"></div>
-                    <span id="txtMp" class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-stone-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]">160 / 160 АРКАНА (+7.0/с)</span>
-                </div>
-                <div class="relative h-3 bg-stone-950 rounded overflow-hidden border border-stone-700 mt-1" title="Выносливость: Shift — бег">
-                    <div id="barSta" class="h-full bg-gradient-to-r from-lime-700 via-lime-500 to-yellow-300 transition-all duration-150" style="width: 100%"></div>
-                    <span id="txtSta" class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-stone-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]">ВЫНОСЛИВОСТЬ</span>
-                </div>
-                <div class="relative h-2 bg-stone-950 rounded overflow-hidden border border-stone-800 mt-1" title="Опыт до следующего уровня">
-                    <div id="barXp" class="h-full bg-gradient-to-r from-amber-800 via-amber-500 to-yellow-300 transition-all duration-300" style="width: 0%"></div>
-                </div>
-            </div>
-
             <!-- Уведомление об очках прокачки сфер -->
             <div id="skillPointsBanner" class="hidden mt-2.5 pt-2 border-t border-stone-700/80 flex items-center justify-between relative z-20">
                 <span class="text-[11px] font-bold text-amber-300 animate-pulse">✨ Очки Древних Сфер: <span id="hudSkillPoints">2</span></span>
@@ -636,6 +756,13 @@
             </div>
         </div>
 
+        <!-- Глобальный магазин: молитва за Алмазы (строго под мини-картой) -->
+        <button id="btnGachaShop" class="gacha-hud-btn pointer-events-auto" onclick="toggleModal('gacha')" title="Глобальный магазин — Звёздная Молитва">
+            <span class="gacha-hud-star" aria-hidden="true">✦</span>
+            <span class="gacha-hud-label">Звёздная Молитва</span>
+            <span class="gacha-hud-dia">💎 <b id="hudDiamonds">0</b></span>
+        </button>
+
         <!-- Кнопки меню -->
         <div class="flex flex-wrap justify-end gap-1.5 pointer-events-auto max-w-xs">
             <button onclick="openMainMenu()" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-rpg font-bold text-amber-200 border-amber-700/70 flex items-center gap-1" title="Главное меню и смена героя">
@@ -670,8 +797,35 @@
             </button>
         </div>
     </div>
-    <!-- ==================== АЛТАРЬ СПОСОБНОСТЕЙ ВНИЗУ (ДИНАМИЧЕСКИЙ: ИНВОКЕР ИЛИ СЕЙБЕР) ==================== -->
-    <div class="fixed bottom-3 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-auto">
+    <!-- ==================== НИЖНЯЯ ПАНЕЛЬ: ЗДОРОВЬЕ И МАНА | НАВЫКИ | ОСОБЫЕ ДЕЙСТВИЯ ==================== -->
+    <div id="bottomDock" class="bottom-dock">
+        <div class="dock-vitals">
+            <div id="vitalHp" class="vital vital-hp" title="Здоровье">
+                <span class="vital-icon" aria-hidden="true">❤</span>
+                <div class="vital-track">
+                    <div id="barHpGhost" class="vital-ghost" style="width:100%"></div>
+                    <div id="barHp" class="vital-fill" style="width:100%"></div>
+                    <span id="txtHp" class="vital-text">140 / 140 HP</span>
+                </div>
+            </div>
+            <div id="vitalMp" class="vital vital-mp" title="Мана — ресурс навыков">
+                <span class="vital-icon" aria-hidden="true">✦</span>
+                <div class="vital-track">
+                    <div id="barMpGhost" class="vital-ghost" style="width:100%"></div>
+                    <div id="barMp" class="vital-fill" style="width:100%"></div>
+                    <span id="txtMp" class="vital-text">160 / 160 MP</span>
+                </div>
+            </div>
+            <div class="vital vital-sta" title="Выносливость: Shift — бег">
+                <span class="vital-icon" aria-hidden="true">➹</span>
+                <div class="vital-track">
+                    <div id="barSta" class="vital-fill" style="width:100%"></div>
+                    <span id="txtSta" class="vital-text">ВЫНОСЛИВОСТЬ</span>
+                </div>
+            </div>
+            <div class="vital-xp" title="Опыт до следующего уровня"><div id="barXp" style="width:0%"></div><span id="txtXp"></span></div>
+        </div>
+        <div class="dock-center">
 
         <!-- Верхняя плашка матрицы сфер Инвокера ИЛИ стойки Сейбер -->
         <div id="invokerTopPill" class="rpg-panel px-4 py-1.5 rounded-full flex items-center gap-3 border border-stone-600 shadow-2xl">
@@ -880,6 +1034,14 @@
 
         <!-- ПАНЕЛЬ 3: АРЧЕР (заполняется из ARCHER_SKILLS функцией buildArcherBar) -->
         <div id="archerActionBar" class="hidden rpg-panel p-2.5 rounded-2xl items-end gap-2 sm:gap-3 border-2 border-lime-700/80"></div>
+        </div>
+        <div class="dock-specials">
+            <button id="btnShadowChallenge" class="dock-special shadow-call hidden" onclick="openShadowPrompt()" title="Все навыки на максимуме. Сразиться со своей тенью?">
+                <span class="dock-special-icon">☾</span>
+                <span class="dock-special-text">Хотите сразиться<br>со своей тенью?</span>
+            </button>
+            <div id="dockBuffs" class="dock-buffs"></div>
+        </div>
     </div>
 
     <!-- Полоса здоровья босса -->
@@ -1028,13 +1190,57 @@
     </div>
 
     <!-- ==================== МОДАЛЬНОЕ ОКНО: АЛХИМИЯ И КРАФТ АРТЕФАКТОВ ==================== -->
+    <!-- ==================== ГЛОБАЛЬНЫЙ МАГАЗИН: ЗВЁЗДНАЯ МОЛИТВА (ГАЧА ЗА АЛМАЗЫ) ==================== -->
+    <div id="modalGacha" class="hidden fixed inset-0 z-40 bg-black/85 flex items-center justify-center p-3" onclick="if (event.target === this) toggleModal('gacha')">
+        <div class="gacha-wrap">
+            <header class="gacha-head">
+                <div>
+                    <div class="gacha-kicker">Глобальный магазин</div>
+                    <h2>✦ Звёздная Молитва</h2>
+                </div>
+                <div class="gacha-head-right">
+                    <div class="gacha-wallet">💎 <b id="gachaDiamonds">0</b> <span>Алмазы</span></div>
+                    <button class="gacha-close" onclick="toggleModal('gacha')" aria-label="Закрыть">✕</button>
+                </div>
+            </header>
+            <nav class="gacha-tabs">
+                <button data-tab="banner" class="on" onclick="gachaTab('banner')">Баннер</button>
+                <button data-tab="pool" onclick="gachaTab('pool')">Оружие и пассивки</button>
+                <button data-tab="history" onclick="gachaTab('history')">История</button>
+            </nav>
+            <section id="gachaBanner" class="gacha-page"></section>
+            <section id="gachaPool" class="gacha-page hidden"></section>
+            <section id="gachaHistory" class="gacha-page hidden"></section>
+            <div id="gachaReveal" class="gacha-reveal hidden" onclick="gachaRevealClick()"></div>
+        </div>
+    </div>
+
+    <!-- Вызов тени Сейбер -->
+    <div id="modalShadow" class="hidden fixed inset-0 z-40 bg-black/85 flex items-center justify-center p-3">
+        <div class="shadow-dialog">
+            <div class="shadow-moon" aria-hidden="true"></div>
+            <h2>Хотите сразиться со своей тенью?</h2>
+            <p>Вы постигли все приёмы меча. В зеркале тьмы ждёт ваше отражение — с теми же навыками и без жалости.
+               Победите его, и Сейбер навсегда примет <b>Тёмную форму</b>. Поражение вернёт вас на место вызова.</p>
+            <div class="shadow-actions">
+                <button class="shadow-yes" onclick="startShadowDuel()">Принять вызов</button>
+                <button class="shadow-no" onclick="closeAllModals()">Не сейчас</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalCraft" class="hidden fixed inset-0 z-40 bg-black/75 flex items-center justify-center p-3">
-        <div class="rpg-panel w-full max-w-2xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto flex flex-col gap-4">
+        <div class="rpg-panel w-full max-w-4xl rounded-2xl p-4 sm:p-6 max-h-[92vh] overflow-y-auto flex flex-col gap-3">
             <div class="flex justify-between items-center border-b border-slate-700 pb-3">
                 <h2 class="font-rpg text-xl sm:text-2xl font-bold text-amber-400 flex items-center gap-2">⚗️ Кузня Тайных Артефактов</h2>
                 <button onclick="closeAllModals()" class="rpg-btn px-3 py-1 rounded-lg text-sm font-bold text-slate-300">✕ Закрыть</button>
             </div>
-            <p class="text-xs text-slate-300">Создавайте эликсиры, магические посохи и легендарный Скипетр Аганима (+1 ко всем уровням сфер Quas, Wex, Exort) из реагентов.</p>
+            <p class="text-xs text-slate-300">Комбинируйте ресурсы с мобов, боссов и сундуков: зелья и эликсиры усиления, компоненты, оружие, броня и кольца. Наведите на ингредиент, чтобы узнать, где его добыть.</p>
+            <div class="craft-toolbar">
+                <div id="craftTabs" class="craft-tabs"></div>
+                <input id="craftSearch" type="search" placeholder="Поиск рецепта…" oninput="renderCraftModal()" class="craft-search">
+                <label class="craft-only"><input type="checkbox" id="craftOnlyReady" onchange="renderCraftModal()"> только доступные</label>
+            </div>
             <div id="craftRecipesList" class="space-y-2.5"></div>
         </div>
     </div>
@@ -2065,6 +2271,432 @@
             bladeRange: 74, bladeIntervalMult: 0.5, bladeDmgMult: 1.2,
             ubwRadius: 340, ubwHitRadius: 44, swordLife: 18, maxCharges: 8, pickupRadius: 30
         };
+
+        // ============================================================================
+        // РАСШИРЕННЫЙ КРАФТ: НОВЫЕ РЕАГЕНТЫ, ЭЛИКСИРЫ, СНАРЯЖЕНИЕ
+        // ============================================================================
+        Object.assign(ITEMS_DB, {
+            wolf_pelt:        { id: 'wolf_pelt', name: 'Шкура Оборотня', icon: '🐺', type: 'material', rarity: 'common', price: 20, desc: 'Жёсткий мех стай Клык-Холда.', src: 'Оборотни (Клык-Холд, Дикий Лес)' },
+            knight_crest:     { id: 'knight_crest', name: 'Герб Багрового Креста', icon: '🛡️', type: 'material', rarity: 'rare', price: 60, desc: 'Нашивка рыцарей-отступников.', src: 'Рыцари и арбалетчики Креста (Земли Этельгарда)' },
+            wraith_essence:   { id: 'wraith_essence', name: 'Эссенция Призрака', icon: '💨', type: 'material', rarity: 'rare', price: 70, desc: 'Холодный сгусток неупокоенной души.', src: 'Призраки (Гримволт, Костяной Лес, Теневые Земли)' },
+            grave_moss:       { id: 'grave_moss', name: 'Могильный Мох', icon: '🌱', type: 'material', rarity: 'common', price: 18, desc: 'Растёт только на старых костях.', src: 'Нежить, Костяной Лес' },
+            blood_lily:       { id: 'blood_lily', name: 'Кровавая Лилия', icon: '🌺', type: 'material', rarity: 'common', price: 22, desc: 'Цветок Багровых Топей.', src: 'Вампиры-трэллы, упыри (Багровые Топи)' },
+            sea_pearl:        { id: 'sea_pearl', name: 'Жемчуг Прилива', icon: '🦪', type: 'material', rarity: 'rare', price: 75, desc: 'Перламутр Змеиного Берега.', src: 'Слизни и контрабандисты (Змеиный Берег), сундуки' },
+            mountain_crystal: { id: 'mountain_crystal', name: 'Горный Хрусталь', icon: '💠', type: 'material', rarity: 'rare', price: 80, desc: 'Сердцевина каменных стражей.', src: 'Горгульи (Гора Гримволт, Сангвиния)' },
+            shadow_ink:       { id: 'shadow_ink', name: 'Чернила Тени', icon: '🖋️', type: 'material', rarity: 'epic', price: 200, desc: 'Тьма, ставшая жидкостью.', src: 'Драгоценные сундуки, редкие враги, Тень Сейбер' },
+            moon_steel:       { id: 'moon_steel', name: 'Лунная Сталь', icon: '🌙', type: 'material', rarity: 'epic', price: 180, desc: 'Звёздная сталь, закалённая в эссенции призраков.', src: 'Кузня: Звёздная Сталь + Эссенция Призрака' },
+            elixir_might:     { id: 'elixir_might', name: 'Эликсир Ярости', icon: '🍷', type: 'consumable', rarity: 'rare', price: 90, buff: 'might', buffTime: 180, desc: '3 мин: +20% урона и мощи навыков.' },
+            elixir_ward:      { id: 'elixir_ward', name: 'Эликсир Стража', icon: '🧉', type: 'consumable', rarity: 'rare', price: 90, buff: 'ward', buffTime: 180, desc: '3 мин: +10 брони и +15% здоровья.' },
+            tonic_vigor:      { id: 'tonic_vigor', name: 'Тоник Странника', icon: '🥤', type: 'consumable', rarity: 'common', price: 50, buff: 'vigor', buffTime: 240, desc: '4 мин: +60 выносливости, вдвое быстрее восстановление.' },
+            elixir_insight:   { id: 'elixir_insight', name: 'Настой Прозрения', icon: '🫖', type: 'consumable', rarity: 'rare', price: 110, buff: 'insight', buffTime: 300, desc: '5 мин: +30% опыта.' },
+            moon_blade:       { id: 'moon_blade', cls: 'saber', name: 'Клинок Лунной Стали', icon: '🗡️', type: 'weapon', rarity: 'epic', price: 520, handDmg: 48, crit: 6, maxHp: 80, desc: 'Сейбер: +48 урона, +6% крита, +80 HP.' },
+            pelt_bow:         { id: 'pelt_bow', cls: 'archer', name: 'Лук из Рога Вожака', icon: '🏹', type: 'weapon', rarity: 'epic', price: 520, handDmg: 40, crit: 10, range: 40, desc: 'Арчер: +40 урона, +10% крита, +40 дальности.' },
+            crystal_staff:    { id: 'crystal_staff', cls: 'invoker', name: 'Посох Горного Хрусталя', icon: '🔮', type: 'weapon', rarity: 'epic', price: 520, spellAmp: 36, cdr: 12, maxMp: 130, desc: 'Инвокер: +36% мощи, -12% КД, +130 маны.' },
+            packleader_cloak: { id: 'packleader_cloak', name: 'Плащ Вожака Стаи', icon: '🧥', type: 'armor', rarity: 'rare', price: 240, armor: 7, maxHp: 110, desc: '+7 брони, +110 HP.' },
+            crest_plate:      { id: 'crest_plate', name: 'Латы Багрового Креста', icon: '🛡️', type: 'armor', rarity: 'epic', price: 480, armor: 14, maxHp: 170, desc: '+14 брони, +170 HP.' },
+            shadow_armor:     { id: 'shadow_armor', name: 'Доспех Тени', icon: '🖤', type: 'armor', rarity: 'legendary', price: 1200, armor: 20, maxHp: 280, spellAmp: 15, desc: '+20 брони, +280 HP, +15% мощи навыков.' },
+            wraith_amulet:    { id: 'wraith_amulet', name: 'Амулет Призрака', icon: '📿', type: 'ring', rarity: 'epic', price: 460, spellAmp: 20, cdr: 8, maxMp: 80, desc: '+20% мощи, -8% КД, +80 MP.' },
+            pearl_ring:       { id: 'pearl_ring', name: 'Кольцо Жемчужного Прилива', icon: '💍', type: 'ring', rarity: 'rare', price: 260, maxHp: 70, maxMp: 70, mpRegen: 2.5, desc: '+70 HP, +70 MP, +2.5 реген маны.' },
+            crystal_band:     { id: 'crystal_band', name: 'Хрустальный Обод', icon: '💍', type: 'ring', rarity: 'epic', price: 480, handDmg: 22, crit: 8, desc: '+22 урона атаки, +8% крита.' }
+        });
+        // Подсказки «где найти» для старых материалов
+        Object.entries({ herb: 'Травы в Диком Лесу и на берегу', slime_gel: 'Слизни', iron_ore: 'Гоблины, разбойники, скелеты, сундуки', soul_crystal: 'Скелеты, адепты, призраки, сундуки',
+            bone_dust: 'Скелеты, костяные ходоки, упыри', shadow_silk: 'Нетопыри, адепты, оборотни', vampire_fang: 'Нежить Сангвинии', demon_horn: 'Демоны Ада',
+            star_steel: 'Кузня, элита лагерей, Малакор', hell_ember: 'Демоны Ада', ash_sigil: 'Мини-босс Цитадели Бездны', blood_sigil: 'Мини-босс Сангвинии',
+            inferno_sigil: 'Мини-босс Ада', boss_heart: 'Малакор', dracula_heart: 'Граф Дракула', hell_core: 'Владыка Ада' })
+            .forEach(([id, src]) => { if (ITEMS_DB[id]) ITEMS_DB[id].src = src; });
+        CRAFT_RECIPES.push(
+            { result: 'tonic_vigor', count: 2, ingredients: [{ id: 'herb', count: 2 }, { id: 'wolf_pelt', count: 1 }] },
+            { result: 'elixir_might', count: 1, ingredients: [{ id: 'blood_lily', count: 2 }, { id: 'hp_pot', count: 1 }, { id: 'demon_horn', count: 1 }] },
+            { result: 'elixir_ward', count: 1, ingredients: [{ id: 'grave_moss', count: 2 }, { id: 'iron_ore', count: 2 }, { id: 'hp_pot', count: 1 }] },
+            { result: 'elixir_insight', count: 1, ingredients: [{ id: 'sea_pearl', count: 1 }, { id: 'mp_pot', count: 1 }, { id: 'herb', count: 2 }] },
+            { result: 'moon_steel', count: 1, ingredients: [{ id: 'star_steel', count: 1 }, { id: 'wraith_essence', count: 2 }] },
+            { result: 'moon_blade', count: 1, ingredients: [{ id: 'ashforged_blade', count: 1 }, { id: 'moon_steel', count: 2 }, { id: 'mountain_crystal', count: 1 }] },
+            { result: 'pelt_bow', count: 1, ingredients: [{ id: 'ash_recurve', count: 1 }, { id: 'wolf_pelt', count: 6 }, { id: 'moon_steel', count: 1 }] },
+            { result: 'crystal_staff', count: 1, ingredients: [{ id: 'ash_scepter', count: 1 }, { id: 'mountain_crystal', count: 3 }, { id: 'wraith_essence', count: 2 }] },
+            { result: 'packleader_cloak', count: 1, ingredients: [{ id: 'wolf_pelt', count: 5 }, { id: 'shadow_silk', count: 2 }] },
+            { result: 'crest_plate', count: 1, ingredients: [{ id: 'knight_crest', count: 4 }, { id: 'star_steel', count: 2 }, { id: 'camelot_plate', count: 1 }] },
+            { result: 'shadow_armor', count: 1, ingredients: [{ id: 'shadow_ink', count: 3 }, { id: 'moon_steel', count: 2 }, { id: 'crest_plate', count: 1 }] },
+            { result: 'wraith_amulet', count: 1, ingredients: [{ id: 'wraith_essence', count: 4 }, { id: 'soul_crystal', count: 2 }] },
+            { result: 'pearl_ring', count: 1, ingredients: [{ id: 'sea_pearl', count: 3 }, { id: 'iron_ore', count: 2 }] },
+            { result: 'crystal_band', count: 1, ingredients: [{ id: 'mountain_crystal', count: 3 }, { id: 'star_steel', count: 1 }] }
+        );
+
+        // ============================================================================
+        // ОРУЖИЕ МОЛИТВЫ (ГАЧА): 3★ / 4★ / 5★ С УНИКАЛЬНЫМИ ПАССИВКАМИ
+        // ============================================================================
+        // Пассивки: dmgPct (+% урона), critDmg (+% крит. урона), crit (+% шанса), lifesteal (% от урона в HP), execute (+% урона по врагам <30% HP),
+        // proc { chance, mult, name } (шанс доп. удара), manaOnHit, moveSpd (+% скорости), spellPct (+% мощи), cdr (−% перезарядки).
+        const GACHA_WEAPONS = {
+            saber: [
+                ['g_sw_squire', 3, 'Меч Оруженосца', '🗡️', { handDmg: 16 }, { name: 'Выучка', dmgPct: 6 }],
+                ['g_sw_dawn', 3, 'Клинок Рассвета', '🗡️', { handDmg: 14, maxHp: 40 }, { name: 'Первый луч', critDmg: 15 }],
+                ['g_sw_broad', 3, 'Стальной Палаш', '🗡️', { handDmg: 18 }, { name: 'Тяжёлый замах', execute: 10 }],
+                ['g_sw_lake', 4, 'Клинок Озёрной Девы', '⚔️', { handDmg: 30, maxHp: 80 }, { name: 'Дар Озера', lifesteal: 4 }],
+                ['g_sw_lancelot', 4, 'Палаш Безупречного Рыцаря', '⚔️', { handDmg: 34, crit: 5 }, { name: 'Безупречность', execute: 25 }],
+                ['g_sw_north', 4, 'Меч Северного Ветра', '⚔️', { handDmg: 28 }, { name: 'Попутный ветер', moveSpd: 8, dmgPct: 8 }],
+                ['g_sw_storm', 4, 'Клинок Грозы', '⚔️', { handDmg: 30 }, { name: 'Разряд', proc: { chance: 0.15, mult: 0.7, name: '⚡', color: '#7dd3fc' } }],
+                ['g_sw_oath', 5, 'Аргентум — Меч Обета', '🌟', { handDmg: 62, crit: 12 }, { name: 'Обет короля', critDmg: 45, dmgPct: 10 }],
+                ['g_sw_caliburn', 5, 'Калибурн Изначальный', '🌟', { handDmg: 56, spellAmp: 20 }, { name: 'Обещанная победа', spellPct: 25, manaOnHit: 3, cdr: 12 }]
+            ],
+            archer: [
+                ['g_bw_ash', 3, 'Ясеневый Лук', '🏹', { handDmg: 14 }, { name: 'Твёрдая рука', crit: 4 }],
+                ['g_bw_road', 3, 'Лук Стража Дорог', '🏹', { handDmg: 12, range: 30 }, { name: 'Дозор', dmgPct: 6 }],
+                ['g_bw_nomad', 3, 'Составной Лук Кочевника', '🏹', { handDmg: 15 }, { name: 'Кочевье', moveSpd: 5 }],
+                ['g_bw_whisper', 4, 'Лук Шёпота Ветра', '🏹', { handDmg: 28, crit: 8 }, { name: 'Шёпот', critDmg: 25 }],
+                ['g_bw_frost', 4, 'Лук Ледяной Зари', '🏹', { handDmg: 26, range: 40 }, { name: 'Иней', proc: { chance: 0.18, mult: 0.6, name: '❄', color: '#bae6fd' } }],
+                ['g_bw_crimson', 4, 'Багровая Тетива', '🏹', { handDmg: 30 }, { name: 'Жажда', lifesteal: 4 }],
+                ['g_bw_witch', 4, 'Лук Охотника на Ведьм', '🏹', { handDmg: 30, crit: 5 }, { name: 'Приговор', execute: 25 }],
+                ['g_bw_starfall', 5, 'Арбалест Звездопада', '🌠', { handDmg: 58, crit: 14, range: 60 }, { name: 'Звездопад', critDmg: 60 }],
+                ['g_bw_sunset', 5, 'Лук Последнего Заката', '🌅', { handDmg: 64, range: 100 }, { name: 'Последний закат', dmgPct: 18, proc: { chance: 0.12, mult: 1.0, name: '☀', color: '#fdba74' } }]
+            ],
+            invoker: [
+                ['g_gr_novice', 3, 'Гримуар Ученика', '📘', { spellAmp: 10, maxMp: 40 }, { name: 'Конспект', spellPct: 5 }],
+                ['g_gr_ash', 3, 'Свиток Пепла', '📜', { spellAmp: 12 }, { name: 'Тлен', execute: 10 }],
+                ['g_gr_runes', 3, 'Книга Тихих Рун', '📗', { spellAmp: 9, cdr: 5 }, { name: 'Тишина', manaOnHit: 1 }],
+                ['g_gr_frost', 4, 'Гримуар Вечной Мерзлоты', '📘', { spellAmp: 22, maxMp: 80 }, { name: 'Вечный холод', proc: { chance: 0.15, mult: 0.6, name: '❄', color: '#7dd3fc' } }],
+                ['g_gr_bloodmoon', 4, 'Кодекс Кровавой Луны', '📕', { spellAmp: 24 }, { name: 'Кровавая луна', lifesteal: 3 }],
+                ['g_gr_storm', 4, 'Фолиант Бури', '📙', { spellAmp: 20, cdr: 10 }, { name: 'Буря', spellPct: 8 }],
+                ['g_gr_devour', 4, 'Книга Пожирателя Маны', '📓', { spellAmp: 22, maxMp: 100 }, { name: 'Пожиратель', manaOnHit: 3 }],
+                ['g_gr_oblivion', 5, 'Некрономикон Забвения', '📕', { spellAmp: 55, maxMp: 160 }, { name: 'Забвение', execute: 35, spellPct: 15 }],
+                ['g_gr_astral', 5, 'Гримуар Астральных Сфер', '🔮', { spellAmp: 46, cdr: 18, maxMp: 200 }, { name: 'Астральные сферы', manaOnHit: 4, proc: { chance: 0.12, mult: 0.9, name: '✦', color: '#c4b5fd' } }]
+            ]
+        };
+        const GACHA_POOL = {};
+        Object.entries(GACHA_WEAPONS).forEach(([cls, list]) => {
+            GACHA_POOL[cls] = { 3: [], 4: [], 5: [] };
+            list.forEach(([id, stars, name, icon, stats, passive]) => {
+                ITEMS_DB[id] = Object.assign({ id, cls, name, icon, type: 'weapon', rarity: stars === 5 ? 'legendary' : (stars === 4 ? 'epic' : 'rare'), price: stars * 120, stars, gacha: true, passive }, stats);
+                ITEMS_DB[id].desc = `${'★'.repeat(stars)} Пассивка «${passive.name}»: ${passiveText(passive, 1)}`;
+                GACHA_POOL[cls][stars].push(id);
+            });
+        });
+        function passiveText(pv, r) {
+            const k = 1 + 0.25 * ((r || 1) - 1), f = v => Math.round(v * k * 10) / 10, out = [];
+            if (pv.dmgPct) out.push(`+${f(pv.dmgPct)}% урона`);
+            if (pv.critDmg) out.push(`+${f(pv.critDmg)}% крит. урона`);
+            if (pv.crit) out.push(`+${f(pv.crit)}% шанса крита`);
+            if (pv.lifesteal) out.push(`${f(pv.lifesteal)}% урона возвращается здоровьем`);
+            if (pv.execute) out.push(`+${f(pv.execute)}% урона по врагам ниже 30% HP`);
+            if (pv.proc) out.push(`${Math.round(pv.proc.chance * k * 100)}% шанс доп. удара на ${Math.round(pv.proc.mult * 100)}% урона`);
+            if (pv.manaOnHit) out.push(`+${f(pv.manaOnHit)} маны за попадание`);
+            if (pv.moveSpd) out.push(`+${f(pv.moveSpd)}% скорости`);
+            if (pv.spellPct) out.push(`+${f(pv.spellPct)}% мощи навыков`);
+            if (pv.cdr) out.push(`−${f(pv.cdr)}% перезарядки`);
+            return out.join(', ');
+        }
+        // Активная пассивка надетого оружия (с учётом пробуждения R1–R5)
+        function weaponPassive() {
+            const id = player.equipment && player.equipment.weapon, def = id && ITEMS_DB[id];
+            if (!def || !def.passive || (def.cls && def.cls !== player.heroType)) return null;
+            const r = (player.refine && player.refine[id]) || 1, k = 1 + 0.25 * (r - 1), pv = def.passive, out = {};
+            for (const key in pv) out[key] = key === 'proc' ? Object.assign({}, pv.proc, { chance: pv.proc.chance * k }) : (typeof pv[key] === 'number' ? pv[key] * k : pv[key]);
+            return out;
+        }
+
+        // ============================================================================
+        // АЛМАЗЫ И ЗВЁЗДНАЯ МОЛИТВА
+        // ============================================================================
+        const GACHA = { cost: 160, base5: 0.006, base4: 0.051, soft: 74, hard: 90, pity4: 10 };
+        const GACHA_FEATURED = { saber: 'g_sw_oath', archer: 'g_bw_starfall', invoker: 'g_gr_oblivion' };
+        const GACHA_REFUND = { 3: 15, 4: 60, 5: 300 };
+        function gachaState() {
+            if (!player.gacha) player.gacha = { pity5: 0, pity4: 0, guarantee: false, history: [], total: 0 };
+            return player.gacha;
+        }
+        function addDiamonds(n, x, y) {
+            if (!n) return;
+            player.diamonds = (player.diamonds || 0) + n;
+            if (x !== undefined) spawnFloatingText(x, y - 46, `+${n} 💎`, '#7dd3fc');
+        }
+        function rollGacha(cls) {
+            const g = gachaState();
+            g.pity5++; g.pity4++;
+            let p5 = GACHA.base5;
+            if (g.pity5 >= GACHA.soft) p5 += (g.pity5 - GACHA.soft + 1) * 0.06;
+            if (g.pity5 >= GACHA.hard) p5 = 1;
+            const r = Math.random();
+            let stars = 3, id;
+            if (r < p5) {
+                stars = 5; g.pity5 = 0;
+                const feat = GACHA_FEATURED[cls];
+                // 50/50 как в Genshin: проиграл — следующий легендарный гарантированно с баннера
+                if (g.guarantee || Math.random() < 0.5) { id = feat; g.guarantee = false; }
+                else { const others = GACHA_POOL[cls][5].filter(x => x !== feat); id = others[Math.floor(Math.random() * others.length)] || feat; g.guarantee = true; }
+            } else if (g.pity4 >= GACHA.pity4 || r < p5 + GACHA.base4) {
+                stars = 4; g.pity4 = 0;
+            }
+            if (!id) { const pool = GACHA_POOL[cls][stars]; id = pool[Math.floor(Math.random() * pool.length)]; }
+            return { id, stars };
+        }
+        function ownsItem(id) { return player.equipment.weapon === id || player.inventory.some(s => s.id === id); }
+        function doGachaPulls(n) {
+            const cls = player.heroType, cost = GACHA.cost * n;
+            if ((player.diamonds || 0) < cost) { showToast(`Нужно ${cost} 💎 — алмазы падают с элиты, боссов и из сундуков`, 'error'); return; }
+            player.diamonds -= cost;
+            const g = gachaState(), res = [];
+            for (let i = 0; i < n; i++) {
+                const { id, stars } = rollGacha(cls);
+                if (!player.refine) player.refine = {};
+                let note = 'Новое оружие!';
+                if (ownsItem(id)) {
+                    const cur = player.refine[id] || 1;
+                    if (cur < 5) { player.refine[id] = cur + 1; note = `Пробуждение R${cur + 1}`; }
+                    else { addDiamonds(GACHA_REFUND[stars]); note = `R5 — возврат ${GACHA_REFUND[stars]} 💎`; }
+                } else if (!addItemToInventory(id, 1)) { addDiamonds(GACHA_REFUND[stars]); note = `Сумка полна — возврат ${GACHA_REFUND[stars]} 💎`; }
+                else player.refine[id] = 1;
+                g.total++;
+                g.history.unshift({ id, stars, t: Date.now() });
+                res.push({ id, stars, note });
+            }
+            g.history = g.history.slice(0, 120);
+            recalcPlayerStats();
+            playGachaReveal(res);
+        }
+        let gachaRevealStage = 0, gachaRevealData = null, gachaRevealTimer = null;
+        function playGachaReveal(res) {
+            const el = document.getElementById('gachaReveal'), best = Math.max(...res.map(r => r.stars));
+            const met = best === 5 ? '#facc15' : (best === 4 ? '#c084fc' : '#60a5fa');
+            gachaRevealData = res; gachaRevealStage = 1;
+            el.style.setProperty('--met', met);
+            el.innerHTML = `<div class="gacha-meteor"></div><div class="gacha-burst"></div><div class="gacha-skip">нажмите, чтобы пропустить</div>`;
+            el.classList.remove('hidden');
+            SoundFX.play('meteor');
+            clearTimeout(gachaRevealTimer);
+            gachaRevealTimer = setTimeout(showGachaCards, 1900);
+        }
+        function showGachaCards() {
+            if (gachaRevealStage !== 1) return;
+            gachaRevealStage = 2;
+            const el = document.getElementById('gachaReveal'), res = gachaRevealData;
+            const best = Math.max(...res.map(r => r.stars));
+            SoundFX.fanfare(best === 5 ? 3 : (best === 4 ? 2 : 1));
+            el.innerHTML = `<div class="gacha-results">${res.map((r, i) => {
+                const d = ITEMS_DB[r.id];
+                return `<div class="gacha-card r${r.stars}" style="animation-delay:${i * 0.09}s"><div class="gs">${'★'.repeat(r.stars)}</div><div class="gi">${d.icon}</div><div class="gn">${d.name}</div><div class="gnote">${r.note}</div></div>`;
+            }).join('')}</div><div class="gacha-skip">нажмите, чтобы закрыть</div>`;
+            renderGachaModal();
+        }
+        function gachaRevealClick() {
+            if (gachaRevealStage === 1) { clearTimeout(gachaRevealTimer); showGachaCards(); return; }
+            gachaRevealStage = 0;
+            document.getElementById('gachaReveal').classList.add('hidden');
+        }
+        let gachaCurTab = 'banner';
+        function gachaTab(t) {
+            gachaCurTab = t;
+            document.querySelectorAll('.gacha-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+            ['banner', 'pool', 'history'].forEach(k => document.getElementById('gacha' + k[0].toUpperCase() + k.slice(1)).classList.toggle('hidden', k !== t));
+            renderGachaModal();
+        }
+        function renderGachaModal() {
+            const cls = player.heroType, g = gachaState(), feat = ITEMS_DB[GACHA_FEATURED[cls]];
+            const kind = { saber: 'Мечи', archer: 'Луки', invoker: 'Гримуары' }[cls] || 'Оружие';
+            document.getElementById('gachaDiamonds').textContent = player.diamonds || 0;
+            const dia = player.diamonds || 0;
+            document.getElementById('gachaBanner').innerHTML = `<div class="gacha-banner">
+                <div class="gacha-art"><canvas id="gachaArtCanvas" width="700" height="420"></canvas>
+                    <div class="gacha-art-info"><span class="tag">Баннер оружия • ${kind} для героя «${heroDef().short}»</span>
+                        <h3>${feat.icon} ${feat.name}</h3><p>★★★★★ • Пассивка «${feat.passive.name}»: ${passiveText(feat.passive, 1)}</p></div></div>
+                <div class="gacha-side">
+                    <div class="gacha-box"><h4>Шансы</h4><div class="gacha-rate">
+                        <span class="s5c">★★★★★</span><span>легендарное</span><b>0.6%</b>
+                        <span class="s4c">★★★★</span><span>эпическое (гарантия каждые 10)</span><b>5.1%</b>
+                        <span class="s3c">★★★</span><span>редкое</span><b>94.3%</b></div>
+                        <div style="margin-top:6px;color:#a5b4fc">С ${GACHA.soft}-й молитвы шанс ★5 растёт, на ${GACHA.hard}-й — гарантия. 50/50 на оружие баннера.</div></div>
+                    <div class="gacha-box"><h4>Гарантия</h4>
+                        <div>★★★★★: ${g.pity5} / ${GACHA.hard} ${g.guarantee ? '<b class="s5c">• следующий — с баннера</b>' : ''}</div><div class="gacha-pity"><i style="width:${g.pity5 / GACHA.hard * 100}%"></i></div>
+                        <div style="margin-top:6px">★★★★: ${g.pity4} / ${GACHA.pity4}</div><div class="gacha-pity"><i style="width:${g.pity4 / GACHA.pity4 * 100}%; background:linear-gradient(90deg,#6d28d9,#c084fc)"></i></div></div>
+                    <div class="gacha-box">Повторное оружие пробуждает его (R2–R5): пассивка сильнее на 25% за ранг. Алмазы падают с элиты, мини-боссов, боссов, из сундуков лагерей и за открытия мест.</div>
+                    <div class="gacha-btns">
+                        <button class="gacha-pull" ${dia < GACHA.cost ? 'disabled' : ''} onclick="doGachaPulls(1)">Молитва ×1<small>💎 ${GACHA.cost}</small></button>
+                        <button class="gacha-pull" ${dia < GACHA.cost * 10 ? 'disabled' : ''} onclick="doGachaPulls(10)">Молитва ×10<small>💎 ${GACHA.cost * 10}</small></button>
+                    </div>
+                </div></div>`;
+            drawGachaArt(feat);
+            document.getElementById('gachaPool').innerHTML = `<div class="gacha-pool">${[5, 4, 3].flatMap(st => GACHA_POOL[cls][st].map(id => {
+                const d = ITEMS_DB[id], r = (player.refine && player.refine[id]) || 0, own = ownsItem(id);
+                const stats = ['handDmg', 'spellAmp', 'crit', 'range', 'cdr', 'maxHp', 'maxMp'].filter(k => d[k]).map(k => `${{ handDmg: 'урон', spellAmp: 'мощь %', crit: 'крит %', range: 'дальн.', cdr: 'КД −%', maxHp: 'HP', maxMp: 'MP' }[k]} +${d[k]}`).join(' • ');
+                return `<div class="gacha-item s${st}"><div><span class="st s${st}c">${'★'.repeat(st)}</span> ${d.icon} <b>${d.name}</b>${own ? ` <span style="color:#86efac">• есть R${r || 1}</span>` : ''}</div><div style="color:#a8a29e;margin-top:3px">${stats}</div><div class="pas">«${d.passive.name}»: ${passiveText(d.passive, r || 1)}</div></div>`;
+            })).join('')}</div>`;
+            document.getElementById('gachaHistory').innerHTML = g.history.length ? `<div class="gacha-hist">${g.history.map(h => `<div><span class="s${h.stars}c">${'★'.repeat(h.stars)} ${ITEMS_DB[h.id].name}</span><span style="color:#78716c">${new Date(h.t).toLocaleString('ru-RU')}</span></div>`).join('')}</div><div style="margin-top:8px;font-size:12px;color:#a5b4fc">Всего молитв: ${g.total}</div>` : '<div style="color:#a5b4fc;font-size:13px">Молитв пока не было.</div>';
+        }
+        function drawGachaArt(feat) {
+            const cv = document.getElementById('gachaArtCanvas'); if (!cv) return;
+            const g = cv.getContext('2d'), W = cv.width, H = cv.height;
+            const bg = g.createRadialGradient(W * 0.68, H * 0.45, 10, W * 0.68, H * 0.45, W * 0.7);
+            bg.addColorStop(0, '#a16207'); bg.addColorStop(0.25, '#4c1d95'); bg.addColorStop(1, '#07040f');
+            g.fillStyle = bg; g.fillRect(0, 0, W, H);
+            g.save(); g.translate(W * 0.68, H * 0.45);
+            for (let i = 0; i < 18; i++) { g.rotate(Math.PI / 9); g.fillStyle = 'rgba(253,230,138,0.07)'; g.beginPath(); g.moveTo(0, 0); g.lineTo(-30, -W); g.lineTo(30, -W); g.closePath(); g.fill(); }
+            g.restore();
+            for (let i = 0; i < 90; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.8})`; g.fillRect(Math.random() * W, Math.random() * H, 1.6, 1.6); }
+            g.font = '170px serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+            g.shadowColor = '#facc15'; g.shadowBlur = 50; g.fillText(feat.icon, W * 0.68, H * 0.42);
+            g.shadowBlur = 0;
+            const fog = g.createLinearGradient(0, H * 0.55, 0, H); fog.addColorStop(0, 'rgba(7,4,15,0)'); fog.addColorStop(1, 'rgba(7,4,15,0.95)');
+            g.fillStyle = fog; g.fillRect(0, 0, W, H);
+        }
+
+        // ============================================================================
+        // ДУЭЛЬ С ТЕНЬЮ И ТЁМНАЯ ФОРМА СЕЙБЕР (ALTER)
+        // ============================================================================
+        const SHADOW_ARENA = { x: 60, y: 318, r: 11 };
+        let saberAlterSpriteCanvas = null;
+        function buildSaberAlterSprite() {
+            if (!saberSpriteCanvas) return null;
+            const w = saberSpriteCanvas.width, h = saberSpriteCanvas.height;
+            return makeCanvas(w, h, g => {
+                // Чёрные латы, бледное золото волос и кроваво-красные прожилки
+                g.filter = 'grayscale(1) brightness(0.42) contrast(1.6)';
+                g.drawImage(saberSpriteCanvas, 0, 0);
+                g.filter = 'none';
+                g.globalCompositeOperation = 'source-atop';
+                g.fillStyle = 'rgba(120,10,30,0.28)'; g.fillRect(0, 0, w, h);
+                g.globalCompositeOperation = 'source-over';
+                g.strokeStyle = 'rgba(239,68,68,0.9)'; g.lineWidth = 1;
+                g.beginPath(); g.moveTo(w * 0.42, h * 0.45); g.lineTo(w * 0.5, h * 0.62); g.lineTo(w * 0.58, h * 0.45); g.moveTo(w * 0.5, h * 0.62); g.lineTo(w * 0.5, h * 0.8); g.stroke();
+                g.fillStyle = '#fde68a'; g.fillRect(w * 0.43, h * 0.22, 2, 1.5); g.fillRect(w * 0.54, h * 0.22, 2, 1.5);
+            });
+        }
+        const saberSkillsMaxed = () => player.heroType === 'saber' && player.orbLevels.q >= 7 && player.orbLevels.w >= 7 && player.orbLevels.e >= 7 && player.orbLevels.r >= 4;
+        function openShadowPrompt() {
+            if (!saberSkillsMaxed() || player.saberAlter) return;
+            closeAllModals();
+            document.getElementById('modalShadow').classList.remove('hidden');
+            SoundFX.play('thunder');
+        }
+        function startShadowDuel() {
+            closeAllModals();
+            if (player.shadowDuel) return;
+            const ax = (SHADOW_ARENA.x + 0.5) * TS, ay = (SHADOW_ARENA.y + 0.5) * TS;
+            const boss = createEnemy('saber_shadow', ax, ay - SHADOW_ARENA.r * 0.55 * TS, { summoned: true, aggro: 999 });
+            boss.engaged = true;
+            enemies.push(boss);
+            player.shadowDuel = { rx: player.x, ry: player.y, boss, endT: 0, won: false };
+            zoneTransition = { t: 0, dur: 1.8, portal: { tx: ax, ty: ay + SHADOW_ARENA.r * 0.5 * TS }, done: false };
+            cancelSaberCast();
+            setTimeout(() => { zoneBanner = { title: 'ТЕНЬ КОРОЛЯ', sub: 'Ваше отражение помнит каждый ваш приём', life: 3.5, maxLife: 3.5, color: '#f87171' }; }, 900);
+        }
+        function endShadowDuel(won) {
+            const d = player.shadowDuel; if (!d) return;
+            enemies = enemies.filter(e => e !== d.boss);
+            enemyHazards = [];
+            player.shadowDuel = null;
+            if (won) {
+                zoneTransition = { t: 0, dur: 1.6, portal: { tx: d.rx, ty: d.ry }, done: false };
+            }
+        }
+        function onShadowDefeated() {
+            const d = player.shadowDuel; if (!d) return;
+            d.won = true; d.endT = 3.8;
+            player.saberAlter = true;
+            saberAlterSpriteCanvas = buildSaberAlterSprite();
+            recalcPlayerStats();
+            player.hp = player.maxHp; player.mp = player.maxMp;
+            lightningFlashAlpha = 0.9; triggerScreenShake(22);
+            spawnParticleRing(player.x, player.y, 160, '#ef4444', 70);
+            spawnParticleBurst(player.x, player.y, '#0a0a0a', 60);
+            SoundFX.play('sunstrike'); SoundFX.fanfare(3);
+            zoneBanner = { title: 'SABER ALTER', sub: 'Тень повержена — вы приняли её силу. Тёмная форма навсегда.', life: 4.5, maxLife: 4.5, color: '#fca5a5' };
+            updateHeroPortraitHUD();
+        }
+        function updateShadowDuel(dt) {
+            const d = player.shadowDuel; if (!d) return;
+            if (d.won) { d.endT -= dt; if (d.endT <= 0) endShadowDuel(true); return; }
+            // Арена замкнута: удерживаем героя в круге
+            const ax = (SHADOW_ARENA.x + 0.5) * TS, ay = (SHADOW_ARENA.y + 0.5) * TS, R = (SHADOW_ARENA.r - 1) * TS, dd = Math.hypot(player.x - ax, player.y - ay);
+            if (!zoneTransition && dd > R) { player.x = ax + (player.x - ax) / dd * R; player.y = ay + (player.y - ay) / dd * R; }
+        }
+        // ИИ Тени: зеркальные приёмы Сейбер
+        function updateShadowSaber(b, dt, dist) {
+            if (zoneTransition) return;
+            const p2 = b.hp < b.maxHp * 0.5;
+            if (p2 && b.phase === 1) {
+                b.phase = 2; b.speed = b.tpl.speed * 1.25;
+                zoneBanner = { title: 'ТЕНЬ В ЯРОСТИ', sub: 'Экскалибур Морган пробуждается', life: 3, maxLife: 3, color: '#ef4444' };
+                SoundFX.play('thunder'); triggerScreenShake(10);
+            }
+            const toP = Math.atan2(player.y - b.y, player.x - b.x), k = p2 ? 0.7 : 1;
+            if (b.state === 'charge') {
+                b.stateT -= dt;
+                if (Math.random() < 0.8) particles.push({ x: b.x + (Math.random() - 0.5) * 60, y: b.y + 20, vx: 0, vy: -120, size: 3, color: Math.random() < 0.5 ? '#ef4444' : '#1c1917', life: 0.5, maxLife: 0.5 });
+                if (b.stateT <= 0) { b.state = 'chase'; SoundFX.play('sunstrike'); triggerScreenShake(14); }
+                return;
+            }
+            if (b.state === 'dash') {
+                b.stateT -= dt;
+                tryMoveEntity(b, b.dvx * dt, b.dvy * dt);
+                if (Math.hypot(player.x - b.x, player.y - b.y) < 46 && !b.dashHit) { b.dashHit = true; damagePlayer(Math.round(b.dmg * 1.2), 'phys'); }
+                if (b.stateT <= 0) b.state = 'chase';
+                return;
+            }
+            // R — Экскалибур Морган: долгий заряд и луч тьмы
+            if (cdReady(b, 'beam', dt)) {
+                b.cds.beam = 11 * k; b.state = 'charge'; b.stateT = 1.6;
+                for (let i = 1; i <= 12; i++) addHazard(b.x + Math.cos(toP) * i * 48, b.y + Math.sin(toP) * i * 48, 46, 1.6, Math.round(b.dmg * 1.6), '#7f1d1d', 'magic');
+                zoneBanner = { title: 'EXCALIBUR MORGAN', sub: 'Уйдите с линии луча!', life: 1.6, maxLife: 1.6, color: '#ef4444' };
+                return;
+            }
+            // W — Рывок Праны
+            if (dist > 140 && cdReady(b, 'dash', dt)) {
+                b.cds.dash = 6 * k; b.state = 'dash'; b.stateT = 0.32; b.dashHit = false;
+                const sp = Math.min(dist + 60, 420) / 0.32; b.dvx = Math.cos(toP) * sp; b.dvy = Math.sin(toP) * sp;
+                spawnParticleBurst(b.x, b.y, '#ef4444', 14);
+                return;
+            }
+            // Q — Разлом и Волна тьмы
+            if (cdReady(b, 'rift', dt)) {
+                b.cds.rift = 5 * k;
+                for (let i = 1; i <= 7; i++) addHazard(b.x + Math.cos(toP) * i * 52, b.y + Math.sin(toP) * i * 52, 40, 0.55 + i * 0.07, Math.round(b.dmg * 0.9), '#991b1b', 'phys');
+            }
+            // E — Колоссальный клинок (во второй фазе)
+            if (p2 && cdReady(b, 'giant', dt)) {
+                b.cds.giant = 7;
+                addHazard(player.x, player.y, 150, 1.0, Math.round(b.dmg * 1.4), '#450a0a', 'phys');
+            }
+            bossChaseAndMelee(b, dt, dist, p2 ? 0.95 : 1.2, 0);
+        }
+
+        // ============================================================================
+        // НИЖНИЙ HUD: ШЛЕЙФ УРОНА, ДОСТУПНОСТЬ НАВЫКОВ, КНОПКА ТЕНИ, БАФФЫ
+        // ============================================================================
+        const hudGhost = { hp: 1, mp: 1, lastHp: null, hitT: 0 };
+        function updateDockHud(dt) {
+            const hpF = Math.max(0, player.hp / player.maxHp), mpF = Math.max(0, player.mp / player.maxMp);
+            if (hudGhost.lastHp !== null && player.hp < hudGhost.lastHp - 0.5) hudGhost.hitT = 0.25;
+            hudGhost.lastHp = player.hp;
+            // «Шлейф»: светлая полоса догоняет текущее значение с задержкой
+            hudGhost.hp = hpF > hudGhost.hp ? hpF : hudGhost.hp - Math.min(hudGhost.hp - hpF, dt * 0.45);
+            hudGhost.mp = mpF > hudGhost.mp ? mpF : hudGhost.mp - Math.min(hudGhost.mp - mpF, dt * 0.6);
+            document.getElementById('barHpGhost').style.width = `${hudGhost.hp * 100}%`;
+            document.getElementById('barMpGhost').style.width = `${hudGhost.mp * 100}%`;
+            if (hudGhost.hitT > 0) hudGhost.hitT -= dt;
+            const vh = document.getElementById('vitalHp');
+            vh.classList.toggle('hit', hudGhost.hitT > 0);
+            vh.classList.toggle('low', hpF < 0.3);
+            document.getElementById('hudDiamonds').textContent = player.diamonds || 0;
+            document.getElementById('btnShadowChallenge').classList.toggle('hidden', !(saberSkillsMaxed() && !player.saberAlter && !player.shadowDuel));
+            // Доступность навыков по мане
+            const h = player.heroType;
+            if (h !== 'invoker') {
+                const P = h === 'archer' ? 'Archer' : 'Saber', SK = h === 'archer' ? ARCHER_SKILLS : SABER_SKILLS;
+                ['q', 'w', 'e', 'r'].forEach(k => { const el = document.getElementById(`cd${P}${k.toUpperCase()}`); if (el && el.parentElement) el.parentElement.classList.toggle('no-mana', player.mp < SK[k].manaCost); });
+            } else {
+                [['cdSpellD', 0], ['cdSpellF', 1]].forEach(([id, slot]) => {
+                    const key = player.invokedSpells[slot], sp = key && INVOKER_SPELLS[key], el = document.getElementById(id);
+                    if (el && el.parentElement) el.parentElement.classList.toggle('no-mana', !!sp && player.mp < sp.manaCost);
+                });
+            }
+            // Активные эффекты
+            const buffs = [];
+            if (player.shrineBuff) buffs.push(`${SHRINE_BUFFS[player.shrineBuff.kind].icon} ${Math.ceil(player.shrineBuff.t)}с`);
+            if (player.saberAlter) buffs.push('🖤 Тёмная форма');
+            const pv = weaponPassive(); if (pv) buffs.push(`✦ ${pv.name}`);
+            const html = buffs.map(b => `<span>${b}</span>`).join('');
+            const box = document.getElementById('dockBuffs'); if (box.innerHTML !== html) box.innerHTML = html;
+        }
+
 
         // ПОЛНЫЙ ПУЛ ИЗ 27 УНИКАЛЬНЫХ ЗАКЛИНАНИЙ ИНВОКЕРА ИЗ СТАРЫХ КАСТОМОК WARCRAFT 3 (DotA Allstars 6.1x)
         // Порядок 3 активных сфер (Q, W, E) строго определяет заклинание (3 x 3 x 3 = 27)!
@@ -4539,7 +5171,15 @@
             if (isSaber && saberSpriteCanvas) {
                 ctx.save();
                 ctx.scale(scaleCast, scaleCast);
-                ctx.drawImage(saberSpriteCanvas, -30, -34 + bobY, 60, 62);
+                if (player.saberAlter) {
+                    // Тёмная аура Сейбер Альтер
+                    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+                    const da = ctx.createRadialGradient(0, -4, 6, 0, -4, 46);
+                    da.addColorStop(0, `rgba(185,28,28,${0.28 + Math.sin(now * 0.006) * 0.1})`); da.addColorStop(1, 'rgba(60,0,10,0)');
+                    ctx.fillStyle = da; ctx.beginPath(); ctx.arc(0, -4, 46, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+                    if (Math.random() < 0.3) particles.push({ x: player.x + (Math.random() - 0.5) * 30, y: player.y + 10, vx: 0, vy: -50, size: 2.5, color: Math.random() < 0.5 ? '#1c1917' : '#b91c1c', life: 0.6, maxLife: 0.6 });
+                }
+                ctx.drawImage(player.saberAlter && saberAlterSpriteCanvas ? saberAlterSpriteCanvas : saberSpriteCanvas, -30, -34 + bobY, 60, 62);
 
                 // Отрисовка священного меча Экскалибура в руках Сейбер с анимацией замаха!
                 ctx.save();
@@ -4551,16 +5191,17 @@
                     // Колоссальный клинок: длина растёт с анимацией появления
                     const g = 1 - Math.max(0, player.giantGrow || 0) / 0.45;
                     const len = 38 + (SABER_GIANT.swordLen - 38) * g, bw = 3 + 7 * g;
-                    ctx.shadowColor = '#fde047'; ctx.shadowBlur = 22;
+                    ctx.shadowColor = player.saberAlter ? '#ef4444' : '#fde047'; ctx.shadowBlur = 22;
                     const sg = ctx.createLinearGradient(10, 0, 10 + len, 0);
-                    sg.addColorStop(0, '#e0f2fe'); sg.addColorStop(0.7, '#fef9c3'); sg.addColorStop(1, '#ffffff');
+                    if (player.saberAlter) { sg.addColorStop(0, '#1c1917'); sg.addColorStop(0.7, '#450a0a'); sg.addColorStop(1, '#ef4444'); }
+                    else { sg.addColorStop(0, '#e0f2fe'); sg.addColorStop(0.7, '#fef9c3'); sg.addColorStop(1, '#ffffff'); }
                     ctx.fillStyle = sg;
                     ctx.beginPath(); ctx.moveTo(10, -bw); ctx.lineTo(10 + len - bw * 2, -bw); ctx.lineTo(10 + len, 0); ctx.lineTo(10 + len - bw * 2, bw); ctx.lineTo(10, bw); ctx.closePath(); ctx.fill();
                     ctx.strokeStyle = '#ca8a04'; ctx.lineWidth = 1; ctx.stroke();
                     ctx.strokeStyle = 'rgba(56,189,248,0.8)'; ctx.lineWidth = 1.2;
                     ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(10 + len - bw * 2.5, 0); ctx.stroke();
                 } else {
-                ctx.strokeStyle = (player.avalonBuffTimer > 0 || player.excaliburChargeTime > 0) ? '#fef08a' : '#bae6fd';
+                ctx.strokeStyle = player.saberAlter ? '#b91c1c' : ((player.avalonBuffTimer > 0 || player.excaliburChargeTime > 0) ? '#fef08a' : '#bae6fd');
                 ctx.lineWidth = player.excaliburChargeTime > 0 ? 5 : 3.2;
                 ctx.shadowColor = '#fde047';
                 ctx.shadowBlur = player.excaliburChargeTime > 0 ? 20 : 10;
@@ -5228,6 +5869,7 @@
                 if (leg) addItemToInventory(leg, 1);
                 updateHudPotions();
                 showToast('Выданы зелья, материалы, печати и легендарное оружие', 'gold');
+            } else if (what === 'diamonds') { addDiamonds(16000); showToast('+16000 алмазов', 'gold');
             } else if (what === 'level') {
                 for (let i = 0; i < 5; i++) gainXp(Math.max(1, player.xpNext - player.xp));
             } else if (what === 'reveal') {
@@ -5555,7 +6197,9 @@
                    !document.getElementById('modalNpc').classList.contains('hidden') ||
                    !document.getElementById('modalHelp').classList.contains('hidden') ||
                    !document.getElementById('modalSpellbook').classList.contains('hidden') ||
-                   !document.getElementById('modalWorldMap').classList.contains('hidden');
+                   !document.getElementById('modalWorldMap').classList.contains('hidden') ||
+                   !document.getElementById('modalGacha').classList.contains('hidden') ||
+                   !document.getElementById('modalShadow').classList.contains('hidden');
         }
 
         function closeAllModals() {
@@ -5565,10 +6209,12 @@
             document.getElementById('modalHelp').classList.add('hidden');
             document.getElementById('modalSpellbook').classList.add('hidden');
             document.getElementById('modalWorldMap').classList.add('hidden');
+            document.getElementById('modalGacha').classList.add('hidden');
+            document.getElementById('modalShadow').classList.add('hidden');
         }
 
         function toggleModal(kind) {
-            const map = { char: 'modalChar', craft: 'modalCraft', help: 'modalHelp', spellbook: 'modalSpellbook', worldmap: 'modalWorldMap' };
+            const map = { char: 'modalChar', craft: 'modalCraft', help: 'modalHelp', spellbook: 'modalSpellbook', worldmap: 'modalWorldMap', gacha: 'modalGacha' };
             const el = document.getElementById(map[kind]);
             const wasHidden = el.classList.contains('hidden');
             closeAllModals();
@@ -5577,6 +6223,7 @@
                 if (kind === 'char') renderCharacterModal();
                 if (kind === 'craft') renderCraftModal();
                 if (kind === 'worldmap') renderWorldMap();
+                if (kind === 'gacha') { gachaTab(gachaCurTab); document.getElementById('gachaReveal').classList.add('hidden'); }
                 if (kind === 'spellbook') renderSpellbookModal();
             }
         }
@@ -5703,6 +6350,12 @@
             const def = ITEMS_DB[slot.id];
             if (def.healHp) player.hp = Math.min(player.maxHp, player.hp + def.healHp);
             if (def.healMp) player.mp = Math.min(player.maxMp, player.mp + def.healMp);
+            if (def.buff) {
+                player.shrineBuff = { kind: def.buff, t: def.buffTime };
+                recalcPlayerStats();
+                if (def.buff === 'vigor') player.stamina = maxStamina();
+                showToast(`${def.icon} ${def.name}: ${def.desc}`, 'gold');
+            }
             SoundFX.play('potion');
             removeItemFromInventory(def.id, 1);
             renderCharacterModal();
@@ -5721,62 +6374,62 @@
             renderCharacterModal();
         }
 
+        let craftTab = 'all';
+        const CRAFT_TABS = [['all', 'Все'], ['consumable', '🧪 Зелья'], ['material', '⚙️ Компоненты'], ['weapon', '⚔️ Оружие'], ['armor', '🛡️ Броня'], ['ring', '💍 Кольца']];
+        function setCraftTab(t) { craftTab = t; renderCraftModal(); }
+        const craftMax = rec => Math.min(...rec.ingredients.map(ing => Math.floor(getItemCount(ing.id) / ing.count)));
         function renderCraftModal() {
             const list = document.getElementById('craftRecipesList');
-            list.innerHTML = '';
-
-            const groups = [['consumable', '🧪 Расходники'], ['material', '⚙️ Компоненты'], ['weapon', '⚔️ Оружие вашего героя'], ['armor', '🛡️ Броня'], ['ring', '💍 Кольца']];
-            const order = Object.fromEntries(groups.map(([g], i) => [g, i]));
-            const sorted = CRAFT_RECIPES.map((rec, rIdx) => ({ rec, rIdx }))
-                .filter(({ rec }) => { const d = ITEMS_DB[rec.result]; return !(d.cls && d.cls !== player.heroType); })
-                .sort((a, b) => order[ITEMS_DB[a.rec.result].type] - order[ITEMS_DB[b.rec.result].type]);
-            let lastGroup = null;
-            sorted.forEach(({ rec, rIdx }) => {
-                const resDef = ITEMS_DB[rec.result];
-                if (resDef.type !== lastGroup) {
-                    lastGroup = resDef.type;
-                    const h = document.createElement('div');
-                    h.className = 'text-xs font-bold uppercase tracking-wider text-amber-300 mt-2 mb-1';
-                    h.textContent = (groups.find(([g]) => g === resDef.type) || [0, resDef.type])[1];
-                    list.appendChild(h);
-                }
-                let canCraft = true;
+            document.getElementById('craftTabs').innerHTML = CRAFT_TABS.map(([k, n]) => `<button class="${craftTab === k ? 'on' : ''}" onclick="setCraftTab('${k}')">${n}</button>`).join('');
+            const q = (document.getElementById('craftSearch').value || '').trim().toLowerCase();
+            const onlyReady = document.getElementById('craftOnlyReady').checked;
+            const order = { consumable: 0, material: 1, weapon: 2, armor: 3, ring: 4 };
+            const rows = CRAFT_RECIPES.map((rec, rIdx) => ({ rec, rIdx, def: ITEMS_DB[rec.result] }))
+                .filter(({ def }) => def && !(def.cls && def.cls !== player.heroType))
+                .filter(({ def }) => craftTab === 'all' || def.type === craftTab)
+                .filter(({ rec, def }) => !q || def.name.toLowerCase().includes(q) || rec.ingredients.some(i => ITEMS_DB[i.id].name.toLowerCase().includes(q)))
+                .filter(({ rec }) => !onlyReady || craftMax(rec) > 0)
+                .sort((a, b) => (craftMax(b.rec) > 0) - (craftMax(a.rec) > 0) || order[a.def.type] - order[b.def.type]);
+            const rarName = { common: 'обычный', rare: 'редкий', epic: 'эпический', legendary: 'легендарный' };
+            list.innerHTML = rows.length ? '' : '<div class="text-sm text-stone-400 p-4 text-center">Ничего не найдено. Сбросьте фильтры или соберите больше ресурсов.</div>';
+            rows.forEach(({ rec, rIdx, def }) => {
+                const n = craftMax(rec);
                 const ingHtml = rec.ingredients.map(ing => {
-                    const ingDef = ITEMS_DB[ing.id];
-                    const have = getItemCount(ing.id);
-                    if (have < ing.count) canCraft = false;
-                    const color = have >= ing.count ? 'text-emerald-400' : 'text-rose-400';
-                    return `<span class="text-xs bg-slate-950 px-2 py-0.5 rounded border border-slate-800">${ingDef.icon} ${ingDef.name}: <strong class="${color}">${have}/${ing.count}</strong></span>`;
+                    const d = ITEMS_DB[ing.id], have = getItemCount(ing.id), ok = have >= ing.count;
+                    return `<span class="craft-ing text-xs bg-slate-950 px-2 py-0.5 rounded border ${ok ? 'border-emerald-800' : 'border-slate-800'}" title="${d.src ? 'Где найти: ' + d.src : d.desc}">${d.icon} ${d.name}: <strong class="${ok ? 'text-emerald-400' : 'text-rose-400'}">${have}/${ing.count}</strong></span>`;
                 }).join(' ');
-
                 const row = document.createElement('div');
-                row.className = `bg-slate-900/90 border-2 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rarity-${resDef.rarity}`;
+                row.className = `bg-slate-900/90 border-2 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rarity-${def.rarity}`;
                 row.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="text-3xl bg-slate-950 w-12 h-12 rounded-xl flex items-center justify-center border border-slate-700">${resDef.icon}</div>
+                        <div class="text-3xl bg-slate-950 w-12 h-12 rounded-xl flex items-center justify-center border border-slate-700 shrink-0">${def.icon}</div>
                         <div>
-                            <div class="font-bold text-sm text-white">${resDef.name} ${rec.count > 1 ? `x${rec.count}` : ''} <span class="text-[10px] uppercase opacity-70">${{ common: 'обычный', rare: 'редкий', epic: 'эпический', legendary: 'легендарный' }[resDef.rarity] || ''}</span></div>
-                            <div class="text-xs text-slate-400 mb-1.5">${resDef.desc}</div>
+                            <div class="font-bold text-sm text-white">${def.name} ${rec.count > 1 ? `x${rec.count}` : ''} <span class="text-[10px] uppercase opacity-70">${rarName[def.rarity] || ''}</span></div>
+                            <div class="text-xs text-slate-400 mb-1.5">${def.desc}</div>
                             <div class="flex flex-wrap gap-1.5">${ingHtml}</div>
                         </div>
                     </div>
-                    <button onclick="craftRecipe(${rIdx})" ${canCraft ? '' : 'disabled'} class="rpg-btn-gold px-4 py-2 rounded-xl text-xs font-bold shrink-0 disabled:opacity-30">
-                        ⚒️ Создать
-                    </button>
-                `;
+                    <div class="flex gap-1.5 shrink-0">
+                        <button onclick="craftRecipe(${rIdx}, 1)" ${n > 0 ? '' : 'disabled'} class="rpg-btn-gold craft-n disabled:opacity-30">⚒️ Создать</button>
+                        ${def.type === 'consumable' || def.type === 'material' ? `<button onclick="craftRecipe(${rIdx}, ${Math.max(1, n)})" ${n > 1 ? '' : 'disabled'} class="rpg-btn craft-n disabled:opacity-30">×${Math.max(1, n)}</button>` : ''}
+                    </div>`;
                 list.appendChild(row);
             });
         }
 
-        function craftRecipe(rIdx) {
+        function craftRecipe(rIdx, times = 1) {
             const rec = CRAFT_RECIPES[rIdx];
-            for (const ing of rec.ingredients) {
-                if (getItemCount(ing.id) < ing.count) return;
+            const n = Math.min(times, craftMax(rec));
+            if (n <= 0) return;
+            for (let k = 0; k < n; k++) {
+                rec.ingredients.forEach(ing => removeItemFromInventory(ing.id, ing.count));
+                if (!addItemToInventory(rec.result, rec.count)) {
+                    groundLoot.push({ uid: Math.random(), x: player.x, y: player.y + 20, kind: 'item', itemId: rec.result, count: 1 });
+                }
             }
-            rec.ingredients.forEach(ing => removeItemFromInventory(ing.id, ing.count));
-            addItemToInventory(rec.result, rec.count);
             SoundFX.play('levelup');
-            showToast(`Создано: ${ITEMS_DB[rec.result].name}!`, 'gold');
+            showToast(`Создано: ${ITEMS_DB[rec.result].name}${n * rec.count > 1 ? ' ×' + n * rec.count : ''}!`, 'gold');
+            updateHudPotions();
             renderCraftModal();
         }
 
@@ -6315,6 +6968,7 @@
             shadowlands:   { label: '🌑 Теневые Земли', title: 'ТЕНЕВЫЕ ЗЕМЛИ', sub: 'Юг Королевства Забвения' },
             forsaken_hills:{ label: '🪦 Забытые Холмы', title: 'ЗАБЫТЫЕ ХОЛМЫ', sub: 'Курганы и склепы' },
             abyss:         { label: '🌋 Цитадель Бездны (Теневые Земли)', title: 'ЦИТАДЕЛЬ БЕЗДНЫ', sub: 'Владения Малакора' },
+            shadow_realm:  { label: '☾ Зеркало Тьмы', title: 'ЗЕРКАЛО ТЬМЫ', sub: 'Дуэль с собственной тенью' },
             hell:          { label: '🔥 Ад — Преисподняя (скрытый ярус)', title: 'ПРЕИСПОДНЯЯ', sub: 'Ярус под миром. Попасть сюда можно только через портал' }
         };
         function zoneLabel25(tx, ty) { return ZONE_INFO[zoneAt((tx + 0.5) * TS, (ty + 0.5) * TS)].label; }
@@ -6515,6 +7169,7 @@
         const remapPx = o => { const n = legacyToNew(o.x / TS, o.y / TS); o.x = n.x * TS; o.y = n.y * TS; return o; };
 
         function regionAt(tx, ty) {
+            if (ty >= WORLD.hellRow && tx < 140) return 'shadow_realm';
             if (ty >= WORLD.hellRow) return 'hell';
             if (tx >= 60 && tx < 84 && ty >= 30 && ty < 55) return 'camelot';
             if (tx >= 302 && tx < 327 && ty >= 130 && ty < 161) return 'sanctuary';
@@ -6532,7 +7187,7 @@
             if (tx >= 212 && ty >= 150) return 'boneswoods';
             return 'forest';
         }
-        const DARK_REGIONS = new Set(['abyss', 'shadowlands', 'forsaken_hills', 'dreadlands', 'grimvault', 'boneswoods', 'hell']);
+        const DARK_REGIONS = new Set(['shadow_realm', 'abyss', 'shadowlands', 'forsaken_hills', 'dreadlands', 'grimvault', 'boneswoods', 'hell']);
         const darkGround = (x, y) => !!(darkMask && darkMask[y * MAP_W + x]);
         // Сила врагов по регионам: чем дальше от стартовых земель, тем опаснее
         const REGION_POWER = { serpent_coast: 1.0, sanctuary: 1.0, aethelgard_plains: 1.1, camelot: 1.1, forest: 1.25, crimson_marsh: 1.45, clawhold: 1.6,
@@ -6655,6 +7310,12 @@
             for (let x = 261; x <= 316; x++) for (const y of [29, 61]) if (NM[y][x] !== 1) NM[y][x] = 6;
             for (let y = 29; y <= 61; y++) for (const x of [261, 316]) if (NM[y][x] !== 1 && !(y >= 58 && y <= 59)) NM[y][x] = 6;
             road(261, 58, 261, 59);
+            // Зеркало Тьмы: замкнутая арена дуэли с тенью (скрытый ярус, вход только по вызову)
+            for (let y = SHADOW_ARENA.y - SHADOW_ARENA.r; y <= SHADOW_ARENA.y + SHADOW_ARENA.r; y++) for (let x = SHADOW_ARENA.x - SHADOW_ARENA.r; x <= SHADOW_ARENA.x + SHADOW_ARENA.r; x++) {
+                const d = Math.hypot(x - SHADOW_ARENA.x, y - SHADOW_ARENA.y);
+                if (d <= SHADOW_ARENA.r) { NM[y][x] = d > SHADOW_ARENA.r - 1 ? 6 : 5; ND[y][x] = d < SHADOW_ARENA.r - 2 && R() < 0.05 ? 'crack' : null; }
+            }
+            for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; ND[Math.round(SHADOW_ARENA.y + Math.sin(a) * (SHADOW_ARENA.r - 2))][Math.round(SHADOW_ARENA.x + Math.cos(a) * (SHADOW_ARENA.r - 2))] = 'candelabra'; }
 
             // 5. Тайные тропы: узкие проходы сквозь чащу к скрытым тайникам (на карте их не видно)
             const secretTrails = [
@@ -6834,6 +7495,7 @@
 
         function heroDisplayName() {
             if (player.heroType === 'invoker' && player.orbLevels.r >= 4) return '👑 Карл • Золотой Инвокер';
+            if (player.heroType === 'saber' && player.saberAlter) return '🖤 Сейбер Альтер • Тёмный Король';
             return heroDef().title;
         }
         function heroStatLine() {
@@ -6913,6 +7575,24 @@
                 player.attackRange = 0;
                 player.critChance = 0;
                 player.critMult = 1;
+            }
+            // Пассивка оружия молитвы
+            const wpv = weaponPassive();
+            if (wpv) {
+                if (wpv.dmgPct) player.handDmg = Math.round(player.handDmg * (1 + wpv.dmgPct / 100));
+                player.spellAmp += Math.round((wpv.spellPct || 0) + (player.heroType === 'invoker' ? (wpv.dmgPct || 0) : 0));
+                player.critMult = +(player.critMult + (wpv.critDmg || 0) / 100).toFixed(2);
+                player.critChance += Math.round(wpv.crit || 0);
+                player.moveSpeed = Math.round(player.moveSpeed * (1 + (wpv.moveSpd || 0) / 100));
+                player.cdrPct = Math.min(60, player.cdrPct + Math.round(wpv.cdr || 0));
+            }
+            // Тёмная форма Сейбер (Alter)
+            if (player.heroType === 'saber' && player.saberAlter) {
+                player.handDmg = Math.round(player.handDmg * 1.3);
+                player.spellAmp += 25;
+                player.maxHp = Math.round(player.maxHp * 1.1);
+                player.critChance += 10;
+                player.moveSpeed = Math.round(player.moveSpeed * 1.05);
             }
             // Благословения святилищ
             const sb = player.shrineBuff;
@@ -7179,7 +7859,7 @@
                     const d = 14 + (rendLen / 9) * i, j = (i === 0 || i === 9) ? 0 : (Math.random() - 0.5) * 14;
                     pts.push([player.x + Math.cos(ang) * d - Math.sin(ang) * j, player.y + Math.sin(ang) * d + Math.cos(ang) * j]);
                 }
-                playerFx.push({ type: 'ground_rift', pts, w: 9, glow: '#38bdf8', life: 5, maxLife: 5 });
+                playerFx.push({ type: 'ground_rift', pts, w: 9, glow: player.saberAlter ? '#ef4444' : '#38bdf8', life: 5, maxLife: 5 });
                 for (let i = 1; i < pts.length; i += 2) addGroundDecal(pts[i][0], pts[i][1], 16, 'scorch');
                 enemies.forEach(en => {
                     if (en.deadTimer > 0) return;
@@ -7300,7 +7980,7 @@
                 en.stunTimer = Math.max(en.stunTimer, 1.5);
                 damageEnemy(en, Math.round(c.dmg * falloff), true, ca, sa, '#fef08a', { crit: true });
             });
-            playerFx.push({ type: 'excalibur_beam', x: player.x, y: player.y, ang: c.ang, len: L, width: W, life: 1.2, maxLife: 1.2 });
+            playerFx.push({ type: 'excalibur_beam', x: player.x, y: player.y, ang: c.ang, len: L, width: W, life: 1.2, maxLife: 1.2, alter: !!player.saberAlter });
             // Последствия: разломы вдоль луча и светящиеся осколки, которые жгут врагов
             const shardDmg = Math.round(c.dmg * 0.04);
             for (let i = 0; i < 3; i++) {
@@ -7485,6 +8165,16 @@
                          classDrops: { saber: 'excalibur_morgan', archer: 'hellstring_bow', invoker: 'staff_of_ruin' }, classDropChance: 1.0 }
         };
 
+        // Тень Сейбер — зеркальный босс дуэли
+        ENEMY_TEMPLATES.saber_shadow = { name: 'Тень Короля Рыцарей', icon: '🖤', hp: 9000, dmg: 88, armor: 12, mres: 0.25, speed: 150, xp: 4000, gold: [600, 900], radius: 20,
+            aggroRange: 700, attackRange: 54, isBoss: true, respawn: 1e9, color: '#7f1d1d', drops: [{ id: 'shadow_ink', chance: 1 }, { id: 'shadow_ink', chance: 1 }, { id: 'star_steel', chance: 1 }] };
+        // Новые реагенты в добыче мобов
+        [['werewolf', 'wolf_pelt', 0.5], ['werewolf_alpha', 'wolf_pelt', 1], ['crimson_knight', 'knight_crest', 0.25], ['crimson_crossbow', 'knight_crest', 0.2],
+         ['wraith', 'wraith_essence', 0.3], ['bone_walker', 'grave_moss', 0.4], ['skeleton', 'grave_moss', 0.15], ['vampire_thrall', 'blood_lily', 0.35], ['ghoul', 'blood_lily', 0.15],
+         ['slime', 'sea_pearl', 0.04], ['bandit', 'sea_pearl', 0.06], ['bandit_archer', 'wolf_pelt', 0.1], ['gargoyle', 'mountain_crystal', 0.35], ['dark_mage', 'wraith_essence', 0.08],
+         ['dracula', 'shadow_ink', 1], ['hell_lord', 'shadow_ink', 1], ['boss', 'mountain_crystal', 1], ['crimson_warden', 'shadow_ink', 0.5]]
+            .forEach(([t, id, ch]) => { if (ENEMY_TEMPLATES[t]) ENEMY_TEMPLATES[t].drops.push({ id, chance: ch }); });
+
         function createEnemy(type, x, y, opts) {
             const tpl = ENEMY_TEMPLATES[type];
             const diff = diffCfg();
@@ -7551,9 +8241,9 @@
             precious: { name: 'Драгоценный сундук', short: 'драгоценный', stars: 3, color: '#d8b4fe', glow: '216,180,254', gold: [300, 520], rolls: 4, gearChance: 0.75, gear: ['ashforged_blade', 'ash_recurve', 'ash_scepter', 'warden_plate', 'bloodweave_mantle', 'malakor_eye', 'vampiric_band', 'archmage_vestment'] }
         };
         const CAMP_LOOT = {
-            common: ['herb', 'slime_gel', 'iron_ore', 'hp_pot', 'mp_pot'],
-            rich: ['iron_ore', 'soul_crystal', 'bone_dust', 'shadow_silk', 'star_steel', 'hp_pot', 'mp_pot'],
-            precious: ['soul_crystal', 'star_steel', 'shadow_silk', 'grand_elixir', 'vampire_fang', 'demon_horn']
+            common: ['herb', 'slime_gel', 'iron_ore', 'hp_pot', 'mp_pot', 'grave_moss', 'wolf_pelt', 'blood_lily', 'tonic_vigor'],
+            rich: ['iron_ore', 'soul_crystal', 'bone_dust', 'shadow_silk', 'star_steel', 'hp_pot', 'mp_pot', 'knight_crest', 'wraith_essence', 'sea_pearl', 'mountain_crystal', 'elixir_ward'],
+            precious: ['soul_crystal', 'star_steel', 'shadow_silk', 'grand_elixir', 'vampire_fang', 'demon_horn', 'shadow_ink', 'moon_steel', 'elixir_might', 'elixir_insight']
         };
         const CAMP_DEFS = [
             // --- Цитадель Бездны ---
@@ -7802,6 +8492,7 @@
                     const label = { waystatue: '🗿 Статуя Странника', shrine: '⛩️ Святилище', tablet: '🔮 Загадка рун', cache: '💰 Тайник' }[p.kind];
                     showToast(`Найдено: ${label} — ${p.name}`, 'gold');
                     gainXp(p.kind === 'cache' ? 60 : 30);
+                    addDiamonds(p.kind === 'waystatue' ? 10 : 5, p.wx, p.wy);
                     if (p.kind === 'waystatue') { player.lastWaypoint = p.id; SoundFX.play('levelup'); spawnParticleRing(p.wx, p.wy, 60, '#67e8f9', 30); }
                 }
             }
@@ -7935,6 +8626,8 @@
 
         function updateCamps(dt) {
             adminTick();
+            updateShadowDuel(dt);
+            updateDockHud(dt);
             updateRares(dt);
             updateExploration(dt);
             for (const c of camps) {
@@ -7995,7 +8688,8 @@
                 if (gear.length) add(gear[Math.floor(Math.random() * gear.length)], 1);
             }
             const gold = Math.round((T.gold[0] + Math.random() * (T.gold[1] - T.gold[0])) * diffCfg().rewardMult);
-            return { gold, items: Object.entries(items).map(([id, count]) => ({ id, count })) };
+            const diamonds = { common: 5, rich: 15, precious: 40 }[c.tier] || 5;
+            return { gold, diamonds, items: Object.entries(items).map(([id, count]) => ({ id, count })) };
         }
 
         function openCampChest(ch) {
@@ -8006,6 +8700,7 @@
             if (ch.cacheId) player.cachesOpened[ch.cacheId] = true;
             const loot = rollChestLoot(c);
             player.gold += loot.gold;
+            addDiamonds(loot.diamonds);
             loot.items.forEach(it => {
                 if (!addItemToInventory(it.id, it.count)) {
                     for (let k = 0; k < it.count; k++) groundLoot.push({ uid: Math.random(), x: ch.x + (Math.random() - 0.5) * 40, y: ch.y + 20 + Math.random() * 10, kind: 'item', itemId: it.id, count: 1 });
@@ -8026,7 +8721,7 @@
         function showChestReward(c, loot) {
             const T = CAMP_TIERS[c.tier];
             const el = document.getElementById('chestReward');
-            const cards = [{ icon: '🪙', name: 'Золото', count: loot.gold, rarity: 'rare' }]
+            const cards = [{ icon: '🪙', name: 'Золото', count: loot.gold, rarity: 'rare' }, { icon: '💎', name: 'Алмазы', count: loot.diamonds, rarity: 'epic' }]
                 .concat(loot.items.map(it => ({ icon: ITEMS_DB[it.id].icon, name: ITEMS_DB[it.id].name, count: it.count, rarity: ITEMS_DB[it.id].rarity })));
             el.style.setProperty('--chest-color', T.color);
             el.style.setProperty('--chest-glow', T.glow);
@@ -8077,7 +8772,12 @@
                 return;
             }
             if (en.isBoss) en.engaged = true;
-            en.aggro = 6; // получив урон издалека, враг идёт на героя
+            en.aggro = 6;
+            const wpv = weaponPassive();
+            if (wpv) {
+                if (wpv.execute && en.hp < en.maxHp * 0.3) dmg *= 1 + wpv.execute / 100;
+                if (wpv.proc && Math.random() < wpv.proc.chance) { dmg += dmg * wpv.proc.mult; spawnFloatingText(en.x + 14, en.y - 42, wpv.proc.name, wpv.proc.color); }
+            } // получив урон издалека, враг идёт на героя
 
             // Cold Snap: любое повреждение вызывает дополнительный взрыв льда и микро-стан
             if (en.coldSnapTimer > 0 && en.coldSnapCd <= 0) {
@@ -8092,6 +8792,8 @@
             const final = Math.max(1, Math.round(dmg * (isSpell ? (1 - en.mres) : armorMult(en.armor))));
             en.hp -= final;
             en.hitFlash = 0.15;
+            if (wpv && wpv.lifesteal) player.hp = Math.min(player.maxHp, player.hp + final * wpv.lifesteal / 100);
+            if (wpv && wpv.manaOnHit) player.mp = Math.min(player.maxMp, player.mp + wpv.manaOnHit);
             SoundFX.play('hit');
 
             if ((knockX !== 0 || knockY !== 0) && en.state !== 'dive') {
@@ -8111,6 +8813,17 @@
             en.deadTimer = en.tpl.respawn || (en.isBoss ? 90 : 22);
             if (en.camp) en.deadTimer = 1e9; // бойцы лагеря возвращаются только все вместе (resetCamp)
             en.state = 'chase';
+            if (en.type === 'saber_shadow') { en.deadTimer = 1e9; onShadowDefeated(); }
+            // Алмазы — валюта молитвы: щедро с боссов и элиты, изредка с обычных врагов
+            if (!en.summoned) {
+                let dia = 0;
+                if (en.tpl.miniBoss) dia = 60;
+                else if (en.isBoss) dia = 160;
+                else if (en.rare) dia = 40;
+                else if (en.elite) dia = en.elite === 'leader' ? 20 : 8;
+                else if (Math.random() < 0.12) dia = 1 + Math.floor(Math.random() * 3);
+                addDiamonds(dia, en.x, en.y);
+            }
             const goldGain = Math.floor(en.goldRange[0] + Math.random() * (en.goldRange[1] - en.goldRange[0] + 1));
             player.gold += goldGain;
             gainXp(en.xp);
@@ -8194,6 +8907,7 @@
                 player.mp = player.maxMp;
                 const rp = respawnPoint();
                 player.x = rp.x; player.y = rp.y;
+                if (player.shadowDuel) { player.x = player.shadowDuel.rx; player.y = player.shadowDuel.ry; endShadowDuel(false); showToast('Тень оказалась сильнее… Вернитесь, когда будете готовы.', 'error'); }
                 player.moveTargetX = null; player.moveTargetY = null; player.attackTarget = null; player.interactTargetGoal = null;
                 player.invulnTime = 2.0;
                 enemyHazards = [];
@@ -8489,6 +9203,7 @@
 
                 if (en.type === 'dracula') { updateDracula(en, dt, dist); continue; }
                 if (en.type === 'hell_lord') { updateHellLord(en, dt, dist); continue; }
+                if (en.type === 'saber_shadow') { updateShadowSaber(en, dt, dist); continue; }
 
                 // Невидимого Инвокера (Ghost Walk) обычные враги не видят
                 if (player.ghostWalkTimer > 0) continue;
@@ -8942,11 +9657,19 @@
         function updateCooldownBadge(elId, cd) {
             const el = document.getElementById(elId);
             if (!el) return;
+            const max = +el.dataset.max || 0;
             if (cd > 0.05) {
+                if (cd > max + 0.05 || !el.dataset.max) el.dataset.max = cd;
+                const frac = Math.min(1, cd / (+el.dataset.max || cd));
                 el.classList.remove('hidden'); el.classList.add('flex');
                 el.textContent = cd >= 10 ? Math.ceil(cd) : cd.toFixed(1);
-            } else {
+                // Радиальная «стрелка» перезарядки
+                el.style.background = `conic-gradient(rgba(0,0,0,0.84) ${frac * 360}deg, rgba(0,0,0,0.28) 0deg)`;
+            } else if (!el.classList.contains('hidden')) {
                 el.classList.add('hidden'); el.classList.remove('flex');
+                el.dataset.max = '';
+                const btn = el.parentElement;
+                if (btn) { btn.classList.remove('cd-ready'); void btn.offsetWidth; btn.classList.add('cd-ready'); }
             }
         }
 
@@ -9080,6 +9803,7 @@
                 spellCooldowns: {}, saberCooldowns: { q: 0, w: 0, e: 0, r: 0 },
                 invokeCd: 0, basicAttackCd: 0,
                 poiFound: {}, cachesOpened: {}, puzzlesSolved: {}, explored: '', lastWaypoint: null, stamina: 100, exhausted: false, shrineBuff: null,
+                diamonds: 1600, gacha: null, refine: {}, saberAlter: false, shadowDuel: null,
                 archerStance: 'bow', ubwCharges: 0, bladeComboStep: 0, bladeSwing: 0, ubwSky: 0,
                 moveTargetX: null, moveTargetY: null, attackTarget: null, interactTargetGoal: null,
                 questStage: 0, questKills: 0, bossKilled: false, draculaKilled: false, hellLordKilled: false,
@@ -9119,6 +9843,7 @@
                     checkpointZone: player.checkpointZone || null, mapVer: 4,
                     poiFound: player.poiFound || {}, cachesOpened: player.cachesOpened || {}, puzzlesSolved: player.puzzlesSolved || {},
                     explored: exploredString(), lastWaypoint: player.lastWaypoint || null,
+                    diamonds: player.diamonds || 0, gacha: gachaState(), refine: player.refine || {}, saberAlter: !!player.saberAlter,
                     worldTimeHours
                 };
                 localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -9142,6 +9867,8 @@
                     player.x = h.x * TS; player.y = h.y * TS;
                 }
                 if (!HERO_DEFS[player.heroType]) player.heroType = 'invoker';
+                player.shadowDuel = null;
+                if (player.saberAlter) saberAlterSpriteCanvas = buildSaberAlterSprite();
                 if (ver < 4) { player.poiFound = {}; player.cachesOpened = {}; player.puzzlesSolved = {}; player.explored = ''; player.lastWaypoint = null; }
                 initPoiState();
                 if (typeof data.worldTimeHours === 'number') worldTimeHours = data.worldTimeHours;
@@ -9446,7 +10173,7 @@
         }
 
         function heroSpriteCanvas() {
-            if (player.heroType === 'saber') return saberSpriteCanvas;
+            if (player.heroType === 'saber') return player.saberAlter && saberAlterSpriteCanvas ? saberAlterSpriteCanvas : saberSpriteCanvas;
             if (player.heroType === 'archer') return archerSpriteCanvas;
             return player.orbLevels?.r >= 4 ? goldenInvokerSpriteCanvas : invokerSpriteCanvas;
         }
@@ -9760,6 +10487,18 @@
             werewolf: ['hellhound', 1.15, 'grayscale(0.9) brightness(0.8) contrast(1.2)'], werewolf_alpha: ['hellhound', 1.5, 'grayscale(0.75) brightness(1.05) contrast(1.25)'] };
         function drawEnemyBody25(c, en, now, bob) {
             const tp = en.type;
+            if (tp === 'saber_shadow') {
+                // Тёмное отражение: силуэт Сейбер в чёрно-красной ауре, золотые глаза
+                const spr = saberAlterSpriteCanvas || (saberAlterSpriteCanvas = buildSaberAlterSprite());
+                c.save(); c.globalCompositeOperation = 'lighter';
+                const ag = c.createRadialGradient(0, -6, 4, 0, -6, 52);
+                ag.addColorStop(0, `rgba(239,68,68,${0.35 + Math.sin(now * 0.008) * 0.15})`); ag.addColorStop(1, 'rgba(127,29,29,0)');
+                c.fillStyle = ag; c.beginPath(); c.arc(0, -6, 52, 0, Math.PI * 2); c.fill(); c.restore();
+                if (spr) { c.save(); c.scale(1.3, 1.3); c.filter = 'brightness(0.55)'; c.drawImage(spr, -30, -36 + bob, 60, 62); c.filter = 'none'; c.restore(); }
+                c.fillStyle = '#fde047'; c.fillRect(-5, -27 + bob, 3, 2); c.fillRect(3, -27 + bob, 3, 2);
+                if (en.state === 'charge') { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = '#ef4444'; c.lineWidth = 5; c.shadowColor = '#ef4444'; c.shadowBlur = 20; c.beginPath(); c.moveTo(0, -30); c.lineTo(0, -120); c.stroke(); c.restore(); }
+                return;
+            }
             const mb = MINIBOSS_BODIES[tp];
             if (mb) {
                 if (mb[2]) {
@@ -10183,8 +10922,9 @@
                     const w = f.width * (0.35 + 0.65 * p), len = f.len * grow;
                     c.save(); c.translate(f.x, f.y - 10); c.rotate(f.ang);
                     const bg = c.createLinearGradient(0, -w, 0, w);
-                    bg.addColorStop(0, 'rgba(245,158,11,0)'); bg.addColorStop(0.3, `rgba(253,224,71,${0.75 * p})`);
-                    bg.addColorStop(0.5, `rgba(255,255,255,${p})`); bg.addColorStop(0.7, `rgba(253,224,71,${0.75 * p})`); bg.addColorStop(1, 'rgba(245,158,11,0)');
+                    const ca = f.alter ? '127,29,29' : '245,158,11', cb = f.alter ? '220,38,38' : '253,224,71', cc = f.alter ? '30,0,8' : '255,255,255';
+                    bg.addColorStop(0, `rgba(${ca},0)`); bg.addColorStop(0.3, `rgba(${cb},${0.75 * p})`);
+                    bg.addColorStop(0.5, `rgba(${cc},${p})`); bg.addColorStop(0.7, `rgba(${cb},${0.75 * p})`); bg.addColorStop(1, `rgba(${ca},0)`);
                     c.fillStyle = bg; c.fillRect(0, -w, len, w * 2);
                     c.fillStyle = `rgba(255,255,255,${0.9 * p})`; c.fillRect(0, -w * 0.12, len, w * 0.24);
                     const eg = c.createRadialGradient(len, 0, 2, len, 0, w * 1.4);
