@@ -266,6 +266,123 @@
         @keyframes chestCardIn { to { opacity: 1; transform: none; } }
         @keyframes chestSpin { to { transform: rotate(360deg); } }
         @media (prefers-reduced-motion: reduce) { #chestReward .chest-rays { animation: none; } }
+
+        /* ===================== ГЛАВНОЕ МЕНЮ ===================== */
+        :root {
+            --m-accent: #d4a24c; --m-accent-2: #f5d68a; --m-glow: 212,162,76; --m-ink: #e7e0d2; --m-dim: #9a8f7c;
+            --m-panel: rgba(12,10,14,0.72); --m-border: rgba(212,162,76,0.35);
+        }
+        body.admin-mode {
+            --m-accent: #ef4444; --m-accent-2: #fca5a5; --m-glow: 239,68,68; --m-ink: #fde2e2; --m-dim: #c08484;
+            --m-panel: rgba(28,4,6,0.78); --m-border: rgba(239,68,68,0.55);
+        }
+        .menu-root { position: fixed; inset: 0; z-index: 50; overflow: hidden; background: #050407; color: var(--m-ink); font-family: Inter, system-ui, sans-serif; transition: opacity .6s ease; }
+        .menu-root.hidden { display: none; }
+        #menuBgCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+        .menu-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(0,0,0,.75) 100%); }
+        .menu-screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px;
+            opacity: 0; visibility: hidden; transform: translateY(18px) scale(.985); transition: opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1), visibility 0s linear .55s; }
+        .menu-screen.is-active { opacity: 1; visibility: visible; transform: none; transition: opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1), visibility 0s; }
+        .menu-main { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 560px; width: 100%; }
+        .menu-kicker { font-size: 12px; letter-spacing: .45em; text-transform: uppercase; color: var(--m-dim); transition: color .6s; }
+        .menu-title { font-family: 'Cinzel', Georgia, serif; font-weight: 900; font-size: clamp(36px, 7vw, 76px); line-height: 1.02; margin: 6px 0 2px;
+            background: linear-gradient(180deg, #fff 0%, var(--m-accent-2) 45%, var(--m-accent) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+            filter: drop-shadow(0 0 22px rgba(var(--m-glow), .45)); transition: filter .6s; }
+        .menu-subtitle { font-family: 'Cinzel', serif; font-size: clamp(14px, 2vw, 19px); letter-spacing: .3em; text-transform: uppercase; color: var(--m-accent); transition: color .6s; }
+        .menu-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 34px; width: min(340px, 100%); }
+        .menu-btn { position: relative; padding: 13px 22px; border: 1px solid var(--m-border); border-radius: 4px; color: var(--m-ink); background: linear-gradient(90deg, rgba(0,0,0,.55), var(--m-panel), rgba(0,0,0,.55));
+            font-family: 'Cinzel', serif; font-weight: 700; font-size: 16px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; overflow: hidden;
+            transition: border-color .3s, color .3s, transform .25s, box-shadow .3s, background .6s; }
+        .menu-btn.hidden { display: none; }
+        .menu-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(var(--m-glow), .28), transparent); transform: translateX(-100%); transition: transform .5s ease; }
+        .menu-btn:hover, .menu-btn:focus-visible { border-color: var(--m-accent); color: #fff; transform: translateX(4px); box-shadow: 0 0 22px rgba(var(--m-glow), .35), inset 0 0 14px rgba(var(--m-glow), .2); outline: none; }
+        .menu-btn:hover::before, .menu-btn:focus-visible::before { transform: translateX(100%); }
+        .menu-btn span { position: relative; }
+        .menu-btn-primary { border-color: var(--m-accent); box-shadow: 0 0 16px rgba(var(--m-glow), .25); }
+        .menu-admin-btn { position: absolute; top: 14px; right: 16px; z-index: 5; display: flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.25); color: rgba(231,224,210,.32); font-size: 10px; letter-spacing: .2em; cursor: pointer; transition: all .35s; }
+        .menu-admin-btn:hover { color: var(--m-ink); border-color: var(--m-border); background: rgba(0,0,0,.5); }
+        body.admin-mode .menu-admin-btn { color: #fecaca; border-color: #ef4444; background: rgba(127,29,29,.55); box-shadow: 0 0 18px rgba(239,68,68,.6); animation: adminPulse 1.6s ease-in-out infinite; }
+        @keyframes adminPulse { 50% { box-shadow: 0 0 30px rgba(239,68,68,.9); } }
+        .menu-admin-note { margin-top: 18px; font-size: 12px; color: #fca5a5; opacity: 0; transform: translateY(6px); transition: opacity .4s, transform .4s; min-height: 16px; }
+        body.admin-mode .menu-admin-note { opacity: 1; transform: none; }
+
+        .menu-screen-head { position: absolute; top: 0; left: 0; right: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 16px 120px 0 16px; gap: 10px; }
+        .menu-screen-head h2 { font-family: 'Cinzel', serif; font-weight: 800; font-size: clamp(18px, 2.6vw, 28px); letter-spacing: .1em; text-transform: uppercase; color: var(--m-accent-2); margin: 0; text-align: center; transition: color .6s; }
+        .menu-step { justify-self: end; font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: var(--m-dim); }
+        .menu-back { justify-self: start; background: none; border: 1px solid transparent; color: var(--m-dim); font-family: 'Cinzel', serif; font-size: 14px; padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: all .25s; }
+        .menu-back:hover { color: #fff; border-color: var(--m-border); }
+
+        /* ---- слайдер героев ---- */
+        .hero-stage { position: relative; width: 100%; height: min(72vh, 640px); margin-top: 26px; perspective: 1400px; }
+        .hero-track { position: absolute; inset: 0; }
+        .hero-card { position: absolute; left: 50%; top: 50%; width: min(860px, 86vw); height: 100%; margin-left: max(-430px, -43vw); margin-top: calc(min(72vh, 640px) / -2);
+            border-radius: 18px; overflow: hidden; border: 1px solid var(--m-border); background: #0b0a0d; cursor: pointer;
+            transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .6s, filter .6s, border-color .6s, box-shadow .6s; transform-style: preserve-3d; will-change: transform; }
+        .hero-card.is-active { z-index: 3; cursor: default; box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 50px rgba(var(--hero-glow), .25); border-color: rgba(var(--hero-glow), .6); }
+        .hero-card.is-prev, .hero-card.is-next { z-index: 2; opacity: .42; filter: blur(1.5px) brightness(.6); }
+        .hero-card.is-hidden { opacity: 0; pointer-events: none; z-index: 1; }
+        .hero-splash { position: absolute; inset: -4%; width: 108%; height: 108%; transition: transform .25s ease-out; }
+        .hero-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5,4,7,.92) 0%, rgba(5,4,7,.6) 38%, transparent 62%), linear-gradient(0deg, rgba(5,4,7,.85), transparent 45%); pointer-events: none; }
+        .hero-info { position: absolute; left: clamp(18px, 4%, 44px); bottom: clamp(18px, 5%, 44px); width: min(380px, 80%); transform: translateZ(40px); transition: transform .25s ease-out; }
+        .hero-card:not(.is-active) .hero-info > * { opacity: 0; transform: translateY(14px); }
+        .hero-info > * { opacity: 1; transform: none; transition: opacity .5s ease, transform .5s ease; }
+        .hero-card.is-active .hero-info > *:nth-child(2) { transition-delay: .08s; } .hero-card.is-active .hero-info > *:nth-child(3) { transition-delay: .16s; }
+        .hero-card.is-active .hero-info > *:nth-child(4) { transition-delay: .24s; } .hero-card.is-active .hero-info > *:nth-child(5) { transition-delay: .32s; }
+        .hero-role { display: inline-block; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(var(--hero-glow), .6); color: rgb(var(--hero-glow)); background: rgba(0,0,0,.4); }
+        .hero-name { font-family: 'Cinzel', serif; font-weight: 900; font-size: clamp(30px, 5vw, 54px); line-height: 1; margin: 10px 0 2px; color: #fff; text-shadow: 0 0 26px rgba(var(--hero-glow), .6); }
+        .hero-epithet { font-family: 'Cinzel', serif; font-size: 15px; color: rgb(var(--hero-glow)); letter-spacing: .12em; }
+        .hero-lore { font-size: 13px; line-height: 1.55; color: #d6d0c4; margin: 12px 0; }
+        .hero-stats { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #a8a29e; }
+        .hero-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+        .hero-bar i { display: block; height: 100%; background: linear-gradient(90deg, rgba(var(--hero-glow), .55), rgb(var(--hero-glow))); width: 0; transition: width .8s cubic-bezier(.2,.8,.2,1) .3s; }
+        .hero-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+        .hero-skills span { font-size: 11px; padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.1); }
+        .hero-skills b { color: rgb(var(--hero-glow)); margin-right: 4px; }
+        .hero-arrow { position: absolute; top: 50%; z-index: 5; width: 54px; height: 54px; margin-top: -27px; border-radius: 50%; border: 1px solid var(--m-border); background: rgba(0,0,0,.55);
+            color: var(--m-ink); font-size: 34px; line-height: 1; cursor: pointer; transition: all .25s; }
+        .hero-arrow:hover { border-color: var(--m-accent); box-shadow: 0 0 20px rgba(var(--m-glow), .45); color: #fff; }
+        .hero-arrow-left { left: max(10px, 2vw); } .hero-arrow-right { right: max(10px, 2vw); }
+        .hero-foot { position: absolute; bottom: 14px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 24px; padding: 0 16px; flex-wrap: wrap; }
+        .hero-dots { display: flex; gap: 8px; }
+        .hero-dots button { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--m-border); background: transparent; cursor: pointer; transition: all .3s; }
+        .hero-dots button.on { background: var(--m-accent); box-shadow: 0 0 10px rgba(var(--m-glow), .8); width: 26px; border-radius: 6px; }
+
+        /* ---- сложность ---- */
+        .diff-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; width: min(1100px, 100%); margin-top: 10px; }
+        .diff-card { position: relative; padding: 22px 18px 18px; min-height: 250px; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); background: linear-gradient(180deg, rgba(var(--d-glow), .14), var(--m-panel) 55%);
+            text-align: left; color: var(--m-ink); cursor: pointer; opacity: 0; transform: translateY(26px); transition: transform .35s, border-color .3s, box-shadow .3s, background .3s; animation: diffIn .6s cubic-bezier(.2,.8,.2,1) forwards; }
+        .diff-card:hover { transform: translateY(-6px); border-color: rgba(var(--d-glow), .7); }
+        .diff-card.on { border-color: rgb(var(--d-glow)); box-shadow: 0 0 34px rgba(var(--d-glow), .4), inset 0 0 26px rgba(var(--d-glow), .15); }
+        .diff-icon { font-size: 34px; }
+        .diff-name { font-family: 'Cinzel', serif; font-weight: 800; font-size: 19px; margin: 8px 0 4px; color: rgb(var(--d-glow)); }
+        .diff-desc { font-size: 12px; line-height: 1.5; color: #c9c2b4; }
+        .diff-mult { margin-top: 12px; display: grid; grid-template-columns: 1fr auto; gap: 4px; font-size: 11px; color: #a8a29e; }
+        .diff-mult b { color: #fff; font-family: ui-monospace, Menlo, monospace; }
+        .diff-summary { font-size: 13px; color: var(--m-dim); max-width: 520px; text-align: center; }
+        @keyframes diffIn { to { opacity: 1; transform: none; } }
+
+        .menu-curtain { position: fixed; inset: 0; z-index: 70; background: #000; opacity: 0; pointer-events: none; transition: opacity .7s ease; }
+        .menu-curtain.on { opacity: 1; pointer-events: all; }
+
+        /* ---- панель администратора в игре ---- */
+        .admin-panel { position: fixed; left: 12px; bottom: 16px; z-index: 35; min-width: 250px; padding: 8px 10px; border-radius: 10px;
+            background: rgba(35,4,6,.88); border: 1px solid #ef4444; box-shadow: 0 0 22px rgba(239,68,68,.45); color: #fde2e2; font-size: 12px; }
+        .admin-panel.hidden { display: none; }
+        .admin-panel-head { display: flex; justify-content: space-between; align-items: center; font-family: 'Cinzel', serif; font-weight: 800; letter-spacing: .2em; color: #fca5a5; }
+        .admin-panel-body { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+        .admin-panel-body.collapsed { display: none; }
+        .admin-panel label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+        .admin-row { display: flex; gap: 6px; }
+        .admin-row button, .admin-mini { flex: 1; padding: 4px 6px; border-radius: 6px; border: 1px solid rgba(239,68,68,.6); background: rgba(127,29,29,.5); color: #fff; cursor: pointer; font-size: 11px; }
+        .admin-mini { flex: none; padding: 0 6px; }
+        .admin-row button:hover { background: rgba(185,28,28,.8); }
+        .admin-hint { font-size: 10px; color: #f0a5a5; opacity: .8; }
+        body.admin-mode .rpg-panel { box-shadow: 0 0 0 1px rgba(239,68,68,.55), 0 0 18px rgba(239,68,68,.25); }
+
+        @media (max-width: 900px) { .diff-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero-info { width: 88%; } .hero-lore { display: none; } }
+        @media (max-width: 560px) { .diff-grid { grid-template-columns: 1fr; } .diff-card { min-height: 0; } .menu-screen-head { padding-right: 16px; grid-template-columns: auto 1fr; } .menu-step { display: none; } }
+        @media (prefers-reduced-motion: reduce) { .menu-screen, .hero-card, .diff-card, .menu-btn { transition-duration: .01s !important; animation-duration: .01s !important; } }
     </style>
 </head>
 <body class="relative select-none">
@@ -273,162 +390,98 @@
     <!-- Основной Canvas Игры -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- ==================== ГЛАВНОЕ МЕНЮ И ВЫБОР ГЕРОЯ (WARCRAFT 3 / DARK FANTASY) ==================== -->
-    <div id="mainMenuOverlay" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-[2px] flex items-center justify-center p-3 overflow-y-auto">
-        <div class="rpg-panel w-full max-w-5xl rounded-2xl p-5 sm:p-7 flex flex-col gap-5 border-2 border-amber-700/80 shadow-2xl my-auto">
-            <!-- Шапка Главного Меню -->
-            <div class="flex flex-col sm:flex-row justify-between items-center border-b border-stone-700/90 pb-4 gap-3 relative z-20">
-                <div class="text-center sm:text-left">
-                    <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-amber-950/90 border border-amber-600/60 text-amber-300 text-[11px] font-bold mb-1">
-                        <span>⚔️ WARCRAFT III 2.5D ENGINE</span>
-                        <span>•</span>
-                        <span>ИНВОКЕР • СЕЙБЕР • АРЧЕР • ЗАМОК ДРАКУЛЫ • АД</span>
-                    </div>
-                    <h1 class="font-rpg text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 drop-shadow">
-                        ХРОНИКИ ЭЛЬДОРИИ: НАСЛЕДИЕ ДРЕВНИХ
-                    </h1>
-                    <p class="text-xs sm:text-sm text-stone-400 mt-0.5">Псевдо-3D Action-RPG в духе классических кастомных карт Warcraft III и Dark Souls</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="openSettingsModal()" class="rpg-btn px-3.5 py-2 rounded-xl text-xs font-rpg font-bold text-amber-300 flex items-center gap-1.5">
-                        <span>⚙️</span><span>Настройки графики</span>
-                    </button>
-                </div>
+    <!-- ==================== ГЛАВНОЕ МЕНЮ: МЕНЮ → ВЫБОР ГЕРОЯ → СЛОЖНОСТЬ → ИГРА ==================== -->
+    <div id="mainMenuOverlay" class="menu-root" data-state="menu">
+        <canvas id="menuBgCanvas"></canvas>
+        <div class="menu-vignette"></div>
+
+        <!-- Секретная кнопка режима администратора -->
+        <button id="btnAdminToggle" class="menu-admin-btn" onclick="toggleAdminMode()" title="Режим администратора" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm0 5a3 3 0 0 1 3 3c0 1.3-.8 2.4-2 2.8V15h-2v-2.2A3 3 0 0 1 12 7Z"/></svg>
+            <span class="menu-admin-label">ADMIN</span>
+        </button>
+
+        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
+        <section id="scrMenu" class="menu-screen is-active" aria-label="Главное меню">
+            <div class="menu-main">
+                <div class="menu-kicker">Королевство Забвения</div>
+                <h1 class="menu-title">Хроники Эльдории</h1>
+                <div class="menu-subtitle">Наследие Древних</div>
+                <nav class="menu-buttons">
+                    <button id="btnMenuResume" class="menu-btn hidden" onclick="resumeFromMenu()"><span>Вернуться в игру</span></button>
+                    <button class="menu-btn menu-btn-primary" onclick="setGameState('char_select')"><span>Играть</span></button>
+                    <button id="btnContinueGame" class="menu-btn hidden" onclick="continueSavedGameFromMenu()"><span>Продолжить сохранение</span></button>
+                    <button class="menu-btn" onclick="openSettingsModal()"><span>Настройки</span></button>
+                    <button class="menu-btn" onclick="setGameState('exit')"><span>Выйти</span></button>
+                </nav>
+                <div id="menuAdminNote" class="menu-admin-note">Режим администратора включён: бессмертие, мгновенная перезарядка, золото, предметы, телепорт</div>
             </div>
+        </section>
 
-            <!-- Секция Выбора Героя и Сложности -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 relative z-20">
-                <!-- Карточки Героев (8 колонок) -->
-                <div class="lg:col-span-8 flex flex-col gap-3">
-                    <div class="flex justify-between items-center">
-                        <h2 class="font-rpg text-sm sm:text-base font-bold text-amber-300 uppercase tracking-wider">1. Выберите своего Героя и Стартовую Локацию</h2>
-                        <span class="text-[11px] text-stone-400">Нажмите на карточку героя</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                        <!-- Герой 1: Архимаг Инвокер (27 заклинаний + Золотая Форма) -->
-                        <div id="cardHeroInvoker" onclick="selectMenuHero('invoker')" class="cursor-pointer bg-stone-950/95 border-2 border-stone-700 rounded-2xl p-4 flex flex-col justify-between transition-all hover:border-amber-500/80 hero-card-selected">
-                            <div>
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-18 h-18 rounded-xl bg-gradient-to-b from-purple-950 to-stone-950 border-2 border-amber-500 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
-                                        <canvas id="menuPreviewInvoker" width="72" height="72"></canvas>
-                                    </div>
-                                    <div>
-                                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700">Чистый кастер • 27 заклинаний</span>
-                                        <h3 class="font-rpg text-lg font-extrabold text-amber-300 mt-1">Карл • Инвокер</h3>
-                                        <p class="text-[11px] text-emerald-400 font-semibold">📍 Спавн: Руины Святилища</p>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-stone-300 leading-relaxed mb-3">
-                                    Властелин сфер <strong class="text-cyan-300">Quas</strong>, <strong class="text-fuchsia-300">Wex</strong> и <strong class="text-orange-300">Exort</strong>. Порядок сфер в матрице создает <strong class="text-amber-300">27 уникальных заклинаний</strong> по канону старых карт Warcraft 3. Автоатак нет — только магия; при касте появляется руна заклинания.
-                                </p>
-                            </div>
-                            <div class="bg-amber-950/40 border border-amber-700/50 rounded-xl p-2 text-[11px] text-amber-200">
-                                ✨ <strong>Легендарный Апгрейд:</strong> на макс. уровне Invoke (Ур. 4) обретает <strong>Золотой Божественный Облик</strong> с солнечным нимбом и крыльями света!
-                            </div>
-                        </div>
-
-                        <!-- Герой 2: Сейбер / Артория Пендрагон (Король Артур) -->
-                        <div id="cardHeroSaber" onclick="selectMenuHero('saber')" class="cursor-pointer bg-stone-950/95 border-2 border-stone-700 rounded-2xl p-4 flex flex-col justify-between transition-all hover:border-sky-400/80">
-                            <div>
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-18 h-18 rounded-xl bg-gradient-to-b from-sky-950 to-stone-950 border-2 border-sky-400 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
-                                        <canvas id="menuPreviewSaber" width="72" height="72"></canvas>
-                                    </div>
-                                    <div>
-                                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-600">Только ближний бой</span>
-                                        <h3 class="font-rpg text-lg font-extrabold text-sky-300 mt-1">Сейбер • Артория</h3>
-                                        <p class="text-[11px] text-amber-300 font-semibold">🏰 Спавн: Королевство Камелот</p>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-stone-300 leading-relaxed mb-3">
-                                    Король Рыцарей из <strong class="text-sky-300">Fate / Warcraft 3</strong>. Мечница: <strong class="text-cyan-200">Разлом и Волна (Q)</strong>, <strong class="text-blue-300">Рывок Праны с ускорением (W)</strong> и <strong class="text-amber-300">Колоссальный Клинок (E)</strong>.
-                                </p>
-                            </div>
-                            <div class="bg-sky-950/40 border border-sky-700/50 rounded-xl p-2 text-[11px] text-sky-200">
-                                ☀️ <strong>Ультимейт (R) — ЛУЧ ЭКСКАЛИБУРА:</strong> сбор света в клинке и направленный луч энергии вперёд. На земле остаются светящиеся осколки и разломы!
-                            </div>
-                        </div>
-
-                        <!-- Герой 3: Арчер / Лучница (механики кастомок Warcraft 3) -->
-                        <div id="cardHeroArcher" onclick="selectMenuHero('archer')" class="cursor-pointer bg-stone-950/95 border-2 border-stone-700 rounded-2xl p-4 flex flex-col justify-between transition-all hover:border-lime-400/80">
-                            <div>
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="w-18 h-18 rounded-xl bg-gradient-to-b from-green-950 to-stone-950 border-2 border-lime-500 flex items-center justify-center shrink-0 overflow-hidden shadow-lg">
-                                        <canvas id="menuPreviewArcher" width="72" height="72"></canvas>
-                                    </div>
-                                    <div>
-                                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-green-950 text-lime-300 border border-lime-700">Лук + Клинки</span>
-                                        <h3 class="font-rpg text-lg font-extrabold text-rose-300 mt-1">Арчер • Страж Клинков</h3>
-                                        <p class="text-[11px] text-emerald-400 font-semibold">📍 Спавн: Руины Святилища</p>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-stone-300 leading-relaxed mb-3">
-                                    Лучница в духе кастомок <strong class="text-lime-300">Warcraft 3</strong>: баллистика стрел, криты, бонус за дистанцию. <strong class="text-cyan-200">Замедляющая стрела (Q)</strong>, <strong class="text-amber-200">Залп (W)</strong>, <strong class="text-lime-300">Отскок (E)</strong>. <strong class="text-rose-300">D</strong> — смена стойки: лук ↔ парные клинки Канто и Бакуя.
-                                </p>
-                            </div>
-                            <div class="bg-green-950/40 border border-lime-700/50 rounded-xl p-2 text-[11px] text-lime-200">
-                                ⚔️ <strong>Ультимейт (R) — БЕСКОНЕЧНЫЙ АРСЕНАЛ:</strong> дождь клинков по огромной области. Подбирайте упавшие мечи и метайте их в цель (F)!
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Панель Сложности и Запуска (4 колонки) -->
-                <div class="lg:col-span-4 flex flex-col justify-between bg-stone-950/90 border border-stone-800 rounded-2xl p-4 gap-4">
-                    <div>
-                        <h2 class="font-rpg text-sm font-bold text-amber-300 uppercase tracking-wider mb-2.5">2. Уровень Сложности</h2>
-                        <div class="space-y-2" id="difficultyButtonsBox">
-                            <button onclick="selectDifficulty('easy')" id="diffBtn_easy" class="w-full text-left px-3 py-2 rounded-xl border border-stone-700 bg-stone-900/90 hover:border-emerald-500 transition flex justify-between items-center">
-                                <div>
-                                    <div class="text-xs font-bold text-emerald-400">🛡️ Послушник (Легко)</div>
-                                    <div class="text-[10px] text-stone-400">Враги: 75% урона и HP, +25% реген</div>
-                                </div>
-                                <span class="text-xs font-mono text-emerald-300">x0.75</span>
-                            </button>
-                            <button onclick="selectDifficulty('normal')" id="diffBtn_normal" class="w-full text-left px-3 py-2 rounded-xl border-2 border-amber-500 bg-amber-950/30 transition flex justify-between items-center">
-                                <div>
-                                    <div class="text-xs font-bold text-amber-300">⚔️ Рыцарь (Нормально)</div>
-                                    <div class="text-[10px] text-stone-400">Классический баланс Warcraft 3 RPG</div>
-                                </div>
-                                <span class="text-xs font-mono text-amber-300">x1.0</span>
-                            </button>
-                            <button onclick="selectDifficulty('hard')" id="diffBtn_hard" class="w-full text-left px-3 py-2 rounded-xl border border-stone-700 bg-stone-900/90 hover:border-orange-500 transition flex justify-between items-center">
-                                <div>
-                                    <div class="text-xs font-bold text-orange-400">🔥 Кошмар (Сложно)</div>
-                                    <div class="text-[10px] text-stone-400">Враги: 140% HP и урона, +35% Золота/XP</div>
-                                </div>
-                                <span class="text-xs font-mono text-orange-300">x1.4</span>
-                            </button>
-                            <button onclick="selectDifficulty('insane')" id="diffBtn_insane" class="w-full text-left px-3 py-2 rounded-xl border border-stone-700 bg-stone-900/90 hover:border-red-500 transition flex justify-between items-center">
-                                <div>
-                                    <div class="text-xs font-bold text-rose-400">💀 Легенда Warcraft (Безумно)</div>
-                                    <div class="text-[10px] text-stone-400">Враги: 200% мощи, +80% Золота и Опыта</div>
-                                </div>
-                                <span class="text-xs font-mono text-rose-400">x2.0</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Кнопки старта -->
-                    <div class="space-y-2 pt-2 border-t border-stone-800">
-                        <button onclick="startNewGameFromMenu()" class="w-full rpg-btn-gold py-3 rounded-xl font-rpg font-extrabold text-sm tracking-wider shadow-xl flex items-center justify-center gap-2">
-                            <span>⚔️</span><span>НОВАЯ ИГРА</span>
-                        </button>
-                        <button id="btnContinueGame" onclick="continueSavedGameFromMenu()" class="hidden w-full rpg-btn py-2.5 rounded-xl font-rpg font-bold text-xs text-emerald-300 border-emerald-700/80 flex items-center justify-center gap-2">
-                            <span>▶️</span><span>ПРОДОЛЖИТЬ СОХРАНЕНИЕ</span>
-                        </button>
-                        <button onclick="openSettingsModal()" class="w-full rpg-btn py-2 rounded-xl text-xs font-semibold text-stone-300 flex items-center justify-center gap-1.5">
-                            <span>⚙️</span><span>Настройки и Оптимизация</span>
-                        </button>
-                    </div>
-                </div>
+        <!-- ЭКРАН 2: ВЫБОР ГЕРОЯ -->
+        <section id="scrHeroes" class="menu-screen" aria-label="Выбор героя">
+            <header class="menu-screen-head">
+                <button class="menu-back" onclick="setGameState('menu')">← Назад</button>
+                <h2>Выберите героя</h2>
+                <div class="menu-step">Шаг 1 из 2</div>
+            </header>
+            <div class="hero-stage">
+                <button class="hero-arrow hero-arrow-left" onclick="heroSlide(-1)" aria-label="Предыдущий герой">‹</button>
+                <div id="heroTrack" class="hero-track"></div>
+                <button class="hero-arrow hero-arrow-right" onclick="heroSlide(1)" aria-label="Следующий герой">›</button>
             </div>
+            <footer class="hero-foot">
+                <div id="heroDots" class="hero-dots"></div>
+                <button class="menu-btn menu-btn-primary hero-confirm" onclick="confirmHero()"><span>Выбрать героя</span></button>
+            </footer>
+        </section>
+
+        <!-- ЭКРАН 3: СЛОЖНОСТЬ -->
+        <section id="scrDifficulty" class="menu-screen" aria-label="Выбор сложности">
+            <header class="menu-screen-head">
+                <button class="menu-back" onclick="setGameState('char_select')">← К героям</button>
+                <h2>Уровень сложности</h2>
+                <div class="menu-step">Шаг 2 из 2</div>
+            </header>
+            <div id="diffGrid" class="diff-grid"></div>
+            <footer class="hero-foot">
+                <div id="diffSummary" class="diff-summary"></div>
+                <button class="menu-btn menu-btn-primary" onclick="startGameFromMenu()"><span>Начать путь</span></button>
+            </footer>
+        </section>
+
+        <!-- ЭКРАН: ВЫХОД -->
+        <section id="scrExit" class="menu-screen" aria-label="Выход">
+            <div class="menu-main">
+                <h1 class="menu-title" style="font-size:clamp(28px,5vw,52px)">Огни замка гаснут…</h1>
+                <div class="menu-subtitle">Спасибо за игру. Закройте вкладку, чтобы выйти.</div>
+                <nav class="menu-buttons"><button class="menu-btn" onclick="setGameState('menu')"><span>Вернуться в меню</span></button></nav>
+            </div>
+        </section>
+    </div>
+    <div id="menuCurtain" class="menu-curtain"></div>
+
+    <!-- Панель режима администратора (в игре) -->
+    <div id="adminPanel" class="admin-panel hidden" role="region" aria-label="Режим администратора">
+        <div class="admin-panel-head">⛧ ADMIN <button onclick="toggleAdminPanelCollapse()" class="admin-mini" title="Свернуть">▾</button></div>
+        <div id="adminPanelBody" class="admin-panel-body">
+            <label><input type="checkbox" id="chkGod" checked onchange="adminCheats.god = this.checked"> Бессмертие</label>
+            <label><input type="checkbox" id="chkNoCd" checked onchange="adminCheats.noCd = this.checked"> Мгновенный кулдаун</label>
+            <div class="admin-row">
+                <button onclick="adminGive('gold')">+5000 🪙</button>
+                <button onclick="adminGive('items')">Предметы</button>
+                <button onclick="adminGive('level')">+5 ур.</button>
+            </div>
+            <div class="admin-row">
+                <button onclick="adminTeleportCursor()">Телепорт (T)</button>
+                <button onclick="adminGive('reveal')">Открыть карту</button>
+            </div>
+            <div class="admin-hint">T — к курсору • на карте M клик — в любую точку</div>
         </div>
     </div>
 
     <!-- ==================== МОДАЛЬНОЕ ОКНО: НАСТРОЙКИ ГРАФИКИ И ОПТИМИЗАЦИИ ==================== -->
-    <div id="modalSettings" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-3">
+    <div id="modalSettings" class="hidden fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-3">
         <div class="rpg-panel w-full max-w-lg rounded-2xl p-5 flex flex-col gap-4 border-2 border-amber-700/70">
             <div class="flex justify-between items-center border-b border-stone-700 pb-3">
                 <h2 class="font-rpg text-xl font-bold text-amber-400 flex items-center gap-2">⚙️ Настройки Графики и Оптимизации</h2>
@@ -532,6 +585,10 @@
                 <div class="relative h-4.5 bg-stone-950 rounded overflow-hidden border border-stone-700 shadow-inner">
                     <div id="barMp" class="h-full liquid-bar-mp transition-all duration-150" style="width: 100%"></div>
                     <span id="txtMp" class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-stone-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]">160 / 160 АРКАНА (+7.0/с)</span>
+                </div>
+                <div class="relative h-3 bg-stone-950 rounded overflow-hidden border border-stone-700 mt-1" title="Выносливость: Shift — бег">
+                    <div id="barSta" class="h-full bg-gradient-to-r from-lime-700 via-lime-500 to-yellow-300 transition-all duration-150" style="width: 100%"></div>
+                    <span id="txtSta" class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-stone-100 drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]">ВЫНОСЛИВОСТЬ</span>
                 </div>
                 <div class="relative h-2 bg-stone-950 rounded overflow-hidden border border-stone-800 mt-1" title="Опыт до следующего уровня">
                     <div id="barXp" class="h-full bg-gradient-to-r from-amber-800 via-amber-500 to-yellow-300 transition-all duration-300" style="width: 0%"></div>
@@ -847,11 +904,11 @@
             <div class="flex items-center justify-between mb-2 relative z-20">
                 <h2 class="font-rpg text-lg font-extrabold text-amber-300">🗺️ The Realm of Oblivion</h2>
                 <div class="flex items-center gap-3 text-[11px] text-stone-300">
-                    <span><span class="text-rose-400">⚔</span> лагерь</span><span><span class="text-amber-300">🎁</span> сундук ждёт</span><span><span class="text-stone-500">✓</span> зачищен</span>
+                    <span>🗿 статуя</span><span>⛩️ святилище</span><span>🔮 загадка</span><span>💰 тайник</span><span><span class="text-rose-400">⚔</span> лагерь</span><span><span class="text-amber-300">🎁</span> сундук ждёт</span><span><span class="text-stone-500">✓</span> зачищен</span>
                     <button onclick="toggleModal('worldmap')" class="rpg-btn px-2 py-1 rounded-lg text-xs">✕ (M)</button>
                 </div>
             </div>
-            <canvas id="worldMapCanvas" width="1000" height="750" class="w-full h-auto rounded-xl block relative z-20 bg-black"></canvas>
+            <canvas id="worldMapCanvas" width="1000" height="834" class="block mx-auto rounded-xl relative z-20 bg-black cursor-pointer" style="max-width:100%; max-height:calc(100vh - 110px); width:auto; height:auto;" onclick="onWorldMapClick(event)"></canvas>
         </div>
     </div>
 
@@ -1052,10 +1109,10 @@
         };
 
         const DIFFICULTY_CONFIG = {
-            easy:   { name: 'Послушник', hpMult: 0.75, dmgMult: 0.75, rewardMult: 1.0 },
+            easy:   { name: 'Искатель приключений', hpMult: 0.75, dmgMult: 0.75, rewardMult: 1.0 },
             normal: { name: 'Рыцарь',    hpMult: 1.0,  dmgMult: 1.0,  rewardMult: 1.0 },
             hard:   { name: 'Кошмар',    hpMult: 1.4,  dmgMult: 1.35, rewardMult: 1.35 },
-            insane: { name: 'Легенда Warcraft', hpMult: 2.0, dmgMult: 1.75, rewardMult: 1.8 }
+            insane: { name: 'Адская Бездна', hpMult: 2.0, dmgMult: 1.75, rewardMult: 1.8 }
         };
 
         let fpsFrames = 0;
@@ -2964,6 +3021,7 @@
         // createEnemy(), damageEnemy(), killEnemy() — см. раздел 19 (броня, сопротивление магии, новые враги)
 
         function gainXp(amount) {
+            if (player.shrineBuff && player.shrineBuff.kind === 'insight') amount = Math.round(amount * 1.3);
             player.xp += amount;
             while (player.xp >= player.xpNext) {
                 player.xp -= player.xpNext;
@@ -3095,7 +3153,7 @@
                     mx /= Math.max(1, keyLen);
                     my /= Math.max(1, keyLen);
                     player.facingAngle = Math.atan2(my, mx);
-                    tryMoveEntity(player, mx * player.moveSpeed * dt, my * player.moveSpeed * dt);
+                    { const sp = moveSpeedNow(dt); tryMoveEntity(player, mx * sp * dt, my * sp * dt); }
                     player.walkCycle += dt * 10;
                 } else if (player.attackTarget) {
                     const target = player.attackTarget;
@@ -3112,7 +3170,7 @@
                         } else {
                             const dx = (target.x - player.x) / dist;
                             const dy = (target.y - player.y) / dist;
-                            tryMoveEntity(player, dx * player.moveSpeed * dt, dy * player.moveSpeed * dt);
+                            { const sp = moveSpeedNow(dt); tryMoveEntity(player, dx * sp * dt, dy * sp * dt); }
                             player.walkCycle += dt * 10;
                         }
                     }
@@ -3129,7 +3187,7 @@
                         const dx = (goal.x - player.x) / dist;
                         const dy = (goal.y - player.y) / dist;
                         player.facingAngle = Math.atan2(dy, dx);
-                        tryMoveEntity(player, dx * player.moveSpeed * dt, dy * player.moveSpeed * dt);
+                        { const sp = moveSpeedNow(dt); tryMoveEntity(player, dx * sp * dt, dy * sp * dt); }
                         player.walkCycle += dt * 10;
                     }
                 } else if (player.moveTargetX !== null && player.moveTargetY !== null) {
@@ -3143,7 +3201,7 @@
                         player.facingAngle = Math.atan2(dy, dx);
                         const oldX = player.x;
                         const oldY = player.y;
-                        tryMoveEntity(player, dx * player.moveSpeed * dt, dy * player.moveSpeed * dt);
+                        { const sp = moveSpeedNow(dt); tryMoveEntity(player, dx * sp * dt, dy * sp * dt); }
                         player.walkCycle += dt * 10;
                         const movedDist = Math.hypot(player.x - oldX, player.y - oldY);
                         if (movedDist < 0.25) {
@@ -3450,6 +3508,11 @@
                     closestDist = d;
                     currentInteractTarget = { type: g.kind, data: g, label: lootLabel(g) };
                 }
+            }
+            for (const p of pois) {
+                if (!isPoiInteractable(p) || p.wx === undefined) continue;
+                const d = Math.hypot(player.x - p.wx, player.y - p.wy);
+                if (d < 72 && d < closestDist) { closestDist = d; currentInteractTarget = { type: 'poi', data: p, label: poiLabel(p) }; }
             }
 
             const promptEl = document.getElementById('interactPrompt');
@@ -4738,6 +4801,451 @@
         // ============================================================================
         // selectMenuHero() и startNewGameFromMenu() — см. раздел 23
 
+        // ============================================================================
+        // ГЛАВНОЕ МЕНЮ: СОСТОЯНИЯ ИГРЫ, ФОН С ЗАМКОМ, СЛАЙДЕР ГЕРОЕВ, СЛОЖНОСТЬ, РЕЖИМ АДМИНИСТРАТОРА
+        // ============================================================================
+        // gameState: 'menu' | 'char_select' | 'difficulty' | 'playing' | 'exit'
+        let gameState = 'menu';
+        let gameStarted = false;
+        const MENU_SCREENS = { menu: 'scrMenu', char_select: 'scrHeroes', difficulty: 'scrDifficulty', exit: 'scrExit' };
+
+        const HERO_MENU = [
+            { key: 'saber', name: 'Сейбер', epithet: 'Король Рыцарей', role: 'Ближний бой • Танк', glow: '250,204,21',
+              lore: 'Владычица Форта Этельгард, вернувшаяся из Авалона. Её клинок раскалывает землю, а Луч Экскалибура выжигает путь сквозь армии тьмы.',
+              stats: [['Атака', 8], ['Защита', 9], ['Мобильность', 6], ['Сложность', 3]],
+              skills: [['Q', 'Разлом и Волна'], ['W', 'Рывок Праны'], ['E', 'Колоссальный Клинок'], ['R', 'Луч Экскалибура']] },
+            { key: 'invoker', name: 'Инвокер', epithet: 'Архимаг Карл', role: 'Маг • Комбинатор', glow: '168,85,247',
+              lore: 'Последний хранитель Руин Голдрона. Сплетает лёд Quas, молнию Wex и огонь Exort в 27 древних заклинаний — нужна лишь верная последовательность.',
+              stats: [['Атака', 9], ['Защита', 3], ['Мобильность', 5], ['Сложность', 9]],
+              skills: [['Q W E', 'Сферы стихий'], ['R', 'Invoke'], ['D F', 'Призванные чары']] },
+            { key: 'archer', name: 'Арчер', epithet: 'Страж Клинков', role: 'Стрелок • Мечник', glow: '239,68,68',
+              lore: 'Воин в алом плаще, разящий из чёрного лука. В ближнем бою призывает клинки Канто и Бакуя, а в час нужды — Бесконечный Арсенал.',
+              stats: [['Атака', 8], ['Защита', 4], ['Мобильность', 8], ['Сложность', 6]],
+              skills: [['Q', 'Ледяная стрела'], ['W', 'Залп'], ['E', 'Отскок'], ['D', 'Лук ↔ Клинки'], ['R', 'Бесконечный Арсенал']] }
+        ];
+        const DIFF_MENU = [
+            { key: 'easy', name: 'Искатель приключений', icon: '🧭', glow: '52,211,153', desc: 'Для тех, кто пришёл за историей и исследованием. Монстры слабее, лагеря проходятся легко.' },
+            { key: 'normal', name: 'Рыцарь', icon: '⚔️', glow: '212,162,76', desc: 'Задуманный баланс. Элита лагерей и Граф Дракула потребуют внимания и тактики.' },
+            { key: 'hard', name: 'Кошмар', icon: '🔥', glow: '249,115,22', desc: 'Враги и боссы заметно сильнее, но щедрее на золото и опыт. Ошибки дорого стоят.' },
+            { key: 'insane', name: 'Адская Бездна', icon: '💀', glow: '239,68,68', desc: 'Дракула и Владыка Ада вдвое опаснее. Только для тех, кто знает каждое заклинание наизусть.' }
+        ];
+        let heroIdx = 0;
+
+        function setGameState(st) {
+            gameState = st;
+            const root = document.getElementById('mainMenuOverlay');
+            updateAdminPanel();
+            if (st === 'playing') { root.classList.add('hidden'); return; }
+            root.classList.remove('hidden');
+            root.dataset.state = st;
+            Object.entries(MENU_SCREENS).forEach(([k, id]) => document.getElementById(id).classList.toggle('is-active', k === st));
+            if (st === 'menu') {
+                document.getElementById('btnMenuResume').classList.toggle('hidden', !gameStarted);
+                let hasSave = false; try { hasSave = !!localStorage.getItem(SAVE_KEY); } catch (e) {}
+                document.getElementById('btnContinueGame').classList.toggle('hidden', !hasSave);
+            }
+            if (st === 'char_select') {
+                const i = HERO_MENU.findIndex(h => h.key === gameSettings.selectedHero);
+                heroIdx = i >= 0 ? i : 0;
+                renderHeroSlider();
+            }
+            if (st === 'difficulty') renderDifficultyCards();
+            startMenuLoop();
+        }
+
+        function openMainMenu() {
+            closeAllModals();
+            setGameState('menu');
+        }
+        function resumeFromMenu() { setGameState('playing'); }
+
+        function withCurtain(fn) {
+            const cur = document.getElementById('menuCurtain');
+            cur.classList.add('on');
+            setTimeout(() => { fn(); setTimeout(() => cur.classList.remove('on'), 120); }, 720);
+        }
+        function continueSavedGameFromMenu() {
+            withCurtain(() => { loadGame(); gameStarted = true; setGameState('playing'); SoundFX.play('levelup'); });
+        }
+        function startGameFromMenu() {
+            SoundFX.play('invoke');
+            withCurtain(() => { startNewGameFromMenu(); gameStarted = true; setGameState('playing'); });
+        }
+
+        // ---------- слайдер героев ----------
+        function renderHeroSlider() {
+            const track = document.getElementById('heroTrack');
+            if (!track.dataset.built) {
+                track.innerHTML = HERO_MENU.map((h, i) => `
+                    <article class="hero-card" data-i="${i}" style="--hero-glow:${h.glow}" onclick="heroCardClick(${i})">
+                        <canvas class="hero-splash" width="1100" height="760"></canvas>
+                        <div class="hero-shade"></div>
+                        <div class="hero-info">
+                            <span class="hero-role">${h.role}</span>
+                            <div class="hero-name">${h.name}</div>
+                            <div class="hero-epithet">${h.epithet}</div>
+                            <p class="hero-lore">${h.lore}</p>
+                            <div class="hero-stats">${h.stats.map(([n, v]) => `<span>${n}</span><div class="hero-bar"><i data-w="${v * 10}"></i></div>`).join('')}</div>
+                            <div class="hero-skills">${h.skills.map(([k, n]) => `<span><b>${k}</b>${n}</span>`).join('')}</div>
+                        </div>
+                    </article>`).join('');
+                document.getElementById('heroDots').innerHTML = HERO_MENU.map((h, i) => `<button aria-label="${h.name}" onclick="heroGo(${i})"></button>`).join('');
+                track.querySelectorAll('.hero-card').forEach(card => {
+                    card.addEventListener('mousemove', e => heroTilt(card, e));
+                    card.addEventListener('mouseleave', () => heroTilt(card, null));
+                });
+                document.querySelector('.hero-stage').addEventListener('wheel', e => {
+                    e.preventDefault();
+                    const now = performance.now();
+                    if (now - (heroSlide.last || 0) < 450) return;
+                    heroSlide.last = now; heroSlide(e.deltaY > 0 || e.deltaX > 0 ? 1 : -1);
+                }, { passive: false });
+                track.dataset.built = '1';
+            }
+            layoutHeroCards();
+        }
+        function layoutHeroCards() {
+            const n = HERO_MENU.length;
+            document.querySelectorAll('.hero-card').forEach(card => {
+                const i = +card.dataset.i;
+                let off = i - heroIdx;
+                if (off > n / 2) off -= n; if (off < -n / 2) off += n;
+                card.classList.toggle('is-active', off === 0);
+                card.classList.toggle('is-prev', off === -1);
+                card.classList.toggle('is-next', off === 1);
+                card.classList.toggle('is-hidden', Math.abs(off) > 1);
+                card.style.transform = off === 0 ? 'translateZ(0)' : `translateX(${off * 64}%) translateZ(-260px) rotateY(${-off * 22}deg) scale(.8)`;
+                card.querySelectorAll('.hero-bar i').forEach(b => { b.style.width = off === 0 ? b.dataset.w + '%' : '0'; });
+            });
+            document.querySelectorAll('#heroDots button').forEach((b, i) => b.classList.toggle('on', i === heroIdx));
+            selectMenuHero(HERO_MENU[heroIdx].key);
+        }
+        function heroSlide(d) { heroIdx = (heroIdx + d + HERO_MENU.length) % HERO_MENU.length; layoutHeroCards(); }
+        function heroGo(i) { heroIdx = i; layoutHeroCards(); }
+        function heroCardClick(i) { if (i !== heroIdx) heroGo(i); }
+        function confirmHero() { selectMenuHero(HERO_MENU[heroIdx].key); setGameState('difficulty'); }
+        // Плавный 3D-наклон карточки и параллакс сплэш-арта за курсором
+        function heroTilt(card, e) {
+            if (!card.classList.contains('is-active')) return;
+            const splash = card.querySelector('.hero-splash'), info = card.querySelector('.hero-info');
+            if (!e) { card.style.transform = 'translateZ(0)'; splash.style.transform = ''; info.style.transform = ''; return; }
+            const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+            card.style.transform = `rotateY(${x * 9}deg) rotateX(${-y * 7}deg)`;
+            splash.style.transform = `translate(${-x * 26}px, ${-y * 18}px)`;
+            info.style.transform = `translateZ(40px) translate(${x * 8}px, ${y * 6}px)`;
+        }
+
+        // ---------- выбор сложности ----------
+        function renderDifficultyCards() {
+            const grid = document.getElementById('diffGrid');
+            grid.innerHTML = DIFF_MENU.map((d, i) => {
+                const cfg = DIFFICULTY_CONFIG[d.key];
+                return `<button class="diff-card ${gameSettings.difficulty === d.key ? 'on' : ''}" style="--d-glow:${d.glow}; animation-delay:${i * 0.08}s" onclick="pickDifficulty('${d.key}')" ondblclick="startGameFromMenu()">
+                    <div class="diff-icon">${d.icon}</div>
+                    <div class="diff-name">${d.name}</div>
+                    <div class="diff-desc">${d.desc}</div>
+                    <div class="diff-mult"><span>Здоровье врагов и боссов</span><b>×${cfg.hpMult}</b><span>Урон врагов и боссов</span><b>×${cfg.dmgMult}</b><span>Золото и опыт</span><b>×${cfg.rewardMult}</b></div>
+                </button>`;
+            }).join('');
+            updateDiffSummary();
+        }
+        function pickDifficulty(key) {
+            selectDifficulty(key);
+            document.querySelectorAll('.diff-card').forEach((el, i) => el.classList.toggle('on', DIFF_MENU[i].key === key));
+            updateDiffSummary();
+        }
+        function updateDiffSummary() {
+            const h = HERO_MENU.find(x => x.key === gameSettings.selectedHero) || HERO_MENU[0];
+            const d = DIFF_MENU.find(x => x.key === gameSettings.difficulty) || DIFF_MENU[1];
+            document.getElementById('diffSummary').textContent = `${h.name} • ${h.epithet} — сложность «${d.name}»`;
+        }
+
+        // Клавиши в меню: ←/→ — листать героев, Enter — подтвердить, Esc — назад
+        function handleMenuKey(e) {
+            if (!document.getElementById('modalSettings').classList.contains('hidden')) { if (e.code === 'Escape') closeSettingsModal(); return; }
+            if (gameState === 'char_select') {
+                if (e.code === 'ArrowLeft') heroSlide(-1);
+                else if (e.code === 'ArrowRight') heroSlide(1);
+                else if (e.code === 'Enter') confirmHero();
+                else if (e.code === 'Escape') setGameState('menu');
+            } else if (gameState === 'difficulty') {
+                const i = DIFF_MENU.findIndex(d => d.key === gameSettings.difficulty);
+                if (e.code === 'ArrowLeft') pickDifficulty(DIFF_MENU[Math.max(0, i - 1)].key);
+                else if (e.code === 'ArrowRight') pickDifficulty(DIFF_MENU[Math.min(DIFF_MENU.length - 1, i + 1)].key);
+                else if (e.code === 'Enter') startGameFromMenu();
+                else if (e.code === 'Escape') setGameState('char_select');
+            } else if (gameState === 'menu') {
+                if (e.code === 'Escape' && gameStarted) resumeFromMenu();
+                else if (e.code === 'Enter') setGameState('char_select');
+            } else if (gameState === 'exit' && e.code === 'Escape') setGameState('menu');
+        }
+
+        // ---------- анимированный фон: готический замок, дождь, туман, молнии ----------
+        const menuFx = { raf: 0, last: 0, t: 0, theme: 0, flash: 0, nextFlash: 4, drops: [], embers: [], fog: [], hills: null, castle: null, heroFx: {} };
+        function startMenuLoop() {
+            if (menuFx.raf) return;
+            menuFx.last = performance.now();
+            const loop = now => {
+                if (gameState === 'playing') { menuFx.raf = 0; return; }
+                const dt = Math.min(0.05, (now - menuFx.last) / 1000); menuFx.last = now;
+                drawMenuBackground(dt);
+                if (gameState === 'char_select') {
+                    const card = document.querySelector('.hero-card.is-active');
+                    if (card) drawHeroSplash(card.querySelector('.hero-splash'), HERO_MENU[heroIdx], dt);
+                }
+                menuFx.raf = requestAnimationFrame(loop);
+            };
+            menuFx.raf = requestAnimationFrame(loop);
+        }
+        const lerpC = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
+        const rgb = a => `rgb(${a[0]},${a[1]},${a[2]})`;
+        function drawMenuBackground(dt) {
+            const cv = document.getElementById('menuBgCanvas'); if (!cv) return;
+            const dpr = Math.min(1.5, window.devicePixelRatio || 1), W = Math.floor(cv.clientWidth * dpr), H = Math.floor(cv.clientHeight * dpr);
+            if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; menuFx.hills = null; }
+            const g = cv.getContext('2d'), F = menuFx;
+            F.t += dt;
+            F.theme += ((adminMode ? 1 : 0) - F.theme) * Math.min(1, dt * 1.6);
+            const k = F.theme;
+            // Небо
+            const sky = g.createLinearGradient(0, 0, 0, H);
+            sky.addColorStop(0, rgb(lerpC([8, 9, 22], [22, 2, 4], k)));
+            sky.addColorStop(0.55, rgb(lerpC([24, 22, 44], [70, 8, 10], k)));
+            sky.addColorStop(1, rgb(lerpC([10, 9, 14], [40, 4, 4], k)));
+            g.fillStyle = sky; g.fillRect(0, 0, W, H);
+            // Луна
+            const mx = W * 0.72, my = H * 0.2, mr = Math.min(W, H) * 0.07;
+            const mg = g.createRadialGradient(mx, my, mr * 0.2, mx, my, mr * 5);
+            mg.addColorStop(0, `rgba(${lerpC([220, 225, 255], [255, 90, 60], k)},0.35)`); mg.addColorStop(1, 'rgba(0,0,0,0)');
+            g.fillStyle = mg; g.fillRect(0, 0, W, H);
+            g.fillStyle = rgb(lerpC([226, 229, 240], [255, 110, 80], k)); g.beginPath(); g.arc(mx, my, mr, 0, Math.PI * 2); g.fill();
+            g.fillStyle = `rgba(0,0,0,${0.12 + k * 0.1})`; g.beginPath(); g.arc(mx - mr * 0.3, my - mr * 0.15, mr * 0.22, 0, Math.PI * 2); g.arc(mx + mr * 0.25, my + mr * 0.3, mr * 0.15, 0, Math.PI * 2); g.fill();
+            // Горы и замок (силуэты строятся один раз под размер экрана)
+            if (!F.hills) buildMenuSilhouettes(W, H);
+            const flashA = F.flash;
+            F.hills.forEach((layer, li) => {
+                g.fillStyle = rgb(lerpC(layer.c, layer.ck, k));
+                g.beginPath(); g.moveTo(0, H); layer.pts.forEach(([x, y]) => g.lineTo(x, y)); g.lineTo(W, H); g.closePath(); g.fill();
+            });
+            // Замок
+            const C = F.castle;
+            g.fillStyle = rgb(lerpC([9, 8, 14], [14, 2, 3], k));
+            C.parts.forEach(p => {
+                g.fillRect(p.x, p.y, p.w, p.h);
+                if (p.spire) { g.beginPath(); g.moveTo(p.x - p.w * 0.12, p.y); g.lineTo(p.x + p.w / 2, p.y - p.spire); g.lineTo(p.x + p.w * 1.12, p.y); g.closePath(); g.fill(); }
+                if (p.crenel) for (let x = p.x; x < p.x + p.w; x += p.crenel * 2) g.fillRect(x, p.y - p.crenel, p.crenel, p.crenel);
+            });
+            C.windows.forEach(w => {
+                const fl = 0.65 + Math.sin(F.t * w.s + w.ph) * 0.2 + (Math.random() < 0.02 ? -0.3 : 0);
+                g.fillStyle = `rgba(${lerpC([255, 176, 80], [255, 50, 30], k)},${Math.max(0.15, fl)})`;
+                g.fillRect(w.x, w.y, w.w, w.h);
+                const wg = g.createRadialGradient(w.x + w.w / 2, w.y + w.h / 2, 0, w.x + w.w / 2, w.y + w.h / 2, w.w * 4);
+                wg.addColorStop(0, `rgba(${lerpC([255, 160, 60], [255, 40, 20], k)},${0.18 * fl})`); wg.addColorStop(1, 'rgba(0,0,0,0)');
+                g.fillStyle = wg; g.fillRect(w.x - w.w * 4, w.y - w.w * 4, w.w * 9, w.w * 9);
+            });
+            // Адское зарево снизу
+            if (k > 0.01) {
+                const hg = g.createLinearGradient(0, H * 0.55, 0, H);
+                hg.addColorStop(0, 'rgba(0,0,0,0)'); hg.addColorStop(1, `rgba(220,38,38,${0.35 * k})`);
+                g.fillStyle = hg; g.fillRect(0, H * 0.55, W, H * 0.45);
+            }
+            // Туман
+            if (!F.fog.length) for (let i = 0; i < 9; i++) F.fog.push({ x: Math.random(), y: 0.55 + Math.random() * 0.4, r: 0.18 + Math.random() * 0.22, v: 0.006 + Math.random() * 0.012 });
+            F.fog.forEach(f => {
+                f.x += f.v * dt; if (f.x - f.r > 1.1) f.x = -f.r;
+                const fx = f.x * W, fy = f.y * H, fr = f.r * W;
+                const fg = g.createRadialGradient(fx, fy, 0, fx, fy, fr);
+                fg.addColorStop(0, `rgba(${lerpC([150, 155, 180], [180, 40, 40], k)},0.13)`); fg.addColorStop(1, 'rgba(0,0,0,0)');
+                g.fillStyle = fg; g.fillRect(fx - fr, fy - fr, fr * 2, fr * 2);
+            });
+            // Дождь (в адском режиме — кровавый) и искры
+            const nDrops = Math.floor(W * H / 9000);
+            while (F.drops.length < nDrops) F.drops.push({ x: Math.random() * W, y: Math.random() * H, v: (700 + Math.random() * 500) * dpr, l: (12 + Math.random() * 16) * dpr });
+            g.strokeStyle = `rgba(${lerpC([170, 190, 230], [255, 90, 80], k)},0.28)`; g.lineWidth = dpr;
+            g.beginPath();
+            F.drops.forEach(d => {
+                d.y += d.v * dt; d.x -= d.v * 0.22 * dt;
+                if (d.y > H) { d.y = -d.l; d.x = Math.random() * W * 1.2; }
+                g.moveTo(d.x, d.y); g.lineTo(d.x + d.l * 0.22, d.y - d.l);
+            });
+            g.stroke();
+            if (k > 0.05) {
+                while (F.embers.length < 70) F.embers.push({ x: Math.random() * W, y: H + Math.random() * H * 0.3, v: (30 + Math.random() * 60) * dpr, s: (1 + Math.random() * 2.2) * dpr, ph: Math.random() * 6 });
+                F.embers.forEach(e => {
+                    e.y -= e.v * dt; e.x += Math.sin(F.t * 1.5 + e.ph) * 12 * dt * dpr;
+                    if (e.y < H * 0.25) { e.y = H + 10; e.x = Math.random() * W; }
+                    g.fillStyle = `rgba(255,${120 + Math.floor(Math.sin(F.t * 4 + e.ph) * 60)},40,${0.7 * k})`;
+                    g.fillRect(e.x, e.y, e.s, e.s);
+                });
+            }
+            // Молния
+            F.nextFlash -= dt;
+            if (F.nextFlash <= 0) { F.flash = 1; F.nextFlash = 5 + Math.random() * 8; if (gameState !== 'playing') SoundFX.play('thunder'); }
+            if (F.flash > 0) {
+                g.fillStyle = `rgba(${lerpC([210, 220, 255], [255, 120, 100], k)},${F.flash * 0.35})`; g.fillRect(0, 0, W, H);
+                F.flash = Math.max(0, F.flash - dt * (F.flash > 0.6 ? 6 : 2.2));
+            }
+        }
+        function buildMenuSilhouettes(W, H) {
+            const F = menuFx, R = (a, b) => a + Math.random() * (b - a);
+            const ridge = (base, amp, step, c, ck) => {
+                const pts = []; let y = base;
+                for (let x = -20; x <= W + 40; x += step) { y = base + Math.sin(x * 0.004 + base) * amp * 0.5 + R(-amp, amp) * 0.4; pts.push([x, y]); }
+                return { pts, c, ck };
+            };
+            F.hills = [ridge(H * 0.62, H * 0.08, W / 30, [22, 20, 36], [48, 8, 10]), ridge(H * 0.74, H * 0.06, W / 40, [14, 13, 22], [30, 4, 6]), ridge(H * 0.86, H * 0.04, W / 50, [7, 7, 11], [16, 2, 3])];
+            // Готический замок на скале
+            const cx = W > H * 1.1 ? W * 0.76 : W * 0.5, base = H * 0.72, u = Math.min(W, H) / 64, parts = [], windows = [];
+            parts.push({ x: cx - u * 14, y: base - u * 4, w: u * 28, h: u * 12 });                       // скала-основание
+            parts.push({ x: cx - u * 11, y: base - u * 13, w: u * 22, h: u * 10, crenel: u * 0.9 });       // стена
+            [[-11, 20, 3.4], [8, 22, 3.4], [-4, 30, 4.2], [2.5, 24, 3], [-14, 15, 2.6], [12, 16, 2.6]].forEach(([dx, h, w]) => {
+                parts.push({ x: cx + dx * u, y: base - u * h, w: u * w, h: u * h, spire: u * (h * 0.32) });
+            });
+            parts.push({ x: cx - u * 2, y: base - u * 20, w: u * 5, h: u * 8, crenel: u * 0.7 });          // донжон
+            parts.forEach(p => {
+                if (p.h < u * 9) return;
+                for (let k = 0; k < 3; k++) if (Math.random() < 0.7) windows.push({ x: p.x + p.w * R(0.25, 0.6), y: p.y + p.h * R(0.15, 0.6), w: u * 0.55, h: u * 1.1, s: R(1.5, 4), ph: R(0, 6) });
+            });
+            F.castle = { parts, windows };
+        }
+
+        // ---------- сплэш-арты героев (анимированные) ----------
+        function drawHeroSplash(cv, h, dt) {
+            const g = cv.getContext('2d'), W = cv.width, H = cv.height;
+            const st = menuFx.heroFx[h.key] || (menuFx.heroFx[h.key] = { t: 0, p: [] });
+            st.t += dt;
+            const t = st.t, glow = h.glow, cx = W * 0.68, cy = H * 0.52;
+            // Фон: цветная мгла, лучи света
+            const bg = g.createRadialGradient(cx, cy, 20, cx, cy, W * 0.75);
+            bg.addColorStop(0, `rgba(${glow},0.38)`); bg.addColorStop(0.45, 'rgba(16,12,20,0.95)'); bg.addColorStop(1, '#050407');
+            g.fillStyle = bg; g.fillRect(0, 0, W, H);
+            g.save(); g.translate(cx, cy - 60); g.rotate(t * 0.05);
+            for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); g.fillStyle = `rgba(${glow},0.05)`; g.beginPath(); g.moveTo(0, 0); g.lineTo(-40, -W); g.lineTo(40, -W); g.closePath(); g.fill(); }
+            g.restore();
+            // Магический круг под героем
+            g.save(); g.translate(cx, cy + 210); g.scale(1, 0.32); g.rotate(t * 0.4);
+            g.strokeStyle = `rgba(${glow},0.55)`; g.lineWidth = 3;
+            g.beginPath(); g.arc(0, 0, 210, 0, Math.PI * 2); g.stroke();
+            g.beginPath(); g.arc(0, 0, 170, 0, Math.PI * 2); g.stroke();
+            for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.moveTo(Math.cos(a) * 170, Math.sin(a) * 170); g.lineTo(Math.cos(a + 2.4) * 170, Math.sin(a + 2.4) * 170); g.stroke(); }
+            g.restore();
+            // Частицы по герою
+            const P = st.p;
+            const spawn = o => P.push(Object.assign({ life: 1, max: 1 }, o));
+            if (h.key === 'saber' && Math.random() < 0.6) spawn({ x: cx + (Math.random() - 0.5) * 360, y: cy + 220, vx: (Math.random() - 0.5) * 20, vy: -60 - Math.random() * 90, s: 2 + Math.random() * 3, c: Math.random() < 0.3 ? '255,255,255' : '250,204,21', life: 3, max: 3 });
+            if (h.key === 'archer') {
+                if (Math.random() < 0.5) spawn({ x: cx + (Math.random() - 0.5) * 420, y: cy + 220, vx: 0, vy: -50 - Math.random() * 70, s: 2 + Math.random() * 2, c: '248,113,113', life: 2.6, max: 2.6 });
+                if (Math.random() < 0.05) spawn({ sword: true, x: cx + (Math.random() - 0.5) * 520, y: -60, vx: 0, vy: 900, s: 0.8 + Math.random() * 0.6, life: 1.2, max: 1.2 });
+            }
+            if (h.key === 'invoker' && Math.random() < 0.5) spawn({ x: cx + (Math.random() - 0.5) * 300, y: cy + (Math.random() - 0.5) * 300, vx: 0, vy: -20, s: 2, c: ['56,189,248', '192,132,252', '251,146,60'][Math.floor(Math.random() * 3)], life: 1.6, max: 1.6 });
+            for (let i = P.length - 1; i >= 0; i--) {
+                const q = P[i]; q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt;
+                if (q.life <= 0 || q.y > H + 80) { P.splice(i, 1); continue; }
+                if (q.sword) {
+                    g.save(); g.translate(q.x, q.y); g.scale(q.s, q.s); g.globalAlpha = Math.min(1, q.life * 2) * 0.55;
+                    g.fillStyle = '#d4d4d8'; g.beginPath(); g.moveTo(-4, -60); g.lineTo(0, 0); g.lineTo(4, -60); g.closePath(); g.fill();
+                    g.fillStyle = '#7f1d1d'; g.fillRect(-10, -64, 20, 4); g.restore();
+                } else {
+                    g.fillStyle = `rgba(${q.c},${q.life / q.max})`; g.beginPath(); g.arc(q.x, q.y, q.s, 0, Math.PI * 2); g.fill();
+                }
+            }
+            // Герой крупным планом
+            const spr = h.key === 'saber' ? saberSpriteCanvas : (h.key === 'archer' ? archerSpriteCanvas : invokerSpriteCanvas);
+            // Чёткий пиксель-арт (целочисленный масштаб) + мягкое свечение-контур
+            const bob = Math.round(Math.sin(t * 1.6) * 6);
+            if (spr) {
+                const sc = Math.max(3, Math.floor(H * 0.6 / spr.height)), S = spr.width * sc, SH = spr.height * sc;
+                const sx = Math.round(cx - S / 2), sy = Math.round(cy - SH * 0.58 + bob);
+                g.save(); g.imageSmoothingEnabled = false;
+                g.shadowColor = `rgba(${glow},0.75)`; g.shadowBlur = 22;
+                g.drawImage(spr, sx, sy, S, SH);
+                g.shadowBlur = 0; g.drawImage(spr, sx, sy, S, SH);
+                g.restore();
+            }
+            // Оружие и магия
+            if (h.key === 'saber') {
+                const glint = (t % 3.2) / 3.2;
+                if (glint < 0.25) {
+                    const k = glint / 0.25;
+                    g.save(); g.globalCompositeOperation = 'lighter'; g.strokeStyle = `rgba(255,250,220,${1 - k})`; g.lineWidth = 6;
+                    g.beginPath(); g.moveTo(cx - 260 + k * 520, cy - 260); g.lineTo(cx - 160 + k * 520, cy + 260); g.stroke(); g.restore();
+                }
+            } else if (h.key === 'invoker') {
+                ['56,189,248', '192,132,252', '251,146,60'].forEach((c, i) => {
+                    const a = t * 1.3 + i * Math.PI * 2 / 3, ox = cx + Math.cos(a) * 230, oy = cy - 40 + Math.sin(a) * 70;
+                    const og = g.createRadialGradient(ox, oy, 2, ox, oy, 46);
+                    og.addColorStop(0, '#fff'); og.addColorStop(0.3, `rgba(${c},0.95)`); og.addColorStop(1, `rgba(${c},0)`);
+                    g.fillStyle = og; g.beginPath(); g.arc(ox, oy, 46, 0, Math.PI * 2); g.fill();
+                });
+            } else if (h.key === 'archer') {
+                g.save(); g.globalCompositeOperation = 'lighter';
+                const pulse = 0.5 + Math.sin(t * 3) * 0.5;
+                g.strokeStyle = `rgba(186,230,253,${0.4 + pulse * 0.5})`; g.lineWidth = 3;
+                g.beginPath(); g.moveTo(cx + 120, cy - 80); g.lineTo(cx + 330, cy - 80); g.stroke();
+                g.restore();
+            }
+            // Нижняя мгла
+            const fogG = g.createLinearGradient(0, H * 0.7, 0, H);
+            fogG.addColorStop(0, 'rgba(5,4,7,0)'); fogG.addColorStop(1, 'rgba(5,4,7,0.9)');
+            g.fillStyle = fogG; g.fillRect(0, H * 0.7, W, H * 0.3);
+        }
+
+        // ---------- режим администратора ----------
+        let adminMode = false;
+        const adminCheats = { god: true, noCd: true };
+        function toggleAdminMode() {
+            adminMode = !adminMode;
+            document.body.classList.toggle('admin-mode', adminMode);
+            document.getElementById('btnAdminToggle').setAttribute('aria-pressed', String(adminMode));
+            try { localStorage.setItem('eldoria_admin', adminMode ? '1' : '0'); } catch (e) {}
+            SoundFX.play(adminMode ? 'thunder' : 'orb');
+            if (adminMode) menuFx.flash = 0.8;
+            updateAdminPanel();
+            if (gameState === 'playing') showToast(adminMode ? '⛧ Режим администратора включён' : 'Режим администратора выключен', adminMode ? 'error' : 'info');
+        }
+        function updateAdminPanel() {
+            const p = document.getElementById('adminPanel');
+            if (p) p.classList.toggle('hidden', !(adminMode && gameState === 'playing'));
+        }
+        function toggleAdminPanelCollapse() { document.getElementById('adminPanelBody').classList.toggle('collapsed'); }
+        function adminTick() {
+            if (!adminMode) return;
+            if (adminCheats.noCd) {
+                for (const k in player.saberCooldowns) player.saberCooldowns[k] = 0;
+                for (const k in player.spellCooldowns) player.spellCooldowns[k] = 0;
+                player.invokeCd = 0; player.stanceCd = 0;
+                player.mp = player.maxMp; player.stamina = maxStamina(); player.exhausted = false;
+            }
+            if (adminCheats.god) player.hp = player.maxHp;
+        }
+        function adminGive(what) {
+            if (!adminMode) return;
+            if (what === 'gold') { player.gold += 5000; showToast('+5000 золота', 'gold'); }
+            else if (what === 'items') {
+                [['hp_pot', 10], ['mp_pot', 10], ['grand_elixir', 5], ['star_steel', 5], ['soul_crystal', 5], ['ash_sigil', 1], ['blood_sigil', 1], ['inferno_sigil', 1], ['hell_ember', 3], ['demon_horn', 3]]
+                    .forEach(([id, n]) => addItemToInventory(id, n));
+                const leg = ENEMY_TEMPLATES.hell_lord.classDrops[player.heroType];
+                if (leg) addItemToInventory(leg, 1);
+                updateHudPotions();
+                showToast('Выданы зелья, материалы, печати и легендарное оружие', 'gold');
+            } else if (what === 'level') {
+                for (let i = 0; i < 5; i++) gainXp(Math.max(1, player.xpNext - player.xp));
+            } else if (what === 'reveal') {
+                if (exploredMask) exploredMask.fill(1);
+                pois.forEach(p => { p.found = true; player.poiFound[p.id] = true; });
+                showToast('Карта открыта, все статуи доступны для перемещения', 'gold');
+            }
+        }
+        function adminTeleportTo(wx, wy) {
+            let tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
+            if (isTileBlocked(tx, ty) || !isReachable(tx, ty)) { const q = nearestFreeTile(tx, ty, WALKABLE_TILES, 30); wx = q.x; wy = q.y; }
+            player.x = wx; player.y = wy;
+            player.moveTargetX = null; player.moveTargetY = null; player.attackTarget = null;
+            spawnParticleRing(player.x, player.y, 50, '#ef4444', 24);
+            SoundFX.play('emp');
+        }
+        function adminTeleportCursor() { if (adminMode && gameState === 'playing') adminTeleportTo(mouseWorldX, mouseWorldY); }
+
         function selectDifficulty(diffKey) {
             gameSettings.difficulty = diffKey;
             ['easy', 'normal', 'hard', 'insane'].forEach(k => {
@@ -4751,21 +5259,6 @@
             });
             SoundFX.play('moveclick');
         }
-
-        function openMainMenu() {
-            closeAllModals();
-            renderMenuHeroPreviews();
-            const hasSave = !!localStorage.getItem(SAVE_KEY);
-            document.getElementById('btnContinueGame').classList.toggle('hidden', !hasSave);
-            document.getElementById('mainMenuOverlay').classList.remove('hidden');
-        }
-
-        function continueSavedGameFromMenu() {
-            loadGame();
-            document.getElementById('mainMenuOverlay').classList.add('hidden');
-            SoundFX.play('levelup');
-        }
-
 
         function openSettingsModal() {
             document.getElementById('modalSettings').classList.remove('hidden');
@@ -4831,6 +5324,10 @@
             document.getElementById('txtHp').textContent = `${Math.ceil(player.hp)} / ${player.maxHp} HP (+${player.hpRegen}/с)`;
 
             document.getElementById('barMp').style.width = `${(player.mp / player.maxMp) * 100}%`;
+            const stMax = maxStamina(), st = player.stamina ?? stMax;
+            document.getElementById('barSta').style.width = `${(st / stMax) * 100}%`;
+            document.getElementById('barSta').style.filter = player.exhausted ? 'grayscale(1) brightness(0.7)' : 'none';
+            document.getElementById('txtSta').textContent = `${Math.ceil(st)} / ${stMax} ВЫНОСЛИВОСТЬ${player.shrineBuff ? ` • ${SHRINE_BUFFS[player.shrineBuff.kind].icon} ${Math.ceil(player.shrineBuff.t)}с` : ''}`;
             document.getElementById('txtMp').textContent = `${Math.ceil(player.mp)} / ${player.maxMp} MP (+${player.mpRegen}/с)`;
 
             document.getElementById('barXp').style.width = `${(player.xp / player.xpNext) * 100}%`;
@@ -5304,6 +5801,8 @@
                 showToast(`Сундук открыт! Получено ${gold} золота и ${ITEMS_DB[rewardItem].name}!`, 'gold');
             } else if (t.type === 'camp_chest') {
                 openCampChest(t.data);
+            } else if (t.type === 'poi') {
+                interactPoi(t.data);
             } else if (t.type === 'npc') {
                 openNpcDialog(t.data);
             }
@@ -5514,7 +6013,9 @@
 
         window.addEventListener('keydown', e => {
             if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+            if (gameState !== 'playing') { handleMenuKey(e); return; }
             keys[e.code] = true;
+            if (e.code === 'KeyT' && adminMode) { adminTeleportCursor(); return; }
 
             if (e.code === 'Escape') {
                 closeAllModals();
@@ -5597,6 +6098,11 @@
             for (const npc of npcs) {
                 if (Math.hypot(npc.x - wx, npc.y - wy) <= tolerance) {
                     return { x: npc.x, y: npc.y, interactObj: { type: 'npc', data: npc, label: `Поговорить: ${npc.name}` } };
+                }
+            }
+            for (const p of pois) {
+                if (isPoiInteractable(p) && p.wx !== undefined && Math.hypot(p.wx - wx, p.wy - 20 - wy) <= tolerance + 10) {
+                    return { x: p.wx, y: p.wy, interactObj: { type: 'poi', data: p, label: poiLabel(p) } };
                 }
             }
             for (const g of groundLoot) {
@@ -5788,7 +6294,7 @@
         function zoneWeather() {
             const z = playerZone();
             if (z === 'abyss' || z === 'dreadlands' || z === 'grimvault') return WEATHER_TYPES[3];
-            if (z === 'crimson_marsh' || z === 'shadowlands' || z === 'forsaken_hills') return WEATHER_TYPES[2];
+            if (z === 'crimson_marsh' || z === 'shadowlands' || z === 'forsaken_hills' || z === 'boneswoods' || z === 'sanguinia_heights') return WEATHER_TYPES[2];
             if (z === 'castle') return ZONE_WEATHER.crypt;
             if (z === 'hell') return ZONE_WEATHER.inferno;
             return WEATHER_TYPES[currentWeatherIdx];
@@ -5802,7 +6308,9 @@
             dreadlands:    { label: '💀 Земли Ужаса (The Dreadlands)', title: 'ЗЕМЛИ УЖАСА', sub: 'Северные пустоши' },
             grimvault:     { label: '⛰️ Гора Гримволт', title: 'ГОРА ГРИМВОЛТ', sub: 'Каменные стражи перевала' },
             serpent_coast: { label: '🌊 Змеиный Берег', title: 'ЗМЕИНЫЙ БЕРЕГ', sub: 'Побережье и болота востока' },
-            crimson_marsh: { label: '🩸 Багровые Топи', title: 'БАГРОВЫЕ ТОПИ', sub: 'Подступы к Сангвинии' },
+            crimson_marsh: { label: '🩸 Багровые Топи', title: 'БАГРОВЫЕ ТОПИ', sub: 'Западные болота Королевства' },
+            sanguinia_heights: { label: '🦇 Высоты Сангвинии', title: 'ВЫСОТЫ САНГВИНИИ', sub: 'Владения Лорда Вампиров' },
+            boneswoods:    { label: '🦴 Костяной Лес (The Boneswoods)', title: 'КОСТЯНОЙ ЛЕС', sub: 'Здесь мёртвые не лежат спокойно' },
             castle:        { label: '🦇 Сангвиния — Владения Лорда Вампиров', title: 'САНГВИНИЯ', sub: 'Замок Графа Дракулы' },
             shadowlands:   { label: '🌑 Теневые Земли', title: 'ТЕНЕВЫЕ ЗЕМЛИ', sub: 'Юг Королевства Забвения' },
             forsaken_hills:{ label: '🪦 Забытые Холмы', title: 'ЗАБЫТЫЕ ХОЛМЫ', sub: 'Курганы и склепы' },
@@ -5976,61 +6484,59 @@
             return null;
         }
 
-        // ---------- КАРТА «THE REALM OF OBLIVION» ----------
-        // Наземный мир 200x150 тайлов, под ним (ряды 150..185) — скрытый ярус Ада.
-        // Готовые постройки старой карты (128x64) вставляются блоками в свои регионы:
-        //   Камелот → Форт Этельгард (запад), Святилище → Руины Голдрона (Змеиный Берег, восток),
-        //   Замок Дракулы → Сангвиния (центр), Цитадель Бездны → Теневые Земли (юг), Ад → нижний ярус.
-        const WORLD = { W: 200, overH: 150, hellRow: 150, H: 186 };
+        // ---------- КАРТА «THE REALM OF OBLIVION» (масштаб почти 1:1) ----------
+        // Наземный мир 360x300 тайлов (≈17 x 14 тыс. пикселей): пересечь его пешком — несколько минут пути.
+        // Ярусы по вертикали карты: СВЕРХУ замки и горы (Форт Этельгард, Гримволт, Сангвиния),
+        // ПОСЕРЕДИНЕ леса (Дикий Лес, Клык-Холд, Костяной Лес), ПО БОКАМ топи (запад) и побережье (восток),
+        // СНИЗУ Теневые Земли и Забытые Холмы с Цитаделью Бездны. Ниже всего — скрытый ярус Ада (ряды 300+).
+        const WORLD = { W: 360, overH: 300, hellRow: 300, H: 340 };
         const WORLD_TIERS = { hellRow: WORLD.hellRow };
         const LEGACY_BLOCKS = [
-            { id: 'camelot',   x0: 46, y0: 3,  x1: 69,  y1: 27, nx: 16,  ny: 58 },
-            { id: 'sanctuary', x0: 1,  y0: 1,  x1: 25,  y1: 31, nx: 155, ny: 45 },
-            { id: 'castle',    x0: 73, y0: 1,  x1: 126, y1: 31, nx: 78,  ny: 64 },
-            { id: 'abyss',     x0: 0,  y0: 33, x1: 71,  y1: 63, nx: 52,  ny: 116 },
-            { id: 'hell',      x0: 73, y0: 32, x1: 126, y1: 62, nx: 78,  ny: 152 }
+            { id: 'camelot',   x0: 46, y0: 3,  x1: 69,  y1: 27, nx: 60,  ny: 30 },
+            { id: 'sanctuary', x0: 1,  y0: 1,  x1: 25,  y1: 31, nx: 302, ny: 130 },
+            { id: 'castle',    x0: 73, y0: 1,  x1: 126, y1: 31, nx: 262, ny: 30 },
+            { id: 'abyss',     x0: 0,  y0: 33, x1: 71,  y1: 63, nx: 150, ny: 252 },
+            { id: 'hell',      x0: 73, y0: 32, x1: 126, y1: 62, nx: 150, ny: 304 }
         ];
-        const WORLD_HUB = { x: 100, y: 50 }; // перекрёсток трактов в Диком Лесу
+        const WORLD_HUB = { x: 180, y: 120 }; // Великий перекрёсток в Диком Лесу
         let legacyMap = null;
         let darkMask = null;
         let reachMask = null;
+        let campSites = [];   // процедурные лагеря (генерируются вместе с рельефом)
+        let pois = [];        // точки интереса: статуи, святилища, загадки, тайники
         const isReachable = (tx, ty) => !reachMask || !!reachMask[ty * MAP_W + tx];
 
         function legacyToNew(tx, ty) {
             const b = LEGACY_BLOCKS.find(b => tx >= b.x0 && tx < b.x1 + 1 && ty >= b.y0 && ty < b.y1 + 1);
             if (b) return { x: tx - b.x0 + b.nx, y: ty - b.y0 + b.ny };
-            return { x: WORLD_HUB.x, y: WORLD_HUB.y }; // старый лес не переносится
+            return { x: WORLD_HUB.x, y: WORLD_HUB.y };
         }
         const remapPt = o => { const n = legacyToNew(o.x, o.y); o.x = n.x; o.y = n.y; return o; };
         const remapPx = o => { const n = legacyToNew(o.x / TS, o.y / TS); o.x = n.x * TS; o.y = n.y * TS; return o; };
-        // Координаты прошлой (ярусной) версии карты → старый план → новая карта (для старых сохранений)
-        function tieredToLegacy(tx, ty) {
-            if (tx >= 46 && tx < 70 && ty >= 3 && ty < 28) return { x: tx, y: ty };
-            if (ty >= 92) return { x: tx, y: ty - 64 };
-            return { x: tx, y: ty - 28 };
-        }
 
-        // Регион по тайлу (новые координаты)
         function regionAt(tx, ty) {
             if (ty >= WORLD.hellRow) return 'hell';
-            if (tx >= 16 && tx < 40 && ty >= 58 && ty < 83) return 'camelot';
-            if (tx >= 155 && tx < 180 && ty >= 45 && ty < 76) return 'sanctuary';
-            if (tx >= 78 && tx < 132 && ty >= 64 && ty < 95) return 'castle';
-            if (tx >= 52 && tx < 124 && ty >= 117 && ty < 147) return 'abyss';
-            if (ty >= 102) return tx < 88 ? 'forsaken_hills' : 'shadowlands';
-            if (tx >= 66 && tx < 144 && ty >= 56) return 'crimson_marsh';
-            if (ty < 32) {
-                if (tx >= 180) return 'serpent_coast';
-                if (tx >= 66 && tx < 106 && ty >= 12) return 'clawhold';
-                if (tx >= 116) return 'grimvault';
-                return 'dreadlands';
+            if (tx >= 60 && tx < 84 && ty >= 30 && ty < 55) return 'camelot';
+            if (tx >= 302 && tx < 327 && ty >= 130 && ty < 161) return 'sanctuary';
+            if (tx >= 262 && tx < 316 && ty >= 30 && ty < 61) return 'castle';
+            if (tx >= 150 && tx < 222 && ty >= 253 && ty < 283) return 'abyss';
+            if (ty < 92) {
+                if (tx < 125) return 'aethelgard_plains';
+                if (tx < 235) return ty < 50 ? 'grimvault' : 'dreadlands';
+                return 'sanguinia_heights';
             }
-            if (tx >= 150) return 'serpent_coast';
-            if (tx < 58) return 'aethelgard_plains';
+            if (ty >= 228) return tx < 140 ? 'forsaken_hills' : 'shadowlands';
+            if (tx < 85) return 'crimson_marsh';
+            if (tx >= 285) return 'serpent_coast';
+            if (Math.hypot((tx - 178) / 1.25, ty - 112) < 22) return 'clawhold';
+            if (tx >= 212 && ty >= 150) return 'boneswoods';
             return 'forest';
         }
-        const DARK_REGIONS = new Set(['abyss', 'shadowlands', 'forsaken_hills', 'dreadlands', 'grimvault', 'hell']);
+        const DARK_REGIONS = new Set(['abyss', 'shadowlands', 'forsaken_hills', 'dreadlands', 'grimvault', 'boneswoods', 'hell']);
         const darkGround = (x, y) => !!(darkMask && darkMask[y * MAP_W + x]);
+        // Сила врагов по регионам: чем дальше от стартовых земель, тем опаснее
+        const REGION_POWER = { serpent_coast: 1.0, sanctuary: 1.0, aethelgard_plains: 1.1, camelot: 1.1, forest: 1.25, crimson_marsh: 1.45, clawhold: 1.6,
+            dreadlands: 1.75, boneswoods: 1.9, grimvault: 2.1, sanguinia_heights: 2.2, forsaken_hills: 2.3, shadowlands: 2.4, castle: 1, abyss: 1, hell: 1 };
 
         function generateWorld() {
             MAP_W = 128; MAP_H = 64;
@@ -6042,56 +6548,75 @@
             const NM = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(3));
             const ND = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(null));
             const pick = (tbl) => { let r = R(); for (const [k, p] of tbl) { if (r < p) return k; r -= p; } return null; };
-            const seaX = y => 186 + Math.sin(y * 0.15) * 3 + Math.sin(y * 0.05) * 4;
+            // Гладкий шум (решётка 1/sc с билинейной интерполяцией) — рощи, поляны, топи и горные массивы
+            const lat = new Float32Array(64 * 64).map(() => R());
+            const noise = (x, y, sc, o = 0) => {
+                const fx = x / sc + o * 7.3, fy = y / sc + o * 3.1, ix = Math.floor(fx), iy = Math.floor(fy), tx = fx - ix, ty = fy - iy;
+                const g = (a, b) => lat[((a & 63) * 64 + (b & 63))];
+                const sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
+                return (g(ix, iy) * (1 - sx) + g(ix + 1, iy) * sx) * (1 - sy) + (g(ix, iy + 1) * (1 - sx) + g(ix + 1, iy + 1) * sx) * sy;
+            };
+            const seaX = y => 344 + Math.sin(y * 0.07) * 5 + Math.sin(y * 0.023) * 6;
 
-            // 1. Регионы наземного мира
+            // 1. Рельеф регионов
             for (let y = 1; y < WORLD.overH - 1; y++) for (let x = 1; x < MAP_W - 1; x++) {
-                const z = regionAt(x, y);
+                const z = regionAt(x, y), n = noise(x, y, 9), n2 = noise(x, y, 23, 1);
                 let t = 4, d = null;
-                if (z === 'forest') {
-                    t = R() < 0.13 ? 3 : 4;
-                    if (t === 4) d = pick([['fern', 0.06], ['tuft', 0.06], ['mushroom', 0.03], ['boulder', 0.02], ['fallen_log', 0.015], ['bones', 0.005]]);
+                if (z === 'forest' || z === 'clawhold') {
+                    const dens = (z === 'clawhold' ? 0.2 : 0.06) + Math.max(0, n2 - 0.45) * 0.7;   // чащи и поляны
+                    t = R() < dens ? 3 : 4;
+                    if (t === 4) d = pick(z === 'clawhold' ? [['bones', 0.04], ['skull', 0.012], ['fern', 0.05], ['tuft', 0.05]] :
+                        [['fern', 0.06], ['tuft', 0.06], ['mushroom', 0.03], ['boulder', 0.015], ['fallen_log', 0.012], ['flower', 0.01]]);
+                } else if (z === 'boneswoods') {
+                    t = R() < 0.1 + Math.max(0, n2 - 0.5) * 0.5 ? 3 : T_GRAVE;
+                    if (t === T_GRAVE) d = pick([['dead_tree', 0.05], ['bones', 0.06], ['skull', 0.02], ['skull_pile', 0.012], ['tuft', 0.05], ['cobweb', 0.01]]);
                 } else if (z === 'aethelgard_plains') {
-                    t = R() < 0.05 ? 3 : 0;
-                    if (t === 0) d = pick([['tuft', 0.1], ['flower', 0.05], ['pebbles', 0.02], ['ruin_pillar', 0.004]]);
-                } else if (z === 'clawhold') {
-                    const dl = Math.hypot((x - 86) / 1.3, y - 23);
-                    if (dl < 10) { t = 0; d = pick([['bones', 0.07], ['skull', 0.03], ['tuft', 0.06], ['skull_pile', 0.01]]); }
-                    else { t = R() < 0.22 ? 3 : 4; if (t === 4) d = pick([['bones', 0.03], ['fern', 0.05], ['mushroom', 0.02]]); }
-                } else if (z === 'dreadlands') {
-                    t = R() < 0.08 ? 6 : 5;
-                    if (t === 5) d = pick([['crack', 0.05], ['bones', 0.04], ['skull', 0.02], ['skull_pile', 0.006]]);
+                    t = n2 > 0.66 ? (R() < 0.25 ? 3 : 4) : (R() < 0.025 ? 3 : 0);
+                    if (t !== 3) d = pick([['tuft', 0.1], ['flower', 0.05], ['pebbles', 0.02], ['ruin_pillar', 0.003], ['boulder', 0.008]]);
                 } else if (z === 'grimvault') {
-                    const m = 1 - Math.hypot((x - 148) / 30, (y - 13) / 13);
-                    t = (m > 0.1 && R() < 0.55 + m * 0.4) ? 6 : (R() < 0.06 ? 6 : 5);
-                    if (t === 5) d = pick([['crack', 0.05], ['pebbles', 0.04], ['bones', 0.02]]);
+                    const m = noise(x, y, 14, 2);
+                    t = m > 0.52 ? (R() < 0.8 ? 6 : 5) : (R() < 0.07 ? 6 : 5);
+                    if (t === 5) d = pick([['crack', 0.05], ['pebbles', 0.04], ['bones', 0.015]]);
+                } else if (z === 'dreadlands') {
+                    t = R() < 0.06 + Math.max(0, n - 0.6) * 0.6 ? 6 : 5;
+                    if (t === 5) d = pick([['crack', 0.05], ['bones', 0.04], ['skull', 0.02], ['skull_pile', 0.006], ['dead_tree', 0.01]]);
+                } else if (z === 'sanguinia_heights') {
+                    t = n2 > 0.7 ? 2 : (R() < 0.04 ? 3 : T_GRAVE);
+                    if (t === T_GRAVE) d = pick([['dead_tree', 0.035], ['blood', 0.03], ['bones', 0.025], ['tuft', 0.07], ['skull', 0.01]]);
+                } else if (z === 'crimson_marsh') {
+                    t = n > 0.6 ? 2 : (R() < 0.04 ? 3 : T_GRAVE);
+                    if (t === T_GRAVE) d = pick([['reeds', 0.06], ['dead_tree', 0.03], ['blood', 0.03], ['bones', 0.02], ['tuft', 0.08]]);
                 } else if (z === 'serpent_coast') {
                     const sx = seaX(y);
                     if (x > sx) t = 2;
-                    else if (x > sx - 9) { t = R() < 0.2 ? 2 : 0; if (t === 0) d = pick([['reeds', 0.2], ['tuft', 0.1], ['pebbles', 0.04]]); }
-                    else { t = R() < 0.07 ? 3 : 0; if (t === 0) d = pick([['tuft', 0.08], ['flower', 0.04], ['ruin_pillar', 0.006], ['boulder', 0.02]]); }
-                } else if (z === 'crimson_marsh') {
-                    const n = Math.sin(x * 0.31) * Math.cos(y * 0.27) + Math.sin((x + y) * 0.13);
-                    t = n > 1.05 ? 2 : (R() < 0.04 ? 3 : T_GRAVE);
-                    if (t === T_GRAVE) d = pick([['dead_tree', 0.03], ['blood', 0.04], ['bones', 0.03], ['tuft', 0.08], ['skull', 0.01]]);
+                    else if (x > sx - 12) { t = n > 0.62 ? 2 : 0; if (t === 0) d = pick([['reeds', 0.16], ['tuft', 0.08], ['pebbles', 0.05], ['boulder', 0.01]]); }
+                    else { t = R() < 0.05 + Math.max(0, n2 - 0.6) * 0.5 ? 3 : 0; if (t === 0) d = pick([['tuft', 0.08], ['flower', 0.04], ['ruin_pillar', 0.004], ['boulder', 0.015]]); }
                 } else if (z === 'shadowlands' || z === 'forsaken_hills') {
-                    t = R() < 0.09 ? 6 : 5;
-                    if (t === 5) d = pick([['dead_tree', 0.025], ['bones', 0.04], ['skull_pile', 0.012], ['crack', 0.04], ['skull', 0.02], ['ember_vent', 0.008]]);
+                    t = R() < 0.06 + Math.max(0, n2 - 0.55) * 0.5 ? 6 : 5;
+                    if (t === 5) d = pick([['dead_tree', 0.025], ['bones', 0.04], ['skull_pile', 0.01], ['crack', 0.04], ['skull', 0.02], ['ember_vent', 0.006]]);
                 }
                 NM[y][x] = t; ND[y][x] = d;
             }
-            // 2. Сумрачная река: с гор Земель Ужаса через лес к Теневым Землям
-            for (let y = 1; y < 104; y++) {
-                const cx = Math.round(60 + Math.sin(y * 0.12) * 5);
-                for (let dx = 0; dx <= 1; dx++) { NM[y][cx + dx] = 2; ND[y][cx + dx] = null; }
-            }
-            // 3. Тракты (поверх воды — мосты)
+            // 2. Реки: Сумрачная (с гор на юго-запад в топи) и Змеиная (с Гримволта к морю)
+            const river = (pts, w) => {
+                for (let i = 0; i < pts.length - 1; i++) {
+                    const [ax, ay] = pts[i], [bx, by] = pts[i + 1], steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 2);
+                    for (let k = 0; k <= steps; k++) {
+                        const cx = ax + (bx - ax) * k / steps + Math.sin((ay + (by - ay) * k / steps) * 0.18) * 3, cy = ay + (by - ay) * k / steps;
+                        for (let o = 0; o < w; o++) for (let p = 0; p < w; p++) { const x = Math.floor(cx) + o, y = Math.floor(cy) + p; if (x > 0 && y > 0 && x < MAP_W - 1 && y < WORLD.overH - 1) { NM[y][x] = 2; ND[y][x] = null; } }
+                    }
+                }
+            };
+            river([[150, 3], [140, 60], [118, 120], [100, 175], [70, 215], [40, 240]], 2);
+            river([[232, 40], [240, 100], [272, 125], [290, 190], [325, 215], [352, 222]], 2);
+
+            // 3. Тракты (с плавными изгибами; поверх воды — мосты)
             const carve = (pts, w = 1) => {
                 for (let i = 0; i < pts.length - 1; i++) {
-                    const [ax, ay] = pts[i], [bx, by] = pts[i + 1];
-                    const steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 2);
+                    const [ax, ay] = pts[i], [bx, by] = pts[i + 1], steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 2);
                     for (let k = 0; k <= steps; k++) {
-                        const cx = ax + (bx - ax) * k / steps, cy = ay + (by - ay) * k / steps;
+                        const f = k / steps, bend = Math.sin(f * Math.PI) * Math.sin(i * 1.7 + ax * 0.1) * 2.5;
+                        const cx = ax + (bx - ax) * f - (by - ay) / (Math.hypot(bx - ax, by - ay) || 1) * bend, cy = ay + (by - ay) * f + (bx - ax) / (Math.hypot(bx - ax, by - ay) || 1) * bend;
                         for (let oy = 0; oy <= w; oy++) for (let ox = 0; ox <= w; ox++) {
                             const x = Math.floor(cx) + ox, y = Math.floor(cy) + oy;
                             if (x < 1 || y < 1 || x >= MAP_W - 1 || y >= WORLD.overH - 1) continue;
@@ -6100,16 +6625,18 @@
                     }
                 }
             };
-            carve([[40, 69], [58, 69], [76, 56], [100, 50]]);                     // Форт → перекрёсток
-            carve([[27, 83], [27, 98], [56, 99], [70, 93], [78, 92]]);            // Форт → ворота Сангвинии
-            carve([[100, 50], [98, 38], [88, 29]]);                               // → Клык-Холд
-            carve([[98, 38], [112, 30], [130, 22], [150, 14]]);                   // → перевал Гримволта
-            carve([[88, 29], [60, 20], [34, 17]]);                                // → Земли Ужаса
-            carve([[100, 50], [125, 52], [145, 57], [156, 59]]);                  // → Руины Голдрона
-            carve([[168, 76], [160, 96], [140, 108], [112, 112], [109, 116]]);    // Голдрон → восточный мост Бездны
-            carve([[70, 93], [80, 104], [97, 112], [97, 116]]);                   // → западный мост Бездны
-            carve([[56, 99], [30, 112], [20, 130]]);                              // → Забытые Холмы
-            carve([[125, 52], [150, 40], [172, 33]]);                             // → бухта Змеиного Берега
+            const H = WORLD_HUB;
+            carve([[85, 41], [120, 44], [160, 62], [205, 64], [240, 63], [258, 59]]);          // Северный тракт: Форт → Сангвиния
+            carve([[71, 56], [74, 88], [110, 108], [150, 118], [H.x, H.y]]);                     // Форт → Великий перекрёсток
+            carve([[H.x, H.y], [220, 128], [262, 140], [300, 144]]);                             // → Руины Голдрона
+            carve([[H.x, H.y], [178, 100]]);                                                     // → Клык-Холд
+            carve([[H.x, H.y], [186, 170], [195, 214], [195, 250]]);                             // → западный мост Бездны
+            carve([[315, 162], [318, 200], [312, 236], [262, 244], [208, 250]]);                 // Голдрон → берег → восточный мост Бездны
+            carve([[110, 108], [72, 140], [45, 160], [48, 210], [62, 262], [118, 252], [150, 250]]); // Топи → Забытые Холмы → Бездна
+            carve([[220, 128], [246, 180]]);                                                     // → Костяной Лес
+            carve([[240, 63], [250, 92], [262, 140]]);                                           // Сангвиния → юг
+            carve([[160, 62], [150, 30], [175, 14]]);                                            // → вершины Гримволта
+            carve([[45, 160], [16, 150]]);                                                       // → западные топи
 
             // 4. Готовые постройки старой карты
             LEGACY_BLOCKS.forEach(b => {
@@ -6120,25 +6647,94 @@
                 }
             });
             const road = (x0, y0, x1, y1, t = 1) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { NM[y][x] = NM[y][x] === 2 ? 9 : t; ND[y][x] = null; } };
-            road(39, 68, 39, 71, 10);      // восточные ворота Форта Этельгард
-            road(40, 69, 44, 70);
-            road(150, 59, 163, 60);        // западный въезд в Руины Голдрона
-            road(167, 69, 168, 76);        // южный выход из руин
-            road(73, 92, 79, 93);          // подъезд к воротам Сангвинии
-            // Обрамление Сангвинии: каменная ограда вокруг замка, кроме ворот
-            for (let x = 77; x <= 132; x++) for (const y of [63, 95]) if (NM[y][x] !== 1) NM[y][x] = 6;
-            for (let y = 63; y <= 95; y++) for (const x of [77, 132]) if (NM[y][x] !== 1 && !(y >= 92 && y <= 93)) NM[y][x] = 6;
-            road(77, 92, 77, 93);
-            // Нижний ярус (Ад) отрезан сплошной скалой: ряды 147..151 и всё вне блока Ада
+            road(83, 40, 83, 43, 10); road(84, 40, 88, 43);    // восточные ворота Форта
+            road(70, 55, 73, 58);                              // от южных ворот Форта
+            road(294, 143, 310, 144);                          // западный въезд в Руины Голдрона
+            road(314, 154, 315, 163);                          // южный выход из руин
+            road(256, 58, 263, 59);                            // подъезд к воротам Сангвинии
+            for (let x = 261; x <= 316; x++) for (const y of [29, 61]) if (NM[y][x] !== 1) NM[y][x] = 6;
+            for (let y = 29; y <= 61; y++) for (const x of [261, 316]) if (NM[y][x] !== 1 && !(y >= 58 && y <= 59)) NM[y][x] = 6;
+            road(261, 58, 261, 59);
+
+            // 5. Тайные тропы: узкие проходы сквозь чащу к скрытым тайникам (на карте их не видно)
+            const secretTrails = [
+                { from: [150, 118], to: [138, 146], ground: 4 }, { from: [220, 128], to: [214, 100], ground: 4 },
+                { from: [186, 170], to: [160, 188], ground: 4 }, { from: [246, 180], to: [270, 206], ground: T_GRAVE },
+                { from: [48, 210], to: [24, 196], ground: T_GRAVE }, { from: [120, 44], to: [104, 16], ground: 0 },
+                { from: [318, 200], to: [298, 214], ground: 0 }, { from: [205, 64], to: [214, 80], ground: 5 },
+                { from: [118, 252], to: [100, 284], ground: 5 }, { from: [312, 236], to: [338, 268], ground: 5 }
+            ];
+            const caches = [];
+            secretTrails.forEach((tr, i) => {
+                const [ax, ay] = tr.from, [bx, by] = tr.to, steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 2);
+                for (let k = 3; k <= steps; k++) {
+                    const f = k / steps, x = Math.floor(ax + (bx - ax) * f + Math.sin(f * 9 + i) * 2), y = Math.floor(ay + (by - ay) * f + Math.cos(f * 7 + i) * 2);
+                    if (NM[y]?.[x] === undefined || x < 1 || y < 1 || x >= MAP_W - 1 || y >= WORLD.overH - 1) continue;
+                    if (NM[y][x] !== 2 && NM[y][x] !== 1 && NM[y][x] !== 8) { NM[y][x] = tr.ground; ND[y][x] = R() < 0.25 ? 'tuft' : null; }
+                    // По краям тропы — сплошная стена чащи: снаружи её почти не видно
+                    for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (R() < 0.75 && NM[y + oy]?.[x + ox] !== undefined && NM[y + oy][x + ox] !== tr.ground && NM[y + oy][x + ox] !== 1) NM[y + oy][x + ox] = 3;
+                }
+                for (let y = by - 2; y <= by + 2; y++) for (let x = bx - 2; x <= bx + 2; x++) { if (NM[y]?.[x] !== undefined) { NM[y][x] = tr.ground; ND[y][x] = null; } }
+                ND[by - 2][bx - 2] = 'ruin_pillar'; ND[by - 2][bx + 2] = 'ruin_pillar';
+                caches.push({ id: 'cache_' + i, x: bx, y: by, tier: i % 3 === 2 ? 'precious' : 'rich' });
+            });
+
+            // 6. Точки интереса
+            pois = [];
+            [[90, 46, 'Статуя у Форта'], [296, 148, 'Статуя у Руин Голдрона'], [184, 125, 'Статуя Великого перекрёстка'], [250, 68, 'Статуя у ворот Сангвинии'],
+             [200, 244, 'Статуя у Цитадели Бездны'], [50, 156, 'Статуя Багровых Топей'], [66, 258, 'Статуя Забытых Холмов'], [320, 232, 'Статуя Змеиного Берега'],
+             [244, 176, 'Статуя Костяного Леса'], [176, 98, 'Статуя Клык-Холда'], [158, 58, 'Статуя перевала Гримволт'], [124, 104, 'Статуя Западного тракта']]
+                .forEach(([x, y, name], i) => pois.push({ id: 'wp_' + i, kind: 'waystatue', x, y, name }));
+            [[136, 82, 'might', 'Святилище Ярости'], [30, 108, 'vigor', 'Святилище Странника'], [228, 102, 'ward', 'Святилище Стража'], [338, 112, 'insight', 'Святилище Прилива'],
+             [100, 232, 'might', 'Святилище Костей'], [278, 268, 'ward', 'Святилище Тени'], [196, 22, 'vigor', 'Святилище Вершины'], [262, 196, 'insight', 'Святилище Мертвецов']]
+                .forEach(([x, y, buff, name], i) => pois.push({ id: 'sh_' + i, kind: 'shrine', x, y, buff, name }));
+            const RUNES = ['ᚠ', 'ᚱ', 'ᚦ', 'ᚨ', 'ᛉ', 'ᛟ'];
+            [[30, 70, 'Круг Камней Этельгарда'], [128, 160, 'Руны Сумрачной реки'], [274, 100, 'Обелиски Багровых Высот'], [236, 280, 'Печать Теневых Земель']].forEach(([x, y, name], i) => {
+                const glyphs = RUNES.slice().sort(() => R() - 0.5).slice(0, 4);
+                const order = glyphs.slice().sort(() => R() - 0.5);
+                pois.push({ id: 'pz_' + i, kind: 'tablet', x, y, name, order });
+                glyphs.forEach((g, k) => { const a = k * Math.PI / 2 + 0.6; pois.push({ id: `pz_${i}_${k}`, kind: 'obelisk', puzzle: 'pz_' + i, glyph: g, x: x + Math.cos(a) * 4, y: y + Math.sin(a) * 4 }); });
+            });
+            caches.forEach(cc => pois.push({ id: cc.id, kind: 'cache', x: cc.x, y: cc.y, tier: cc.tier, name: 'Тайник в глуши' }));
+            // Площадки под точки интереса: расчищаем землю
+            pois.forEach(p => {
+                const r = p.kind === 'tablet' ? 6 : 1, gx = Math.floor(p.x), gy = Math.floor(p.y);
+                for (let y = gy - r; y <= gy + r; y++) for (let x = gx - r; x <= gx + r; x++) {
+                    if (NM[y]?.[x] === undefined || x < 1 || y < 1 || x >= MAP_W - 1 || y >= WORLD.overH - 1) continue;
+                    if ([3, 6, 2].includes(NM[y][x])) NM[y][x] = darkRegionTile(regionAt(x, y));
+                    ND[y][x] = null;
+                }
+            });
+
+            // 7. Лагеря: каждому — свой рельеф (укрытия, палатки, костры)
+            campSites = [];
+            const CAMP_COUNT = { aethelgard_plains: 9, grimvault: 6, dreadlands: 7, sanguinia_heights: 7, crimson_marsh: 9, forest: 14, clawhold: 4,
+                boneswoods: 7, serpent_coast: 8, forsaken_hills: 7, shadowlands: 8 };
+            const taken = pois.map(p => [p.x, p.y, 10]).concat([[H.x, H.y, 10]], LEGACY_BLOCKS.filter(b => b.id !== 'hell').map(b => [b.nx + (b.x1 - b.x0) / 2, b.ny + (b.y1 - b.y0) / 2, 22]));
+            Object.entries(CAMP_COUNT).forEach(([reg, n]) => {
+                for (let i = 0, tries = 0; i < n && tries < 5000; tries++) {
+                    const x = 4 + Math.floor(R() * (MAP_W - 8)), y = 4 + Math.floor(R() * (WORLD.overH - 8));
+                    if (regionAt(x, y) !== reg) continue;
+                    if (taken.some(([tx, ty, tr]) => Math.hypot(tx - x, ty - y) < tr + (reg === 'clawhold' ? 5 : 8))) continue;
+                    if ([1, 2, 8].includes(NM[y][x])) continue;
+                    taken.push([x, y, 9]);
+                    const tier = R() < 0.16 ? 'precious' : (R() < 0.42 ? 'rich' : 'common');
+                    const site = { id: `camp_${reg}_${i}`, region: reg, x, y, tier };
+                    buildCampTerrain(NM, ND, site, R);
+                    campSites.push(site);
+                    i++;
+                }
+            });
+
             worldMap = NM; worldDecor = ND;
             tileVariants = Array.from({ length: MAP_H }, () => Array.from({ length: MAP_W }, () => Math.random()));
 
-            // 5. Ключевые точки, NPC, ловушки и порталы — в новые координаты
+            // 8. Ключевые точки, NPC, ловушки и порталы — в новые координаты
             Object.values(CASTLE).forEach(remapPt);
             Object.values(HELL).forEach(remapPt);
             Object.values(HERO_DEFS).forEach(d => remapPt(d.home));
             npcs.forEach(n => {
-                if (n.id === 'vanhelsing') { n.x = 74.5 * TS; n.y = 90.6 * TS; return; } // охотник у ворот Сангвинии
+                if (n.id === 'vanhelsing') { n.x = 252.5 * TS; n.y = 57.6 * TS; return; } // охотник у ворот Сангвинии
                 remapPx(n);
             });
             worldTraps.forEach(tr => { const n = legacyToNew(tr.tx, tr.ty); tr.tx = n.x; tr.ty = n.y; });
@@ -6146,7 +6742,7 @@
                 remapPx(po);
                 const t = legacyToNew(po.tx / TS, po.ty / TS); po.tx = t.x * TS; po.ty = t.y * TS;
             });
-            // Карта достижимости (от перекрёстка и от врат Ада): спавны не попадут в замкнутые скалами карманы
+            // Карта достижимости (от перекрёстка и от врат Ада)
             reachMask = new Uint8Array(MAP_W * MAP_H);
             [[WORLD_HUB.x, WORLD_HUB.y], [HELL.arrival.x, HELL.arrival.y]].forEach(([sx, sy]) => {
                 const st = [[Math.floor(sx), Math.floor(sy)]];
@@ -6160,6 +6756,9 @@
                     }
                 }
             });
+            // Точки интереса — только на достижимых клетках
+            pois.forEach(p => { const q = nearestFreeTile(p.x, p.y, WALKABLE_TILES, 40); p.x = q.x / TS; p.y = q.y / TS; });
+            campSites = campSites.filter(s => isReachable(s.x, s.y));
             darkMask = new Uint8Array(MAP_W * MAP_H);
             for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) if (DARK_REGIONS.has(regionAt(x, y))) darkMask[y * MAP_W + x] = 1;
             const h = HERO_DEFS.invoker.home;
@@ -6167,9 +6766,49 @@
             R25.minimap = null;
         }
 
+        // Базовая проходимая земля региона
+        function darkRegionTile(z) {
+            return ({ forest: 4, clawhold: 4, boneswoods: T_GRAVE, aethelgard_plains: 0, grimvault: 5, dreadlands: 5, sanguinia_heights: T_GRAVE,
+                crimson_marsh: T_GRAVE, serpent_coast: 0, shadowlands: 5, forsaken_hills: 5 })[z] || 0;
+        }
+
+        // Рельеф лагеря: расчищенная площадка, кольцо укрытий с проходами, палатки/костёр/знамёна по теме региона
+        const CAMP_THEMES = {
+            aethelgard_plains: ['knights', 'bandits'], grimvault: ['gargoyles', 'wraiths'], dreadlands: ['undead', 'werewolves', 'bandits'],
+            sanguinia_heights: ['vampires', 'thralls'], crimson_marsh: ['slimes', 'thralls', 'vampires'], forest: ['goblins', 'bandits', 'slimes', 'werewolves'],
+            clawhold: ['werewolves'], boneswoods: ['undead', 'wraiths'], serpent_coast: ['slimes', 'smugglers', 'goblins'],
+            forsaken_hills: ['undead', 'wraiths', 'bandits'], shadowlands: ['undead', 'wraiths', 'vampires']
+        };
+        function buildCampTerrain(NM, ND, site, R) {
+            const themes = CAMP_THEMES[site.region];
+            site.theme = themes[Math.floor(R() * themes.length)];
+            const ground = darkRegionTile(site.region);
+            const cover = { undead: T_TOMB, wraiths: T_TOMB, vampires: T_TOMB, thralls: T_TOMB }[site.theme] || 6;
+            for (let y = site.y - 6; y <= site.y + 6; y++) for (let x = site.x - 6; x <= site.x + 6; x++) {
+                if (x < 1 || y < 1 || x >= MAP_W - 1 || y >= WORLD.overH - 1) continue;
+                const d = Math.hypot(x - site.x, y - site.y);
+                if (d > 6.3 || [1, 8].includes(NM[y][x])) continue;
+                NM[y][x] = ground; ND[y][x] = null;
+                // Кольцо укрытий с 3 проходами
+                const a = Math.atan2(y - site.y, x - site.x), gap = Math.abs(Math.sin(a * 1.5 + site.x)) < 0.45;
+                if (d > 4.6 && d < 5.6 && !gap && R() < 0.7) NM[y][x] = cover;
+            }
+            const deco = {
+                knights: ['tent', 'banner_cross', 'campfire'], bandits: ['tent', 'campfire', 'fallen_log'], smugglers: ['tent', 'campfire', 'boulder'],
+                goblins: ['tent', 'campfire', 'bones'], slimes: ['mushroom', 'reeds', 'tuft'], werewolves: ['skull_pile', 'bones', 'dead_tree'],
+                undead: ['skull_pile', 'coffin', 'candelabra'], wraiths: ['candelabra', 'cobweb', 'skull'], vampires: ['banner_blood', 'coffin', 'candelabra'],
+                thralls: ['coffin', 'blood', 'dead_tree'], gargoyles: ['ruin_pillar', 'gargoyle_statue', 'crack']
+            }[site.theme] || ['campfire'];
+            for (let k = 0; k < 5; k++) {
+                const a = R() * Math.PI * 2, r = 2 + R() * 2.2, x = Math.round(site.x + Math.cos(a) * r), y = Math.round(site.y + Math.sin(a) * r);
+                if (Math.hypot(x - site.x, y - site.y) < 1.5) continue;
+                ND[y][x] = deco[k % deco.length];
+            }
+        }
+
         // Ближайший проходимый тайл к точке (в новых тайловых координатах)
-        function nearestFreeTile(x, y, allowed) {
-            for (let r = 0; r < 8; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+        function nearestFreeTile(x, y, allowed, maxR = 8) {
+            for (let r = 0; r < maxR; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
                 if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
                 const tx = Math.floor(x) + dx, ty = Math.floor(y) + dy;
                 if (allowed.includes(worldMap[ty]?.[tx]) && isReachable(tx, ty) && !worldDecor[ty]?.[tx]?.match?.(/pillar|statue|throne/)) return { x: (tx + 0.5) * TS, y: (ty + 0.5) * TS };
@@ -6274,6 +6913,12 @@
                 player.attackRange = 0;
                 player.critChance = 0;
                 player.critMult = 1;
+            }
+            // Благословения святилищ
+            const sb = player.shrineBuff;
+            if (sb && sb.t > 0) {
+                if (sb.kind === 'might') { player.handDmg = Math.round(player.handDmg * 1.2); player.spellAmp += 20; }
+                if (sb.kind === 'ward') { player.armor += 10; player.maxHp = Math.round(player.maxHp * 1.15); }
             }
             player.hp = Math.min(player.hp, player.maxHp);
             player.mp = Math.min(player.mp, player.maxMp);
@@ -6813,6 +7458,20 @@
             // --- Демоны Ада ---
             imp:       { name: 'Огненный Бес', icon: '👿', hp: 380, dmg: 50, armor: 4, mres: 0.3, speed: 150, xp: 220, gold: [40, 70], radius: 13, aggroRange: 380, attackRange: 250, ranged: true, projColor: '#fb923c', projSpeed: 330, color: '#f97316',
                          drops: [{ id: 'hell_ember', chance: 0.25 }, { id: 'mp_pot', chance: 0.3 }] },
+            bandit:        { name: 'Разбойник', icon: '🗡️', hp: 260, dmg: 26, armor: 2, mres: 0, speed: 135, xp: 60, gold: [14, 26], radius: 15, aggroRange: 260, attackRange: 38, color: '#a16207',
+                             drops: [{ id: 'iron_ore', chance: 0.3 }, { id: 'hp_pot', chance: 0.15 }, { id: 'shadow_silk', chance: 0.05 }] },
+            bandit_archer: { name: 'Разбойник-лучник', icon: '🏹', hp: 200, dmg: 24, armor: 1, mres: 0, speed: 125, xp: 65, gold: [14, 26], radius: 15, aggroRange: 300, attackRange: 240, ranged: true, projColor: '#d6d3d1', projSpeed: 340, dmgKind: 'phys', color: '#65a30d',
+                             drops: [{ id: 'herb', chance: 0.3 }, { id: 'mp_pot', chance: 0.12 }] },
+            crimson_knight: { name: 'Рыцарь Багрового Креста', icon: '⚔️', hp: 560, dmg: 46, armor: 10, mres: 0.1, speed: 120, xp: 150, gold: [30, 50], radius: 18, aggroRange: 280, attackRange: 44, color: '#dc2626',
+                             drops: [{ id: 'iron_ore', chance: 0.5 }, { id: 'star_steel', chance: 0.08 }, { id: 'camelot_plate', chance: 0.03 }] },
+            crimson_crossbow: { name: 'Арбалетчик Креста', icon: '🎯', hp: 380, dmg: 40, armor: 6, mres: 0.1, speed: 115, xp: 140, gold: [28, 46], radius: 17, aggroRange: 320, attackRange: 270, ranged: true, projColor: '#fca5a5', projSpeed: 380, dmgKind: 'phys', color: '#b91c1c',
+                             drops: [{ id: 'iron_ore', chance: 0.4 }, { id: 'hp_pot', chance: 0.15 }] },
+            bone_walker:   { name: 'Костяной Ходок', icon: '🦴', hp: 420, dmg: 38, armor: 6, mres: 0.15, speed: 110, xp: 120, gold: [20, 36], radius: 17, aggroRange: 270, attackRange: 40, color: '#d6d3d1',
+                             drops: [{ id: 'bone_dust', chance: 0.6 }, { id: 'soul_crystal', chance: 0.1 }] },
+            wraith:        { name: 'Призрак Кургана', icon: '👻', hp: 340, dmg: 44, armor: 0, mres: 0.4, speed: 125, xp: 150, gold: [24, 40], radius: 16, aggroRange: 320, attackRange: 230, ranged: true, projColor: '#a5f3fc', projSpeed: 300, color: '#67e8f9',
+                             drops: [{ id: 'soul_crystal', chance: 0.35 }, { id: 'shadow_silk', chance: 0.2 }] },
+            vampire_thrall: { name: 'Вампир-трэлл', icon: '🧛', hp: 380, dmg: 36, armor: 4, mres: 0.15, speed: 150, xp: 110, gold: [20, 36], radius: 16, aggroRange: 290, attackRange: 38, lifesteal: 0.3, attackTime: 1.0, color: '#be123c',
+                             drops: [{ id: 'vampire_fang', chance: 0.2 }, { id: 'shadow_silk', chance: 0.1 }] },
             werewolf:  { name: 'Оборотень Клык-Холда', icon: '🐺', hp: 520, dmg: 46, armor: 5, mres: 0.1, speed: 168, xp: 160, gold: [25, 45], radius: 16, aggroRange: 300, attackRange: 40, leap: true, attackTime: 0.95, color: '#78716c',
                          drops: [{ id: 'shadow_silk', chance: 0.15 }, { id: 'bone_dust', chance: 0.3 }, { id: 'hp_pot', chance: 0.1 }] },
             werewolf_alpha: { name: 'Альфа Клык-Холда', icon: '🐺', hp: 1600, dmg: 70, armor: 8, mres: 0.15, speed: 176, xp: 520, gold: [90, 140], radius: 21, aggroRange: 330, attackRange: 46, leap: true, lifesteal: 0.2, attackTime: 0.9, color: '#a8a29e',
@@ -6857,13 +7516,15 @@
             const L = (type, x, y) => { const n = legacyToNew(x, y); return E(type, n.x, n.y); };
 
             // Травы Звёздного Лотуса — в Диком Лесу и на Змеином Берегу
-            for (let i = 0; i < 24; i++) {
-                const pos = i < 18 ? findFreeTileOf(62, 148, 33, 55, [4]) : findFreeTileOf(150, 180, 78, 100, [0]);
+            for (let i = 0; i < 46; i++) {
+                const pos = i < 34 ? findFreeTileOf(88, 284, 94, 226, [4]) : findFreeTileOf(286, 340, 94, 226, [0]);
                 if (pos) groundLoot.push({ uid: Math.random(), x: pos.x, y: pos.y, kind: 'herb_node', itemId: 'herb', count: 1, respawnTimer: 0 });
             }
 
-            // Все обычные враги живут в лагерях и патрулях (см. CAMP_DEFS)
+            // Все обычные враги живут в лагерях (процедурные campSites + комнаты замков из CAMP_DEFS)
             spawnCamps();
+            spawnRares();
+            initPoiState();
 
             // Боссы и их стражи-мини-боссы
             const malakor = L('boss', 13, 48);
@@ -6895,33 +7556,6 @@
             precious: ['soul_crystal', 'star_steel', 'shadow_silk', 'grand_elixir', 'vampire_fang', 'demon_horn']
         };
         const CAMP_DEFS = [
-            // --- Дикий Лес ---
-            { id: 'ww_slimes', name: 'Слизни у Сумрачной реки', x: 115, y: 44, tier: 'common', units: [['slime', 4]] },
-            { id: 'ww_goblins', name: 'Гоблинская стоянка', x: 132, y: 40, tier: 'common', units: [['goblin', 3], ['slime', 1]] },
-            { id: 'ww_den', name: 'Логово в чаще', x: 80, y: 43, tier: 'rich', units: [['goblin', 3], ['dark_mage', 1]] },
-            { id: 'ww_patrol', name: 'Патруль гоблинов на тракте', x: 92, y: 49, tier: 'rich', units: [['goblin', 4]], patrol: [[92, 49], [118, 51], [140, 55], [118, 51]] },
-            // --- Земли Этельгарда ---
-            { id: 'ae_ambush', name: 'Засада у Южного тракта', x: 46, y: 95, tier: 'common', units: [['goblin', 4]] },
-            { id: 'ae_ruin', name: 'Нежить у павшей заставы', x: 42, y: 42, tier: 'rich', units: [['skeleton', 3], ['dark_mage', 1]] },
-            // --- Клык-Холд ---
-            { id: 'ch_outer', name: 'Клык-Холд: внешний круг', x: 78, y: 30, tier: 'rich', units: [['werewolf', 3]] },
-            { id: 'ch_alpha', name: 'Клык-Холд: логово Альфы', x: 87, y: 21, tier: 'precious', units: [['werewolf_alpha', 1], ['werewolf', 3]] },
-            // --- Земли Ужаса и Гримволт ---
-            { id: 'dl_undead', name: 'Курган Земель Ужаса', x: 38, y: 14, tier: 'rich', units: [['skeleton', 4], ['dark_mage', 1]] },
-            { id: 'gv_pass', name: 'Горгульи перевала', x: 150, y: 14, tier: 'rich', units: [['gargoyle', 3]] },
-            { id: 'gv_peak', name: 'Вершина Гримволта', x: 166, y: 24, tier: 'precious', units: [['gargoyle', 2], ['werewolf', 2], ['dark_mage', 1]] },
-            // --- Змеиный Берег ---
-            { id: 'sc_slimes', name: 'Слизни прибрежных болот', x: 176, y: 88, tier: 'common', units: [['slime', 5]] },
-            { id: 'sc_cove', name: 'Бухта контрабандистов', x: 172, y: 33, tier: 'rich', units: [['goblin', 4], ['dark_mage', 1]] },
-            // --- Багровые Топи ---
-            { id: 'cm_outpost', name: 'Вампирский аванпост', x: 70, y: 78, tier: 'rich', units: [['ghoul', 3], ['bat', 2]] },
-            { id: 'cm_patrol', name: 'Кровавый дозор топей', x: 72, y: 97, tier: 'rich', units: [['ghoul', 2], ['bat', 2]], patrol: [[72, 97], [100, 99], [136, 99], [100, 99]] },
-            { id: 'cm_bloodguard', name: 'Кровавая застава', x: 138, y: 74, tier: 'precious', units: [['blood_knight', 2], ['ghoul', 2], ['bat', 2]] },
-            // --- Теневые Земли и Забытые Холмы ---
-            { id: 'fh_undead', name: 'Курганы Забытых Холмов', x: 28, y: 122, tier: 'rich', units: [['skeleton', 4], ['dark_mage', 1]] },
-            { id: 'fh_crypt', name: 'Склеп Забытых Холмов', x: 20, y: 139, tier: 'precious', units: [['skeleton', 3], ['dark_mage', 2], ['ghoul', 1]] },
-            { id: 'sl_cult', name: 'Теневой круг культистов', x: 150, y: 118, tier: 'rich', units: [['dark_mage', 3], ['skeleton', 2]] },
-            { id: 'sl_graves', name: 'Теневое кладбище', x: 176, y: 136, tier: 'precious', units: [['ghoul', 3], ['blood_knight', 1]] },
             // --- Цитадель Бездны ---
             { id: 'ab_gate', name: 'Цитадель Бездны: врата', legacy: true, x: 50, y: 38, tier: 'rich', units: [['skeleton', 3], ['dark_mage', 1]] },
             { id: 'ab_halls', name: 'Цитадель Бездны: чертоги', legacy: true, x: 40, y: 52, tier: 'rich', units: [['skeleton', 3], ['dark_mage', 1]] },
@@ -6950,6 +7584,7 @@
 
         function spawnCamps() {
             camps = [];
+            campSites.forEach(spawnSiteCamp);
             CAMP_DEFS.forEach(def => {
                 const c0 = def.legacy ? legacyToNew(def.x, def.y) : { x: def.x, y: def.y };
                 const center = nearestFreeTile(c0.x, c0.y, WALKABLE_TILES);
@@ -6976,6 +7611,321 @@
             });
         }
 
+        // Процедурные лагеря: состав по теме, один элитный страж (в драгоценных — Вожак), сила по региону
+        const THEME_INFO = {
+            knights:    { name: 'Застава Багрового Креста', units: [['crimson_knight', 2], ['crimson_crossbow', 2]], extra: ['iron_ore'] },
+            bandits:    { name: 'Лагерь разбойников', units: [['bandit', 3], ['bandit_archer', 2]], extra: ['iron_ore'] },
+            smugglers:  { name: 'Схрон контрабандистов', units: [['bandit', 2], ['bandit_archer', 1], ['goblin', 2]], extra: ['shadow_silk'] },
+            goblins:    { name: 'Гоблинская стоянка', units: [['goblin', 4], ['slime', 1]] },
+            slimes:     { name: 'Гнездо слизней', units: [['slime', 5]], extra: ['slime_gel'] },
+            werewolves: { name: 'Логово стаи', units: [['werewolf', 4]], extra: ['shadow_silk'] },
+            undead:     { name: 'Курган нежити', units: [['bone_walker', 2], ['skeleton', 2], ['dark_mage', 1]], extra: ['bone_dust'] },
+            wraiths:    { name: 'Круг призраков', units: [['wraith', 3], ['bone_walker', 1]], extra: ['soul_crystal'] },
+            vampires:   { name: 'Вампирский форпост', units: [['vampire_thrall', 2], ['bat', 2], ['blood_knight', 1]], extra: ['vampire_fang'] },
+            thralls:    { name: 'Гнездо трэллов', units: [['vampire_thrall', 3], ['ghoul', 1]], extra: ['vampire_fang'] },
+            gargoyles:  { name: 'Каменные стражи', units: [['gargoyle', 3], ['wraith', 1]], extra: ['star_steel'] }
+        };
+        const REGION_SHORT = { aethelgard_plains: 'Этельгард', grimvault: 'Гримволт', dreadlands: 'Земли Ужаса', sanguinia_heights: 'Высоты Сангвинии',
+            crimson_marsh: 'Багровые Топи', forest: 'Дикий Лес', clawhold: 'Клык-Холд', boneswoods: 'Костяной Лес', serpent_coast: 'Змеиный Берег',
+            forsaken_hills: 'Забытые Холмы', shadowlands: 'Теневые Земли' };
+        // Редкие враги: именные элиты бродят по своему региону, перерождаются через 10 минут
+        const RARE_DEFS = [
+            { id: 'rare_fang', name: 'Седой Клык', type: 'werewolf_alpha', region: 'forest' },
+            { id: 'rare_reaper', name: 'Костяной Жнец', type: 'bone_walker', region: 'boneswoods' },
+            { id: 'rare_mirela', name: 'Леди Мирела', type: 'vampire_thrall', region: 'sanguinia_heights' },
+            { id: 'rare_mordred', name: 'Сэр Мордред Отступник', type: 'crimson_knight', region: 'aethelgard_plains' },
+            { id: 'rare_rotgut', name: 'Гнилоглаз', type: 'slime', region: 'crimson_marsh' },
+            { id: 'rare_whisper', name: 'Шёпот Гримволта', type: 'wraith', region: 'grimvault' },
+            { id: 'rare_saltbeard', name: 'Капитан Солёная Борода', type: 'bandit', region: 'serpent_coast' },
+            { id: 'rare_barrow', name: 'Пожиратель Курганов', type: 'ghoul', region: 'forsaken_hills' }
+        ];
+
+        function powerUp(en, k) {
+            en.maxHp = en.hp = Math.round(en.maxHp * k);
+            en.dmg = Math.round(en.dmg * (0.6 + 0.4 * k));
+            en.xp = Math.round(en.xp * k);
+            en.goldRange = en.goldRange.map(g => Math.round(g * k));
+        }
+        function makeElite(en, leader) {
+            en.elite = leader ? 'leader' : 'elite';
+            powerUp(en, leader ? 4 : 2.4);
+            en.dmg = Math.round(en.dmg * (leader ? 1.25 : 1.1));
+            en.radius = Math.round(en.radius * 1.2);
+            en.name = (leader ? 'Вожак: ' : 'Элита: ') + en.name;
+            en.drops = en.drops.concat([{ id: leader ? 'star_steel' : 'soul_crystal', chance: 1 }]);
+        }
+
+        function spawnSiteCamp(site) {
+            const th = THEME_INFO[site.theme];
+            const center = nearestFreeTile(site.x, site.y, WALKABLE_TILES);
+            const def = { id: site.id, name: `${th.name} • ${REGION_SHORT[site.region]}`, tier: site.tier, extra: th.extra, units: th.units.map(u => u.slice()) };
+            if (site.tier === 'common') { const big = def.units.reduce((a, u) => u[1] > a[1] ? u : a); big[1] = Math.max(1, big[1] - 1); }
+            if (site.tier === 'precious') def.units[0][1] += 1;
+            const camp = { def, id: def.id, name: def.name, tier: def.tier, x: center.x, y: center.y, ax: center.x, ay: center.y, members: [], state: 'active', resetTimer: 0, patrolIdx: 1, region: site.region };
+            const list = []; def.units.forEach(([t, n]) => { for (let i = 0; i < n; i++) list.push(t); });
+            const pw = REGION_POWER[site.region] || 1;
+            list.forEach((t, i) => {
+                const a = (i / list.length) * Math.PI * 2 + 0.4, r = 2.2 + (list.length > 4 ? 0.6 : 0);
+                const p = nearestFreeTile(center.x / TS - 0.5 + Math.cos(a) * r, center.y / TS - 0.5 + Math.sin(a) * r, WALKABLE_TILES);
+                const en = createEnemy(t, p.x, p.y, { camp });
+                powerUp(en, pw);
+                if (i === 0) makeElite(en, site.tier === 'precious');
+                en.campOff = { x: p.x - center.x, y: p.y - center.y };
+                camp.members.push(en); enemies.push(en);
+            });
+            camp.chest = { uid: Math.random(), x: center.x, y: center.y, kind: 'camp_chest', camp, tier: def.tier, sealed: true, opened: false, hidden: false, openAnim: 0 };
+            groundLoot.push(camp.chest);
+            camps.push(camp);
+        }
+
+        function spawnRares() {
+            RARE_DEFS.forEach(r => {
+                let pos = null;
+                for (let k = 0; k < 400 && !pos; k++) {
+                    const x = 3 + Math.floor(Math.random() * (MAP_W - 6)), y = 3 + Math.floor(Math.random() * (WORLD.overH - 6));
+                    if (regionAt(x, y) !== r.region || !isReachable(x, y) || isTileBlocked(x, y) || worldMap[y][x] === 1) continue;
+                    if (camps.some(c => Math.hypot(c.x / TS - x, c.y / TS - y) < 14)) continue;
+                    pos = { x: (x + 0.5) * TS, y: (y + 0.5) * TS };
+                }
+                if (!pos) return;
+                const en = createEnemy(r.type, pos.x, pos.y, { rare: r, homeX: pos.x, homeY: pos.y, wanderT: 0 });
+                powerUp(en, (REGION_POWER[r.region] || 1) * 3.5);
+                en.dmg = Math.round(en.dmg * 1.3);
+                en.radius = Math.round(en.radius * 1.3);
+                en.name = `★ ${r.name}`;
+                en.tpl = Object.assign({}, en.tpl, { respawn: 600 });
+                const gear = CAMP_TIERS.precious.gear.filter(id => !(ITEMS_DB[id].cls && ITEMS_DB[id].cls !== player.heroType));
+                en.drops = [{ id: 'star_steel', chance: 1 }, { id: 'grand_elixir', chance: 1 }, { id: gear[Math.floor(Math.random() * gear.length)], chance: 1 }];
+                enemies.push(en);
+            });
+        }
+
+        // Бродяжничество редких врагов по своему региону
+        function updateRares(dt) {
+            for (const en of enemies) {
+                if (!en.rare || en.deadTimer > 0 || en.aggro > 0) continue;
+                en.wanderT -= dt;
+                if (en.wanderT > 0) continue;
+                en.wanderT = 6 + Math.random() * 6;
+                for (let k = 0; k < 20; k++) {
+                    const a = Math.random() * Math.PI * 2, r = Math.random() * 18 * TS;
+                    const x = en.homeX + Math.cos(a) * r, y = en.homeY + Math.sin(a) * r, tx = Math.floor(x / TS), ty = Math.floor(y / TS);
+                    if (regionAt(tx, ty) === en.rare.region && isReachable(tx, ty) && !isTileBlocked(tx, ty)) { en.spawnX = x; en.spawnY = y; break; }
+                }
+            }
+        }
+
+        // ============================================================================
+        // ТОЧКИ ИНТЕРЕСА, ВЫНОСЛИВОСТЬ, БЫСТРОЕ ПЕРЕМЕЩЕНИЕ И ТУМАН НА КАРТЕ
+        // ============================================================================
+        const SHRINE_BUFFS = {
+            might:   { name: 'Ярость', icon: '⚔️', color: '#f87171', rgb: '248,113,113', desc: '+20% урона и +20% мощи навыков' },
+            vigor:   { name: 'Выносливость странника', icon: '🏃', color: '#86efac', rgb: '134,239,172', desc: '+60 к макс. выносливости и вдвое быстрее восстановление' },
+            ward:    { name: 'Защита стража', icon: '🛡️', color: '#93c5fd', rgb: '147,197,253', desc: '+10 брони и +15% здоровья' },
+            insight: { name: 'Прозрение', icon: '📜', color: '#fde68a', rgb: '253,230,138', desc: '+30% получаемого опыта' }
+        };
+        const SHRINE_BUFF_TIME = 300, SHRINE_COOLDOWN = 600;
+        const FOG_CHUNK = 6;
+        let exploredMask = null;
+        const shrineCd = {};
+        const puzzleProgress = {};
+
+        function initPoiState() {
+            player.poiFound = player.poiFound || {};
+            player.cachesOpened = player.cachesOpened || {};
+            player.puzzlesSolved = player.puzzlesSolved || {};
+            const fw = Math.ceil(MAP_W / FOG_CHUNK), fh = Math.ceil(WORLD.overH / FOG_CHUNK);
+            exploredMask = new Uint8Array(fw * fh);
+            if (typeof player.explored === 'string') for (let i = 0; i < Math.min(player.explored.length, exploredMask.length); i++) exploredMask[i] = player.explored.charCodeAt(i) === 49 ? 1 : 0;
+            pois.forEach(p => { p.wx = p.x * TS; p.wy = p.y * TS; p.found = !!player.poiFound[p.id]; p.lit = false; });
+            for (const k in puzzleProgress) delete puzzleProgress[k];
+            // Тайники и решённые загадки: сундуки на месте
+            groundLoot = groundLoot.filter(g => !(g.kind === 'camp_chest' && g.camp && g.camp.static));
+            pois.forEach(p => {
+                if (p.kind === 'cache') addStaticChest(p, p.tier, p.name, !!player.cachesOpened[p.id]);
+                if (p.kind === 'tablet' && player.puzzlesSolved[p.id]) addStaticChest(p, 'precious', p.name, !!player.cachesOpened[p.id]);
+            });
+        }
+        function exploredString() { return exploredMask ? Array.from(exploredMask).join('') : ''; }
+
+        function addStaticChest(p, tier, name, opened) {
+            const camp = { static: true, id: p.id, name, tier, members: [], def: { name, extra: [] }, state: opened ? 'opened' : 'cleared' };
+            const ch = { uid: Math.random(), x: p.wx, y: p.wy + (p.kind === 'tablet' ? TS * 1.2 : 0), kind: 'camp_chest', camp, tier, sealed: false, opened, hidden: false, openAnim: opened ? 1 : 0, cacheId: p.id };
+            camp.chest = ch;
+            groundLoot.push(ch);
+            return ch;
+        }
+
+        // Выносливость: Shift — бег (+60% скорости). Пустая шкала — короткая одышка.
+        function moveSpeedNow(dt) {
+            let sp = player.moveSpeed;
+            const want = keys['ShiftLeft'] || keys['ShiftRight'];
+            if (want && !player.exhausted && player.stamina > 0) {
+                sp *= 1.6;
+                player.stamina = Math.max(0, player.stamina - 22 * dt);
+                player.sprintedThisFrame = true;
+                if (Math.random() < 0.35) particles.push({ x: player.x + (Math.random() - 0.5) * 14, y: player.y + 18, vx: (Math.random() - 0.5) * 30, vy: -20, size: 2.5, color: '#a8a29e', life: 0.4, maxLife: 0.4 });
+                if (player.stamina <= 0) { player.exhausted = true; spawnFloatingText(player.x, player.y - 40, '😮‍💨 Нет сил — отдышитесь', '#fde68a'); }
+            }
+            return sp;
+        }
+        const maxStamina = () => 100 + (player.shrineBuff && player.shrineBuff.kind === 'vigor' ? 60 : 0);
+
+        function updateExploration(dt) {
+            // Выносливость
+            const ms = maxStamina();
+            if (player.stamina === undefined) player.stamina = ms;
+            if (!player.sprintedThisFrame) {
+                const rate = (player.moveTargetX !== null || player.attackTarget ? 9 : 16) * (player.shrineBuff && player.shrineBuff.kind === 'vigor' ? 2 : 1);
+                player.stamina = Math.min(ms, player.stamina + rate * dt);
+            }
+            if (player.exhausted && player.stamina >= 30) player.exhausted = false;
+            player.sprintedThisFrame = false;
+            // Бафф святилища
+            if (player.shrineBuff) {
+                player.shrineBuff.t -= dt;
+                if (player.shrineBuff.t <= 0) { showToast(`Благословение «${SHRINE_BUFFS[player.shrineBuff.kind].name}» угасло`, 'info'); player.shrineBuff = null; recalcPlayerStats(); }
+            }
+            for (const id in shrineCd) if (shrineCd[id] > 0) shrineCd[id] -= dt;
+            if (!exploredMask || player.y / TS >= WORLD.hellRow) return;
+            // Туман на карте мира: открываем область вокруг героя
+            const fw = Math.ceil(MAP_W / FOG_CHUNK), cx = Math.floor(player.x / TS / FOG_CHUNK), cy = Math.floor(player.y / TS / FOG_CHUNK);
+            for (let y = cy - 3; y <= cy + 3; y++) for (let x = cx - 3; x <= cx + 3; x++) {
+                if (x < 0 || y < 0 || x >= fw || y * FOG_CHUNK >= WORLD.overH || Math.hypot(x - cx, y - cy) > 3.2) continue;
+                exploredMask[y * fw + x] = 1;
+            }
+            // Открытие точек интереса
+            for (const p of pois) {
+                if (p.found || p.kind === 'obelisk') continue;
+                if (Math.hypot(player.x - p.wx, player.y - p.wy) < 9 * TS) {
+                    p.found = true; player.poiFound[p.id] = true;
+                    const label = { waystatue: '🗿 Статуя Странника', shrine: '⛩️ Святилище', tablet: '🔮 Загадка рун', cache: '💰 Тайник' }[p.kind];
+                    showToast(`Найдено: ${label} — ${p.name}`, 'gold');
+                    gainXp(p.kind === 'cache' ? 60 : 30);
+                    if (p.kind === 'waystatue') { player.lastWaypoint = p.id; SoundFX.play('levelup'); spawnParticleRing(p.wx, p.wy, 60, '#67e8f9', 30); }
+                }
+            }
+            // Статуя рядом: восстанавливает силы и становится точкой возрождения
+            for (const p of pois) {
+                if (p.kind !== 'waystatue' || !p.found) continue;
+                if (Math.hypot(player.x - p.wx, player.y - p.wy) < 2.2 * TS) {
+                    player.lastWaypoint = p.id;
+                    player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.15 * dt);
+                    player.mp = Math.min(player.maxMp, player.mp + player.maxMp * 0.15 * dt);
+                }
+            }
+        }
+
+        function poiLabel(p) {
+            if (p.kind === 'shrine') return shrineCd[p.id] > 0 ? `${p.name} (восстанавливается ${Math.ceil(shrineCd[p.id])}с)` : `Помолиться: ${p.name} — ${SHRINE_BUFFS[p.buff].name}`;
+            if (p.kind === 'tablet') return `Прочесть: ${p.name}`;
+            if (p.kind === 'obelisk') return `Коснуться руны ${p.glyph}`;
+            if (p.kind === 'waystatue') return `${p.name} (быстрое перемещение — карта M)`;
+            return p.name || '';
+        }
+        const isPoiInteractable = p => ['shrine', 'tablet', 'obelisk', 'waystatue'].includes(p.kind);
+
+        function interactPoi(p) {
+            if (p.kind === 'shrine') {
+                if (shrineCd[p.id] > 0) { showToast('Святилище ещё не восстановило силу', 'error'); return; }
+                const b = SHRINE_BUFFS[p.buff];
+                shrineCd[p.id] = SHRINE_COOLDOWN;
+                player.shrineBuff = { kind: p.buff, t: SHRINE_BUFF_TIME };
+                if (!player.poiFound['used_' + p.id]) { player.poiFound['used_' + p.id] = true; gainXp(150); }
+                recalcPlayerStats();
+                if (p.buff === 'vigor') player.stamina = maxStamina();
+                SoundFX.play('levelup');
+                spawnParticleRing(p.wx, p.wy, 70, b.color, 36);
+                zoneBanner = { title: `${b.icon} ${b.name.toUpperCase()}`, sub: `${b.desc} • ${SHRINE_BUFF_TIME / 60} мин`, life: 3.2, maxLife: 3.2, color: b.color };
+            } else if (p.kind === 'tablet') {
+                if (player.puzzlesSolved[p.id]) { showToast('Руны этого круга уже пробуждены', 'info'); return; }
+                zoneBanner = { title: p.name.toUpperCase(), sub: `«Пробуди камни в порядке: ${p.order.join(' → ')}»`, life: 6, maxLife: 6, color: '#c4b5fd' };
+                SoundFX.play('orb');
+            } else if (p.kind === 'obelisk') {
+                const tab = pois.find(q => q.id === p.puzzle);
+                if (player.puzzlesSolved[tab.id]) { showToast('Руны уже пробуждены', 'info'); return; }
+                const prog = puzzleProgress[tab.id] || 0;
+                if (tab.order[prog] === p.glyph && !p.lit) {
+                    p.lit = true; puzzleProgress[tab.id] = prog + 1;
+                    SoundFX.play('orb');
+                    spawnParticleBurst(p.wx, p.wy - 30, '#c4b5fd', 16);
+                    if (prog + 1 === tab.order.length) {
+                        player.puzzlesSolved[tab.id] = true;
+                        gainXp(300);
+                        const ch = addStaticChest(tab, 'precious', tab.name, false);
+                        spawnParticleRing(ch.x, ch.y, 90, '#d8b4fe', 40);
+                        SoundFX.play('thunder');
+                        zoneBanner = { title: 'ЗАГАДКА РЕШЕНА', sub: `${tab.name} • появился драгоценный сундук`, life: 4, maxLife: 4, color: '#d8b4fe' };
+                    }
+                } else if (!p.lit) {
+                    // Неверный порядок: руны гаснут, камень бьёт разрядом
+                    pois.forEach(q => { if (q.puzzle === tab.id) q.lit = false; });
+                    puzzleProgress[tab.id] = 0;
+                    damagePlayer(Math.round(player.maxHp * 0.08), 'magic');
+                    activeZones.push({ type: 'afterglow', x: p.wx, y: p.wy, radius: 50, color: '#a78bfa', life: 0.4, maxLife: 0.4 });
+                    showToast('Неверный порядок — руны погасли. Перечитайте скрижаль.', 'error');
+                }
+            } else if (p.kind === 'waystatue') {
+                toggleModal('worldmap');
+            }
+        }
+
+        // Быстрое перемещение между открытыми статуями (с карты мира)
+        function fastTravelTo(p) {
+            if (playerZone() === 'hell') { showToast('Из Ада к статуям не перенестись', 'error'); return; }
+            const danger = enemies.some(en => en.deadTimer <= 0 && en.aggro > 0 && Math.hypot(en.x - player.x, en.y - player.y) < 700);
+            if (danger) { showToast('Нельзя перемещаться во время боя', 'error'); return; }
+            closeAllModals();
+            player.lastWaypoint = p.id;
+            zoneTransition = { t: 0, dur: 1.6, portal: { tx: p.wx, ty: p.wy + TS * 1.4 }, done: false };
+            SoundFX.play('emp');
+        }
+
+        // ---------- рисование точек интереса ----------
+        function drawPoi25(c, p, now) {
+            const x = p.wx, y = p.wy;
+            if (p.kind === 'waystatue') {
+                castShadow(c, x, y + 16, 18);
+                c.fillStyle = '#44403c'; c.fillRect(x - 15, y + 4, 30, 12); c.fillStyle = '#57534e'; c.fillRect(x - 11, y - 2, 22, 8);
+                const sg = c.createLinearGradient(x - 8, y - 46, x + 8, y);
+                sg.addColorStop(0, '#a8a29e'); sg.addColorStop(1, '#57534e');
+                c.fillStyle = sg;
+                c.beginPath(); c.moveTo(x - 8, y - 2); c.lineTo(x - 6, y - 30); c.lineTo(x - 10, y - 36); c.lineTo(x, y - 48); c.lineTo(x + 10, y - 36); c.lineTo(x + 6, y - 30); c.lineTo(x + 8, y - 2); c.closePath(); c.fill();
+                c.fillStyle = '#d6d3d1'; c.beginPath(); c.arc(x, y - 40, 4.5, 0, Math.PI * 2); c.fill();
+                if (p.found) {
+                    const pu = 0.6 + Math.sin(now * 0.004) * 0.4;
+                    glow(c, x, y - 30, 40, '103,232,249', 0.25 + pu * 0.2);
+                    c.fillStyle = `rgba(165,243,252,${0.7 + pu * 0.3})`; c.beginPath(); c.arc(x, y - 26, 4, 0, Math.PI * 2); c.fill();
+                }
+            } else if (p.kind === 'shrine') {
+                const b = SHRINE_BUFFS[p.buff], ready = !(shrineCd[p.id] > 0);
+                castShadow(c, x, y + 14, 18);
+                c.fillStyle = '#3f3f46'; c.fillRect(x - 16, y + 2, 32, 12); c.fillStyle = '#52525b'; c.fillRect(x - 12, y - 10, 24, 12);
+                c.fillStyle = '#27272a'; c.fillRect(x - 18, y - 24, 4, 38); c.fillRect(x + 14, y - 24, 4, 38); c.fillRect(x - 20, y - 28, 40, 5);
+                if (ready) { flame(c, x, y - 10, 14, now, x); glow(c, x, y - 18, 50, b.rgb, 0.35); }
+                c.font = '13px sans-serif'; c.textAlign = 'center'; c.fillStyle = ready ? '#fff' : '#71717a'; c.fillText(b.icon, x, y - 34);
+            } else if (p.kind === 'tablet') {
+                castShadow(c, x, y + 12, 16);
+                c.fillStyle = '#44403c'; c.beginPath(); c.roundRect(x - 13, y - 26, 26, 38, [10, 10, 2, 2]); c.fill();
+                c.strokeStyle = '#a78bfa'; c.lineWidth = 1; c.stroke();
+                c.font = 'bold 9px serif'; c.textAlign = 'center'; c.fillStyle = player.puzzlesSolved?.[p.id] ? '#4ade80' : '#c4b5fd';
+                c.fillText(p.order.slice(0, 2).join(' '), x, y - 10); c.fillText(p.order.slice(2).join(' '), x, y + 2);
+            } else if (p.kind === 'obelisk') {
+                const solved = player.puzzlesSolved?.[p.puzzle], lit = p.lit || solved;
+                castShadow(c, x, y + 12, 12);
+                c.fillStyle = '#292524';
+                c.beginPath(); c.moveTo(x - 9, y + 10); c.lineTo(x - 6, y - 44); c.lineTo(x, y - 52); c.lineTo(x + 6, y - 44); c.lineTo(x + 9, y + 10); c.closePath(); c.fill();
+                c.font = 'bold 16px serif'; c.textAlign = 'center';
+                c.fillStyle = lit ? '#e9d5ff' : '#57534e';
+                if (lit) glow(c, x, y - 24, 34, '196,181,253', 0.4 + Math.sin(now * 0.006) * 0.15);
+                c.fillText(p.glyph, x, y - 18);
+            }
+            if (p.found && p.name && p.kind !== 'obelisk' && Math.hypot(player.x - x, player.y - y) < 260) {
+                c.font = 'bold 10px ui-monospace, Menlo, monospace'; c.textAlign = 'center';
+                c.fillStyle = '#000'; c.fillText(p.name, x + 1, y - 57); c.fillStyle = '#e7e5e4'; c.fillText(p.name, x, y - 58);
+            }
+        }
+
         function resetCamp(c) {
             c.state = 'active';
             c.ax = c.x; c.ay = c.y; c.patrolIdx = 1;
@@ -6984,6 +7934,9 @@
         }
 
         function updateCamps(dt) {
+            adminTick();
+            updateRares(dt);
+            updateExploration(dt);
             for (const c of camps) {
                 if (c.state === 'active') {
                     const alive = c.members.filter(m => m.deadTimer <= 0);
@@ -7035,7 +7988,7 @@
             const add = (id, n = 1) => { items[id] = (items[id] || 0) + n; };
             const pool = CAMP_LOOT[c.tier].concat(c.def.extra || []);
             for (let i = 0; i < T.rolls; i++) add(pool[Math.floor(Math.random() * pool.length)], 1 + (Math.random() < 0.35 ? 1 : 0));
-            if (c.def.extra) add(c.def.extra[0], 1);
+            if (c.def.extra && c.def.extra.length) add(c.def.extra[0], 1);
             if (Math.random() < T.gearChance) {
                 // Экипировка: оружие — только для класса героя
                 const gear = T.gear.filter(id => { const d = ITEMS_DB[id]; return d && !(d.cls && d.cls !== player.heroType); });
@@ -7050,6 +8003,7 @@
             const c = ch.camp, T = CAMP_TIERS[c.tier];
             ch.opened = true; ch.openAnim = 0;
             c.state = 'opened'; c.resetTimer = CAMP_RESET_TIME;
+            if (ch.cacheId) player.cachesOpened[ch.cacheId] = true;
             const loot = rollChestLoot(c);
             player.gold += loot.gold;
             loot.items.forEach(it => {
@@ -7211,13 +8165,16 @@
             const z = player.checkpointZone;
             if (z === 'castle') return { x: (CASTLE.bonfire.x + 1.5) * TS, y: (CASTLE.bonfire.y + 0.5) * TS, name: 'костру у ворот Замка Дракулы' };
             if (z === 'hell') return { x: HELL.arrival.x * TS, y: HELL.arrival.y * TS, name: 'вратам Преисподней' };
+            const wp = player.lastWaypoint && pois.find(p => p.id === player.lastWaypoint);
+            if (wp) return { x: wp.wx, y: wp.wy + TS * 1.4, name: wp.name };
             const h = heroDef().home;
-            return { x: h.x * TS, y: h.y * TS, name: player.heroType === 'saber' ? 'Камелот' : 'Святилище' };
+            return { x: h.x * TS, y: h.y * TS, name: player.heroType === 'saber' ? 'Форт Этельгард' : 'Руины Голдрона' };
         }
 
         // kind: 'phys' — полная броня; 'magic' — броня работает лишь на 40%
         function damagePlayer(rawDmg, kind = 'phys') {
             if (player.invulnTime > 0 || zoneTransition) return;
+            if (adminMode && adminCheats.god) return; // режим администратора: бессмертие
             const arm = player.armor * (kind === 'magic' ? 0.4 : 1);
             let mult = armorMult(arm);
             if (player.ultCast) mult *= SABER_ULT.castDamageTaken;
@@ -8122,6 +9079,7 @@
                 activeOrbs: ['q', 'q', 'q'], invokedSpells: ['qqq', 'eee'],
                 spellCooldowns: {}, saberCooldowns: { q: 0, w: 0, e: 0, r: 0 },
                 invokeCd: 0, basicAttackCd: 0,
+                poiFound: {}, cachesOpened: {}, puzzlesSolved: {}, explored: '', lastWaypoint: null, stamina: 100, exhausted: false, shrineBuff: null,
                 archerStance: 'bow', ubwCharges: 0, bladeComboStep: 0, bladeSwing: 0, ubwSky: 0,
                 moveTargetX: null, moveTargetY: null, attackTarget: null, interactTargetGoal: null,
                 questStage: 0, questKills: 0, bossKilled: false, draculaKilled: false, hellLordKilled: false,
@@ -8158,7 +9116,9 @@
                     equipment: player.equipment, inventory: player.inventory,
                     questStage: player.questStage, questKills: player.questKills,
                     bossKilled: player.bossKilled, draculaKilled: !!player.draculaKilled, hellLordKilled: !!player.hellLordKilled,
-                    checkpointZone: player.checkpointZone || null, mapVer: 3,
+                    checkpointZone: player.checkpointZone || null, mapVer: 4,
+                    poiFound: player.poiFound || {}, cachesOpened: player.cachesOpened || {}, puzzlesSolved: player.puzzlesSolved || {},
+                    explored: exploredString(), lastWaypoint: player.lastWaypoint || null,
                     worldTimeHours
                 };
                 localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -8176,14 +9136,14 @@
                 const ver = data.mapVer || 1;
                 delete data.mapVer;
                 Object.assign(player, data);
-                if (ver < 3) {
-                    // Сохранение с прежней картой: переводим позицию героя в «The Realm of Oblivion»
-                    let t = { x: player.x / TS, y: player.y / TS };
-                    if (ver === 2) t = tieredToLegacy(t.x, t.y);
-                    const n = legacyToNew(t.x, t.y);
-                    player.x = n.x * TS; player.y = n.y * TS;
+                if (ver < 4) {
+                    // Сохранение с прежней картой: героя возвращаем домой на новой карте мира
+                    const h = heroDef().home;
+                    player.x = h.x * TS; player.y = h.y * TS;
                 }
                 if (!HERO_DEFS[player.heroType]) player.heroType = 'invoker';
+                if (ver < 4) { player.poiFound = {}; player.cachesOpened = {}; player.puzzlesSolved = {}; player.explored = ''; player.lastWaypoint = null; }
+                initPoiState();
                 if (typeof data.worldTimeHours === 'number') worldTimeHours = data.worldTimeHours;
                 delete player.worldTimeHours;
                 if (diff && DIFFICULTY_CONFIG[diff] && diff !== gameSettings.difficulty) { selectDifficulty(diff); populateWorldEntities(); }
@@ -8601,6 +9561,20 @@
         // ---------- объёмные детали (сортируются по глубине вместе с существами) ----------
         // ay — «линия опоры» внутри тайла: по ней объект встаёт перед героем или за ним
         const TALL_DECOR = {
+            tent: { ay: 40, draw(c, px, py, v) {
+                castShadow(c, px + 24, py + 40, 20);
+                const col = v < 0.5 ? ['#78350f', '#451a03'] : ['#57534e', '#292524'];
+                c.fillStyle = col[0]; c.beginPath(); c.moveTo(px + 2, py + 40); c.lineTo(px + 24, py + 4); c.lineTo(px + 46, py + 40); c.closePath(); c.fill();
+                c.fillStyle = col[1]; c.beginPath(); c.moveTo(px + 18, py + 40); c.lineTo(px + 24, py + 18); c.lineTo(px + 30, py + 40); c.closePath(); c.fill();
+                c.strokeStyle = '#a8a29e'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px + 24, py + 4); c.lineTo(px + 24, py - 4); c.stroke();
+            } },
+            banner_cross: { ay: 40, draw(c, px, py, v, now) {
+                const sw = Math.sin(now * 0.003 + px) * 2;
+                castShadow(c, px + 24, py + 41, 6);
+                c.fillStyle = '#57534e'; c.fillRect(px + 22, py - 20, 4, 60);
+                c.fillStyle = '#f5f5f4'; c.beginPath(); c.moveTo(px + 26, py - 18); c.lineTo(px + 46 + sw, py - 14); c.lineTo(px + 44 + sw, py + 12); c.lineTo(px + 26, py + 14); c.closePath(); c.fill();
+                c.fillStyle = '#b91c1c'; c.fillRect(px + 33 + sw * 0.5, py - 14, 4, 24); c.fillRect(px + 28, py - 5, 15 + sw * 0.6, 4);
+            } },
             campfire: { ay: 30, draw(c, px, py, v, now) {
                 c.fillStyle = '#292524'; c.beginPath(); c.ellipse(px + 24, py + 28, 13, 6, 0, 0, Math.PI * 2); c.fill();
                 c.strokeStyle = '#78350f'; c.lineWidth = 4; c.beginPath(); c.moveTo(px + 14, py + 30); c.lineTo(px + 34, py + 25); c.moveTo(px + 15, py + 24); c.lineTo(px + 33, py + 31); c.stroke();
@@ -8781,7 +9755,8 @@
 
         // ---------- существа ----------
         // Мини-боссы рисуются на основе существующих тел, крупнее и с аурой своего цвета
-        const MINIBOSS_BODIES = { ash_warden: ['gargoyle', 1.45], crimson_warden: ['blood_knight', 1.35], infernal_gatekeeper: ['pit_demon', 1.4],
+        const MINIBOSS_BODIES = { crimson_knight: ['blood_knight', 1.05, 'saturate(1.5) brightness(1.15)'], crimson_crossbow: ['blood_knight', 1.0, 'brightness(0.85) hue-rotate(-12deg)'], vampire_thrall: ['ghoul', 1.0, 'hue-rotate(-70deg) saturate(1.5)'],
+            ash_warden: ['gargoyle', 1.45], crimson_warden: ['blood_knight', 1.35], infernal_gatekeeper: ['pit_demon', 1.4],
             werewolf: ['hellhound', 1.15, 'grayscale(0.9) brightness(0.8) contrast(1.2)'], werewolf_alpha: ['hellhound', 1.5, 'grayscale(0.75) brightness(1.05) contrast(1.25)'] };
         function drawEnemyBody25(c, en, now, bob) {
             const tp = en.type;
@@ -8920,9 +9895,28 @@
         }
 
         const LEGACY_ENEMY_TYPES = new Set(['slime', 'goblin', 'skeleton', 'dark_mage', 'boss']);
+        // Новые враги без своей графики рисуются телом существующего с цветовым фильтром
+        const BODY_ALIAS = {
+            bandit: ['goblin', 'sepia(0.7) hue-rotate(-25deg) saturate(1.2)'], bandit_archer: ['goblin', 'grayscale(0.3) hue-rotate(70deg)'],
+            bone_walker: ['skeleton', 'sepia(0.6) brightness(0.85)'], wraith: ['dark_mage', 'hue-rotate(170deg) brightness(1.25)'],
+            crimson_knight: ['blood_knight', 'saturate(1.5) brightness(1.15)'], crimson_crossbow: ['blood_knight', 'brightness(0.85) hue-rotate(-12deg)'],
+            vampire_thrall: ['ghoul', 'hue-rotate(-70deg) saturate(1.5)']
+        };
         function drawEnemy25(c, en, now) {
             const lift = en.tornadoLiftTimer > 0 ? Math.sin(now * 0.02) * 8 + 28 : 0;
-            if (LEGACY_ENEMY_TYPES.has(en.type)) {
+            if (en.elite || en.rare) {
+                // Элита и редкие враги: золотое / пурпурное кольцо под ногами
+                c.save(); c.strokeStyle = en.rare ? '#d8b4fe' : (en.elite === 'leader' ? '#f59e0b' : '#fde68a'); c.lineWidth = 2.2;
+                c.globalAlpha = 0.6 + Math.sin(now * 0.006 + en.uid * 9) * 0.25;
+                c.beginPath(); c.ellipse(en.x, en.y + en.radius - 2, en.radius + 8, (en.radius + 8) * 0.42, 0, 0, Math.PI * 2); c.stroke(); c.restore();
+            }
+            const al = BODY_ALIAS[en.type];
+            if (al && LEGACY_ENEMY_TYPES.has(al[0])) {
+                castShadow(c, en.x, en.y + en.radius - 2, en.radius);
+                c.save(); c.filter = al[1];
+                drawRealisticEnemy(c, Object.assign({}, en, { type: al[0] }), now);
+                c.filter = 'none'; c.restore();
+            } else if (LEGACY_ENEMY_TYPES.has(en.type)) {
                 castShadow(c, en.x, en.y + en.radius - 2, en.radius);
                 drawRealisticEnemy(c, en, now);
             } else {
@@ -8932,7 +9926,7 @@
                 c.save();
                 c.translate(en.x, en.y - lift - (flying ? 12 : 0));
                 if (en.type === 'dracula' && en.phase === 3) c.scale(1.15, 1.15);
-                if (player.x < en.x && (en.type === 'hellhound' || en.type === 'werewolf' || en.type === 'werewolf_alpha' || en.type === 'blood_knight' || en.type === 'ghoul' || en.type === 'pit_demon')) c.scale(-1, 1);
+                if (player.x < en.x && (en.type === 'hellhound' || en.type === 'werewolf' || en.type === 'werewolf_alpha' || en.type === 'crimson_knight' || en.type === 'crimson_crossbow' || en.type === 'vampire_thrall' || en.type === 'blood_knight' || en.type === 'ghoul' || en.type === 'pit_demon')) c.scale(-1, 1);
                 if (en.invuln > 0 && !hidden) c.globalAlpha = 0.6;
                 const bob = Math.sin(now * 0.008 + en.uid * 10) * 2;
                 drawEnemyBody25(c, en, now, bob);
@@ -8949,11 +9943,11 @@
                 }
             }
             const top = en.y - en.radius - (en.isBoss ? 52 : 30) - lift;
-            if (en.isBoss || (en.tpl.xp >= 170 && Math.hypot(player.x - en.x, player.y - en.y) < 430)) {
+            if (en.isBoss || en.elite || en.rare || (en.tpl.xp >= 170 && Math.hypot(player.x - en.x, player.y - en.y) < 430)) {
                 // Подписи в стиле код-арта (как имена персонажей на референсе)
                 c.font = 'bold 10px ui-monospace, Menlo, Consolas, monospace'; c.textAlign = 'center';
                 c.fillStyle = '#000'; c.fillText(en.name, en.x + 1, top + 1);
-                c.fillStyle = en.isBoss ? '#fca5a5' : '#e2e8f0'; c.fillText(en.name, en.x, top);
+                c.fillStyle = en.isBoss ? '#fca5a5' : (en.rare ? '#d8b4fe' : (en.elite ? '#fde68a' : '#e2e8f0')); c.fillText(en.name, en.x, top);
             }
             if (en.stunTimer > 0) {
                 for (let i = 0; i < 3; i++) {
@@ -9258,6 +10252,7 @@
             const vis = o => o.x > x0 && o.x < x1 && o.y > y0 && o.y < y1 && !realmHidden(Math.floor(o.x / TS), Math.floor(o.y / TS));
 
             groundLoot.forEach(g => { if (!(g.respawnTimer > 0) && vis(g)) add(g.y, () => drawLoot25(c, g, now)); });
+            pois.forEach(p => { if (p.wx !== undefined && vis({ x: p.wx, y: p.wy })) add(p.wy + 10, () => drawPoi25(c, p, now)); });
             npcs.forEach(n => { if (vis(n)) add(n.y, () => { castShadow(c, n.x, n.y + 16, 14); drawRealisticNPC(c, n, now); }); });
             enemies.forEach(en => { if (en.deadTimer <= 0 && vis(en)) add(en.y, () => drawEnemy25(c, en, now)); });
             forgeSpirits.forEach(sp => add(sp.y, () => {
@@ -9671,12 +10666,22 @@
         const MINIMAP_COLORS = { 0: '#2e6f40', 1: '#a8a29e', 2: '#0284c7', 3: '#0f172a', 4: '#14532d', 5: '#312e81', 6: '#0f172a', 7: '#ef4444', 8: '#a8a29e', 9: '#0ea5e9',
             10: '#e7e5e4', 11: '#2563eb', 12: '#f59e0b', 13: '#3b3355', 14: '#12101a', 15: '#7f1d1d', 16: '#71717a', 17: '#431407', 18: '#1f4d36', 19: '#64748b', 20: '#57534e', 21: '#1c0a05', 22: '#57534e' };
         const WORLD_LABELS = [
-            ['Форт Этельгард', 28, 55, '#fcd34d'], ['Земли Этельгарда', 30, 100, '#d6d3d1'], ['Дикий Лес', 112, 47, '#86efac'],
-            ['Клык-Холд', 86, 11, '#d6d3d1'], ['Земли Ужаса', 34, 7, '#a8a29e'], ['Гора Гримволт', 148, 5, '#cbd5e1'],
-            ['Змеиный Берег', 176, 92, '#7dd3fc'], ['Руины Голдрона', 167, 42, '#fde68a'], ['Сангвиния', 105, 80, '#fca5a5'],
-            ['Багровые Топи', 105, 59, '#fda4af'], ['Теневые Земли', 155, 128, '#c4b5fd'], ['Забытые Холмы', 26, 132, '#a8a29e'],
-            ['Цитадель Бездны', 88, 132, '#fdba74']
+            ['Форт Этельгард', 72, 24, '#fcd34d'], ['Земли Этельгарда', 60, 78, '#d6d3d1'], ['Гора Гримволт', 180, 26, '#cbd5e1'], ['Земли Ужаса', 185, 80, '#a8a29e'],
+            ['Сангвиния', 289, 24, '#fca5a5'], ['Высоты Сангвинии', 300, 80, '#fda4af'], ['Дикий Лес', 150, 150, '#86efac'], ['Клык-Холд', 178, 92, '#d6d3d1'],
+            ['Костяной Лес', 250, 205, '#e7e5e4'], ['Багровые Топи', 42, 190, '#fda4af'], ['Змеиный Берег', 318, 190, '#7dd3fc'], ['Руины Голдрона', 314, 124, '#fde68a'],
+            ['Забытые Холмы', 70, 280, '#a8a29e'], ['Теневые Земли', 290, 285, '#c4b5fd'], ['Цитадель Бездны', 186, 248, '#fdba74']
         ];
+        let worldMapGeom = null;
+        function onWorldMapClick(e) {
+            if (!worldMapGeom) return;
+            const cv = e.currentTarget, r = cv.getBoundingClientRect();
+            const mx = (e.clientX - r.left) * cv.width / r.width, my = (e.clientY - r.top) * cv.height / r.height;
+            const tx = (mx - worldMapGeom.ox) / worldMapGeom.sc, ty = (my - worldMapGeom.oy) / worldMapGeom.sc;
+            let best = null, bd = 6;
+            pois.forEach(p => { if (p.kind === 'waystatue' && p.found) { const d = Math.hypot(p.x - tx, p.y - ty); if (d < bd) { bd = d; best = p; } } });
+            if (best) fastTravelTo(best);
+            else if (adminMode && ty >= 0 && ty < WORLD.overH) { closeAllModals(); adminTeleportTo((tx + 0.5) * TS, (ty + 0.5) * TS); }
+        }
         function renderWorldMap() {
             const cv = document.getElementById('worldMapCanvas'), g = cv.getContext('2d');
             if (!R25.minimap) renderMinimap();
@@ -9688,6 +10693,12 @@
             // Пергаментная тонировка
             g.fillStyle = 'rgba(40,24,8,0.28)'; g.fillRect(ox, oy, MAP_W * sc, rows * sc);
             const X = t => ox + t * sc, Y = t => oy + t * sc;
+            worldMapGeom = { ox, oy, sc, W, H };
+            // Туман: неизведанные земли скрыты
+            const fw = Math.ceil(MAP_W / FOG_CHUNK), fh = Math.ceil(WORLD.overH / FOG_CHUNK);
+            const seen = (tx, ty) => exploredMask && exploredMask[Math.floor(ty / FOG_CHUNK) * fw + Math.floor(tx / FOG_CHUNK)];
+            g.fillStyle = 'rgba(8,6,4,0.9)';
+            for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) if (!exploredMask || !exploredMask[y * fw + x]) g.fillRect(X(x * FOG_CHUNK) - 0.5, Y(y * FOG_CHUNK) - 0.5, FOG_CHUNK * sc + 1, FOG_CHUNK * sc + 1);
             g.textAlign = 'center'; g.textBaseline = 'middle';
             WORLD_LABELS.forEach(([n, x, y, col]) => {
                 g.font = 'bold 15px Cinzel, serif';
@@ -9695,15 +10706,29 @@
                 g.fillStyle = col; g.fillText(n, X(x), Y(y));
             });
             g.font = '15px sans-serif';
+            pois.forEach(p => {
+                if (!p.found || p.kind === 'obelisk') return;
+                const ic = { waystatue: '🗿', shrine: '⛩️', tablet: player.puzzlesSolved[p.id] ? '✨' : '🔮', cache: player.cachesOpened[p.id] ? '·' : '💰' }[p.kind];
+                g.font = p.kind === 'waystatue' ? '20px sans-serif' : '15px sans-serif';
+                g.fillText(ic, X(p.x), Y(p.y));
+            });
+            g.font = '15px sans-serif';
             camps.forEach(c => {
                 if (c.y / TS >= WORLD.hellRow) return; // лагеря Ада на общей карте не показываются
+                if (!seen(c.ax / TS, c.ay / TS)) return;
                 const icon = c.state === 'active' ? '⚔' : (c.state === 'cleared' ? '🎁' : '✓');
                 g.fillStyle = c.state === 'active' ? '#f87171' : (c.state === 'cleared' ? '#fcd34d' : '#78716c');
                 g.fillText(icon, X(c.ax / TS), Y(c.ay / TS));
             });
-            enemies.forEach(en => { if ((en.isBoss) && en.deadTimer <= 0 && en.y / TS < WORLD.hellRow) { g.fillText(en.tpl.miniBoss ? '☠' : '💀', X(en.x / TS), Y(en.y / TS)); } });
-            npcs.forEach(n => { g.fillStyle = '#38bdf8'; g.beginPath(); g.arc(X(n.x / TS), Y(n.y / TS), 3, 0, Math.PI * 2); g.fill(); });
+            enemies.forEach(en => { if ((en.isBoss) && en.deadTimer <= 0 && en.y / TS < WORLD.hellRow && seen(en.x / TS, en.y / TS)) { g.fillText(en.tpl.miniBoss ? '☠' : '💀', X(en.x / TS), Y(en.y / TS)); } });
+            npcs.forEach(n => { if (!seen(n.x / TS, n.y / TS)) return; g.fillStyle = '#38bdf8'; g.beginPath(); g.arc(X(n.x / TS), Y(n.y / TS), 3, 0, Math.PI * 2); g.fill(); });
             g.font = 'bold 22px Cinzel, serif'; g.fillStyle = 'rgba(253,230,138,0.85)'; g.fillText('THE REALM OF OBLIVION', W / 2, oy + 22);
+            const found = pois.filter(p => p.kind !== 'obelisk' && p.found).length, total = pois.filter(p => p.kind !== 'obelisk').length;
+            const cleared = camps.filter(c => c.ay / TS < WORLD.hellRow && c.state !== 'active').length, ctotal = camps.filter(c => c.ay / TS < WORLD.hellRow).length;
+            let ex = 0; if (exploredMask) for (let i = 0; i < fw * fh; i++) ex += exploredMask[i];
+            g.font = '13px sans-serif'; g.fillStyle = '#e7e5e4'; g.textAlign = 'left';
+            g.fillText(`Исследовано: ${Math.round(ex / (fw * fh) * 100)}%   •   Мест найдено: ${found}/${total}   •   Лагерей зачищено: ${cleared}/${ctotal}   •   🗿 клик по статуе — перемещение`, ox + 8, oy + rows * sc - 12);
+            g.textAlign = 'center';
             if (playerZone() === 'hell') {
                 g.fillStyle = 'rgba(0,0,0,0.78)'; g.fillRect(0, 0, W, H);
                 g.font = 'bold 26px Cinzel, serif'; g.fillStyle = '#f87171'; g.fillText('Скрытое измерение', W / 2, H / 2 - 16);
@@ -9730,10 +10755,12 @@
                     })
                 };
             }
+            // Мини-карта — окрестности героя (80x80 тайлов); весь мир — на карте M
             const inHell = playerZone() === 'hell';
             const row0 = inHell ? WORLD_TIERS.hellRow : 0, rows = inHell ? MAP_H - WORLD_TIERS.hellRow : WORLD_TIERS.hellRow;
-            const W = minimapCanvas.width, H = minimapCanvas.height;
-            const scale = Math.min(W / MAP_W, H / rows), oy = (H - rows * scale) / 2, ox = (W - MAP_W * scale) / 2;
+            const W = minimapCanvas.width, H = minimapCanvas.height, VIEW = 80;
+            const scale = W / VIEW, vx = player.x / TS - VIEW / 2, vy = player.y / TS - row0 - VIEW / 2;
+            const ox = -vx * scale, oy = -vy * scale;
             miniCtx.fillStyle = '#090d16';
             miniCtx.fillRect(0, 0, W, H);
             miniCtx.imageSmoothingEnabled = false;
@@ -9772,10 +10799,10 @@
             updateInvokerBarUI();
             updateHeroPortraitHUD();
 
-            const hasSave = !!localStorage.getItem(SAVE_KEY);
-            document.getElementById('btnContinueGame').classList.toggle('hidden', !hasSave);
+            try { if (localStorage.getItem('eldoria_admin') === '1') toggleAdminMode(); } catch (e) {}
+            setGameState('menu');
 
-            setInterval(() => saveGame(false), 20000);
+            setInterval(() => { if (gameStarted) saveGame(false); }, 20000);
 
             let lastTime = performance.now();
             function gameLoop(now) {
@@ -9792,7 +10819,7 @@
                 }
 
                 updateGame(dt);
-                renderGame();
+                if (gameState === 'playing') renderGame(); // под непрозрачным меню мир не рисуем
                 requestAnimationFrame(gameLoop);
             }
             requestAnimationFrame(gameLoop);
