@@ -309,11 +309,11 @@
                                     </div>
                                 </div>
                                 <p class="text-xs text-stone-300 leading-relaxed mb-3">
-                                    Король Рыцарей из <strong class="text-sky-300">Fate / Warcraft 3</strong>. Только меч: <strong class="text-cyan-200">Удар Ветра (Q)</strong>, <strong class="text-blue-300">Рывок Праны (W)</strong> и <strong class="text-amber-300">Авалон (E)</strong>. Дальних атак нет.
+                                    Король Рыцарей из <strong class="text-sky-300">Fate / Warcraft 3</strong>. Мечница: <strong class="text-cyan-200">Разлом и Волна (Q)</strong>, <strong class="text-blue-300">Рывок Праны с ускорением (W)</strong> и <strong class="text-amber-300">Колоссальный Клинок (E)</strong>.
                                 </p>
                             </div>
                             <div class="bg-sky-950/40 border border-sky-700/50 rounded-xl p-2 text-[11px] text-sky-200">
-                                🗡️ <strong>Ультимейт (R) — ЭКСКАЛИБУР:</strong> 5.5 секунд сбора энергии с поднятым мечом (3.4с на макс. уровне) — и колоссальный удар перед собой!
+                                ☀️ <strong>Ультимейт (R) — ЛУЧ ЭКСКАЛИБУРА:</strong> сбор света в клинке и направленный луч энергии вперёд. На земле остаются светящиеся осколки и разломы!
                             </div>
                         </div>
 
@@ -325,17 +325,17 @@
                                         <canvas id="menuPreviewArcher" width="72" height="72"></canvas>
                                     </div>
                                     <div>
-                                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-green-950 text-lime-300 border border-lime-700">Дальний бой • Стрелок</span>
-                                        <h3 class="font-rpg text-lg font-extrabold text-lime-300 mt-1">Арчер • Элиара</h3>
+                                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-green-950 text-lime-300 border border-lime-700">Лук + Клинки</span>
+                                        <h3 class="font-rpg text-lg font-extrabold text-rose-300 mt-1">Арчер • Страж Клинков</h3>
                                         <p class="text-[11px] text-emerald-400 font-semibold">📍 Спавн: Руины Святилища</p>
                                     </div>
                                 </div>
                                 <p class="text-xs text-stone-300 leading-relaxed mb-3">
-                                    Лучница в духе кастомок <strong class="text-lime-300">Warcraft 3</strong>: баллистика стрел, криты, бонус за дистанцию. <strong class="text-cyan-200">Замедляющая стрела (Q)</strong>, <strong class="text-amber-200">Залп (W)</strong>, <strong class="text-lime-300">Отскок (E)</strong>.
+                                    Лучница в духе кастомок <strong class="text-lime-300">Warcraft 3</strong>: баллистика стрел, криты, бонус за дистанцию. <strong class="text-cyan-200">Замедляющая стрела (Q)</strong>, <strong class="text-amber-200">Залп (W)</strong>, <strong class="text-lime-300">Отскок (E)</strong>. <strong class="text-rose-300">D</strong> — смена стойки: лук ↔ парные клинки Канто и Бакуя.
                                 </p>
                             </div>
                             <div class="bg-green-950/40 border border-lime-700/50 rounded-xl p-2 text-[11px] text-lime-200">
-                                🌠 <strong>Ультимейт (R) — СТРЕЛА ЗВЁЗД:</strong> чем дальше пролетела стрела, тем сильнее урон и дольше оглушение!
+                                ⚔️ <strong>Ультимейт (R) — БЕСКОНЕЧНЫЙ АРСЕНАЛ:</strong> дождь клинков по огромной области. Подбирайте упавшие мечи и метайте их в цель (F)!
                             </div>
                         </div>
                     </div>
@@ -601,7 +601,7 @@
 
         <div id="archerTopPill" class="hidden rpg-panel px-4 py-1.5 rounded-full items-center gap-3 border border-lime-700 shadow-2xl">
             <span class="text-[10px] font-rpg font-bold uppercase tracking-wider text-lime-300 relative z-20">🏹 Арчер:</span>
-            <span class="text-[11px] font-rpg font-bold text-amber-300 relative z-20">ЛКМ / Пробел — выстрел • ПКМ по врагу — автоатака • издалека урон выше</span>
+            <span class="text-[11px] font-rpg font-bold text-amber-300 relative z-20">ЛКМ / Пробел — атака • ПКМ по врагу — цель • D — лук / клинки • F — метнуть клинок</span>
         </div>
 
         <!-- ПАНЕЛЬ 1: АЛТАРЬ ИНВОКЕРА (Q, W, E | D, F | R + Зелья) -->
@@ -718,20 +718,20 @@
             <!-- Q: Удар Ветра (Strike Air) -->
             <div class="flex flex-col items-center relative z-20">
                 <button id="btnSaberLvlQ" onclick="levelUpOrb('q')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
-                <button onclick="castSaberSkill('q')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="Q — Удар Ветра (Strike Air): БЛИЖНИЙ БОЙ. Широкий взмах Незримым Мечом по конусу перед собой — урон, отбрасывание и оглушение.">
+                <button onclick="castSaberSkill('q')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="Q — Разлом и Волна: меч вырубает трещину в земле, из неё вперёд вырывается энергетическая волна.">
                     <span class="hotkey-badge">Q</span>
-                    <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🌪️</span>
+                    <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🌋</span>
                     <span class="text-[9px] font-rpg font-bold text-cyan-200 mt-0.5">25 MP</span>
                     <div id="cdSaberQ" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
                 </button>
-                <span class="text-[9px] font-rpg text-sky-200 mt-1">Strike Air</span>
+                <span class="text-[9px] font-rpg text-sky-200 mt-1">Разлом</span>
                 <div id="pipsSaberQ" class="level-pips"></div>
             </div>
 
             <!-- W: Рывок Праны (Mana Burst Dash) -->
             <div class="flex flex-col items-center relative z-20">
                 <button id="btnSaberLvlW" onclick="levelUpOrb('w')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
-                <button onclick="castSaberSkill('w')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="W — Рывок Праны (Mana Burst): рывок сквозь врагов к курсору с уроном и короткой неуязвимостью.">
+                <button onclick="castSaberSkill('w')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="W — Рывок Праны: блинк сквозь врагов к курсору с уроном, затем кратковременное ускорение.">
                     <span class="hotkey-badge">W</span>
                     <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">⚡</span>
                     <span class="text-[9px] font-rpg font-bold text-cyan-200 mt-0.5">30 MP</span>
@@ -744,20 +744,20 @@
             <!-- E: Благословение Авалона (Avalon & King's Charisma) -->
             <div class="flex flex-col items-center relative z-20">
                 <button id="btnSaberLvlE" onclick="levelUpOrb('e')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
-                <button onclick="castSaberSkill('e')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="E — Авалон: исцеление, броня и усиленные удары меча с широкой дугой.">
+                <button onclick="castSaberSkill('e')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="E — Колоссальный Клинок: меч увеличивается в разы, атаки бьют по огромной дуге.">
                     <span class="hotkey-badge">E</span>
-                    <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🛡️</span>
+                    <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🗡️</span>
                     <span class="text-[9px] font-rpg font-bold text-cyan-200 mt-0.5">40 MP</span>
                     <div id="cdSaberE" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
                 </button>
-                <span class="text-[9px] font-rpg text-sky-200 mt-1">Авалон</span>
+                <span class="text-[9px] font-rpg text-sky-200 mt-1">Колосс</span>
                 <div id="pipsSaberE" class="level-pips"></div>
             </div>
 
             <!-- R: ЭКСКАЛИБУР! (Excalibur Ultimate) -->
             <div class="flex flex-col items-center relative z-20">
                 <button id="btnSaberLvlR" onclick="levelUpOrb('r')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
-                <button onclick="castSaberSkill('r')" class="relative w-14 h-14 sm:w-16 sm:h-16 rpg-btn-gold rounded-xl flex flex-col items-center justify-center group border-2 border-yellow-300" title="R — ЭКСКАЛИБУР: долгий каст (5.5с → 3.4с) с поднятым мечом, затем колоссальный удар ближнего боя перед собой. S или ПКМ — отмена.">
+                <button onclick="castSaberSkill('r')" class="relative w-14 h-14 sm:w-16 sm:h-16 rpg-btn-gold rounded-xl flex flex-col items-center justify-center group border-2 border-yellow-300" title="R — ЛУЧ ЭКСКАЛИБУРА: каст (3.6с → 2.25с), затем направленный луч энергии вперёд. Остаются светящиеся осколки. S — отмена.">
                     <span class="hotkey-badge">R</span>
                     <span class="text-2xl sm:text-3xl group-hover:scale-125 transition-transform drop-shadow">🗡️</span>
                     <span class="text-[9px] font-rpg font-extrabold text-amber-100 mt-0.5">100 MP</span>
@@ -969,7 +969,7 @@
                 <p><strong class="text-rose-400">ЛКМ / Пробел:</strong> атака в сторону курсора. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-rose-500 text-rose-300">A</kbd> — Attack-Move, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-amber-500 text-amber-300">S</kbd> — стоп (и отмена каста Экскалибура).</p>
                 <p><strong class="text-amber-300">Инвокер:</strong> автоатак нет. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-cyan-500 text-cyan-300">Q</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-fuchsia-500 text-fuchsia-300">W</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-orange-500 text-orange-300">E</kbd> — сферы, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-amber-500 text-amber-300">R</kbd> — Invoke (27 заклинаний), <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">D</kbd>/<kbd class="bg-slate-800 px-1.5 py-0.5 rounded">F</kbd> — каст в точку курсора (ЛКМ тоже применяет слот D). Над магом и под ним появляется руна заклинания.</p>
                 <p><strong class="text-sky-300">Сейбер:</strong> только ближний бой. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">Q</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">W</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">E</kbd> — навыки, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">R</kbd> — Экскалибур: 5.5с каста (3.4с на 4 ур.), двигаться нельзя.</p>
-                <p><strong class="text-lime-300">Арчер:</strong> стрелы летят по дуге и падают в точку прицеливания; издалека урон выше (до +30%), в упор — ниже. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">Q</kbd> замедление, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">W</kbd> залп, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">E</kbd> отскок, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">R</kbd> Стрела Звёзд.</p>
+                <p><strong class="text-lime-300">Арчер:</strong> стрелы летят по дуге и падают в точку прицеливания; издалека урон выше (до +30%), в упор — ниже. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">Q</kbd> замедление, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">W</kbd> залп, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">E</kbd> отскок, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">R</kbd> Бесконечный Арсенал (дождь клинков; наступите на меч, чтобы подобрать), <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">D</kbd> лук ↔ парные клинки, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">F</kbd> метнуть клинок в цель.</p>
                 <p><strong class="text-rose-300">Маршрут:</strong> южные ворота Камелота → тракт на восток → Замок Дракулы → тронный зал → портал → Ад.</p>
                 <hr class="border-slate-700 my-2">
                 <div class="flex justify-between items-center pt-1">
@@ -989,7 +989,7 @@
         // ============================================================================
         const TILE_SIZE = 48;
         const MAP_W = 128; // Расширенный мир с Королевством Камелот на северо-востоке
-        const MAP_H = 64;
+        let MAP_H = 64; // после генерации — 128: наземный мир (ряды 0..91) + скрытый ярус Ада (ряды 92..127)
 
         // Настройки графики, оптимизации и уровня сложности
         const gameSettings = {
@@ -1761,6 +1761,14 @@
             vampire_fang: { id: 'vampire_fang', name: 'Клык Вампира', icon: '🦷', type: 'material', rarity: 'rare', price: 60, desc: 'Трофей с нежити Замка Дракулы.' },
             dracula_heart: { id: 'dracula_heart', name: 'Сердце Дракулы', icon: '🫀', type: 'material', rarity: 'legendary', price: 600, desc: 'Небьющееся сердце Графа. Основа легендарного оружия.' },
             hell_ember: { id: 'hell_ember', name: 'Уголь Преисподней', icon: '🔥', type: 'material', rarity: 'epic', price: 120, desc: 'Негаснущий уголь из лавовых рек Ада.' },
+            bone_dust: { id: 'bone_dust', name: 'Костяная Пыль', icon: '🦴', type: 'material', rarity: 'common', price: 16, desc: 'Прах нежити. Скелеты и упыри Бездны и Замка.' },
+            shadow_silk: { id: 'shadow_silk', name: 'Теневой Шёлк', icon: '🕸️', type: 'material', rarity: 'rare', price: 45, desc: 'Нить тьмы: нетопыри и адепты Пустоты.' },
+            demon_horn: { id: 'demon_horn', name: 'Рог Демона', icon: '🐏', type: 'material', rarity: 'epic', price: 110, desc: 'Трофей гончих и палачей Ада.' },
+            star_steel: { id: 'star_steel', name: 'Звёздная Сталь', icon: '⚙️', type: 'material', rarity: 'rare', price: 80, desc: 'Сплав метеоритной руды и кристалла Бездны. Основа эпической ковки.' },
+            ash_sigil: { id: 'ash_sigil', name: 'Печать Привратника Пепла', icon: '🔶', type: 'material', rarity: 'epic', price: 250, desc: 'Трофей мини-босса Цитадели Бездны.' },
+            blood_sigil: { id: 'blood_sigil', name: 'Печать Кровавого Привратника', icon: '🩸', type: 'material', rarity: 'epic', price: 400, desc: 'Трофей мини-босса Замка Дракулы.' },
+            inferno_sigil: { id: 'inferno_sigil', name: 'Печать Стража Врат', icon: '♨️', type: 'material', rarity: 'legendary', price: 700, desc: 'Трофей мини-босса Преисподней.' },
+            grand_elixir: { id: 'grand_elixir', name: 'Великий Эликсир', icon: '🍷', type: 'consumable', rarity: 'rare', price: 120, healHp: 320, healMp: 260, desc: 'Восстанавливает 320 HP и 260 MP.' },
             hell_core: { id: 'hell_core', name: 'Ядро Преисподней', icon: '☄️', type: 'material', rarity: 'legendary', price: 900, desc: 'Сердцевина силы Владыки Преисподней.' },
 
             // --- Оружие Инвокера: только сила заклинаний, мана и перезарядка ---
@@ -1772,6 +1780,9 @@
             // --- Мечи Сейбер ---
             knight_sword: { id: 'knight_sword', cls: 'saber', name: 'Рыцарский Меч', icon: '🗡️', type: 'weapon', rarity: 'common', price: 60, handDmg: 10, desc: 'Сейбер: +10 к урону меча.' },
             caliburn_sword: { id: 'caliburn_sword', cls: 'saber', name: 'Калибурн (Меч Камня)', icon: '⚔️', type: 'weapon', rarity: 'rare', price: 170, handDmg: 24, maxHp: 50, desc: 'Сейбер: +24 к урону меча, +50 HP.' },
+            ashforged_blade: { id: 'ashforged_blade', cls: 'saber', name: 'Клинок Пепельной Ковки', icon: '⚔️', type: 'weapon', rarity: 'epic', price: 400, handDmg: 40, armor: 3, maxHp: 90, desc: 'Сейбер: +40 к урону меча, +3 брони, +90 HP.' },
+            clarent_blood: { id: 'clarent_blood', cls: 'saber', name: 'Кларент Багровой Луны', icon: '🗡️', type: 'weapon', rarity: 'legendary', price: 820, handDmg: 72, crit: 10, maxHp: 120, desc: 'Сейбер: +72 урона меча, +10% крита, +120 HP. Трофей Дракулы.' },
+            excalibur_morgan: { id: 'excalibur_morgan', cls: 'saber', name: 'Тёмный Экскалибур', icon: '🖤', type: 'weapon', rarity: 'legendary', price: 1300, handDmg: 100, spellAmp: 40, cdr: 10, maxHp: 140, desc: 'Сейбер: +100 урона меча, +40% мощи навыков, -10% КД, +140 HP. Трофей Владыки Ада.' },
             excalibur_true: { id: 'excalibur_true', cls: 'saber', name: 'Истинный Экскалибур', icon: '🗡️', type: 'weapon', rarity: 'legendary', price: 720, handDmg: 60, spellAmp: 30, maxHp: 160, desc: 'Сейбер: +60 к урону меча, +30% мощи навыков, +160 HP.' },
 
             // --- Луки Арчер ---
@@ -1779,6 +1790,24 @@
             elven_longbow: { id: 'elven_longbow', cls: 'archer', name: 'Эльфийский Длинный Лук', icon: '🏹', type: 'weapon', rarity: 'rare', price: 170, handDmg: 20, crit: 6, range: 30, desc: 'Арчер: +20 урона, +6% крита, +30 дальности.' },
             storm_bow: { id: 'storm_bow', cls: 'archer', name: 'Лук Бури', icon: '🏹', type: 'weapon', rarity: 'epic', price: 380, handDmg: 34, crit: 10, range: 50, desc: 'Арчер: +34 урона, +10% крита, +50 дальности.' },
             nightfall_bow: { id: 'nightfall_bow', cls: 'archer', name: 'Лук Сумеречной Охоты', icon: '🌙', type: 'weapon', rarity: 'legendary', price: 760, handDmg: 58, crit: 15, range: 70, maxHp: 80, desc: 'Арчер: +58 урона, +15% крита, +70 дальности, +80 HP.' },
+
+            ash_recurve: { id: 'ash_recurve', cls: 'archer', name: 'Пепельный Рекурсивный Лук', icon: '🏹', type: 'weapon', rarity: 'epic', price: 400, handDmg: 30, crit: 8, range: 40, desc: 'Арчер: +30 урона, +8% крита, +40 дальности.' },
+            crimson_moon_bow: { id: 'crimson_moon_bow', cls: 'archer', name: 'Лук Багровой Луны', icon: '🌕', type: 'weapon', rarity: 'legendary', price: 820, handDmg: 64, crit: 14, range: 60, desc: 'Арчер: +64 урона, +14% крита, +60 дальности. Трофей Дракулы.' },
+            hellstring_bow: { id: 'hellstring_bow', cls: 'archer', name: 'Лук Адской Тетивы', icon: '🔥', type: 'weapon', rarity: 'legendary', price: 1300, handDmg: 92, crit: 18, range: 90, maxHp: 100, desc: 'Арчер: +92 урона, +18% крита, +90 дальности, +100 HP. Трофей Владыки Ада.' },
+            ash_scepter: { id: 'ash_scepter', cls: 'invoker', name: 'Скипетр Пепельного Стража', icon: '🪄', type: 'weapon', rarity: 'epic', price: 400, spellAmp: 28, cdr: 10, maxMp: 100, desc: 'Инвокер: +28% мощи магии, -10% КД, +100 маны.' },
+            blood_grimoire: { id: 'blood_grimoire', cls: 'invoker', name: 'Кровавый Гримуар', icon: '📕', type: 'weapon', rarity: 'legendary', price: 820, spellAmp: 50, cdr: 18, maxMp: 160, maxHp: 60, desc: 'Инвокер: +50% мощи магии, -18% КД, +160 маны, +60 HP. Трофей Дракулы.' },
+            staff_of_ruin: { id: 'staff_of_ruin', cls: 'invoker', name: 'Посох Руин Преисподней', icon: '🔱', type: 'weapon', rarity: 'legendary', price: 1300, spellAmp: 75, cdr: 25, maxMp: 220, desc: 'Инвокер: +75% мощи магии, -25% КД, +220 маны. Трофей Владыки Ада.' },
+
+            bone_mail: { id: 'bone_mail', name: 'Костяная Кираса', icon: '🦴', type: 'armor', rarity: 'rare', price: 180, armor: 6, maxHp: 70, desc: '+6 брони, +70 здоровья.' },
+            shadow_cloak: { id: 'shadow_cloak', name: 'Плащ Теневого Шёлка', icon: '🥷', type: 'armor', rarity: 'rare', price: 190, armor: 4, maxHp: 50, maxMp: 60, mpRegen: 2.0, desc: '+4 брони, +50 HP, +60 MP, +2.0 реген маны.' },
+            warden_plate: { id: 'warden_plate', name: 'Латы Привратника', icon: '🛡️', type: 'armor', rarity: 'epic', price: 420, armor: 12, maxHp: 160, desc: '+12 брони, +160 здоровья.' },
+            malakor_ashguard: { id: 'malakor_ashguard', name: 'Пепельная Броня Малакора', icon: '🌋', type: 'armor', rarity: 'epic', price: 450, armor: 10, maxHp: 130, spellAmp: 10, desc: '+10 брони, +130 HP, +10% мощи навыков. Трофей Малакора.' },
+            bloodweave_mantle: { id: 'bloodweave_mantle', name: 'Мантия Кровавого Плетения', icon: '🧣', type: 'armor', rarity: 'epic', price: 560, armor: 9, maxHp: 140, maxMp: 80, mpRegen: 3.0, desc: '+9 брони, +140 HP, +80 MP, +3.0 реген маны.' },
+            infernal_aegis: { id: 'infernal_aegis', name: 'Инфернальная Эгида', icon: '🛡️', type: 'armor', rarity: 'legendary', price: 1100, armor: 18, maxHp: 260, mpRegen: 3.0, desc: '+18 брони, +260 HP, +3.0 реген маны.' },
+            ember_loop: { id: 'ember_loop', name: 'Кольцо Тлеющего Угля', icon: '💍', type: 'ring', rarity: 'rare', price: 160, handDmg: 10, spellAmp: 8, crit: 3, desc: '+10 урона атаки, +8% мощи навыков, +3% крита.' },
+            malakor_eye: { id: 'malakor_eye', name: 'Око Малакора', icon: '👁️', type: 'ring', rarity: 'epic', price: 460, spellAmp: 18, crit: 6, maxMp: 60, desc: '+18% мощи навыков, +6% крита, +60 MP. Трофей Малакора.' },
+            vampiric_band: { id: 'vampiric_band', name: 'Перстень Вампира', icon: '💍', type: 'ring', rarity: 'epic', price: 520, handDmg: 18, maxHp: 100, crit: 5, desc: '+18 урона атаки, +100 HP, +5% крита.' },
+            ring_of_wardens: { id: 'ring_of_wardens', name: 'Кольцо Трёх Привратников', icon: '💠', type: 'ring', rarity: 'legendary', price: 1200, maxHp: 150, maxMp: 100, spellAmp: 25, handDmg: 20, cdr: 12, desc: '+150 HP, +100 MP, +25% мощи, +20 урона атаки, -12% КД.' },
 
             mage_robe: { id: 'mage_robe', name: 'Мантия Ученика', icon: '👘', type: 'armor', rarity: 'common', price: 70, armor: 3, maxHp: 35, mpRegen: 1.5, desc: '+3 брони, +35 здоровья, +1.5 реген маны.' },
             ranger_leather: { id: 'ranger_leather', name: 'Куртка Следопыта', icon: '🧥', type: 'armor', rarity: 'common', price: 70, armor: 3, maxHp: 30, mpRegen: 1.0, desc: '+3 брони, +30 здоровья, +1.0 реген маны.' },
@@ -1792,55 +1821,76 @@
             hellfire_signet: { id: 'hellfire_signet', name: 'Печать Адского Пламени', icon: '🔥', type: 'ring', rarity: 'legendary', price: 900, maxHp: 120, spellAmp: 30, handDmg: 25, crit: 8, desc: '+120 HP, +30% мощи навыков, +25 урона атаки, +8% крита.' }
         };
 
+        // group: 'consumable' | 'material' | 'weapon' | 'armor' | 'ring' — для группировки в окне крафта
         const CRAFT_RECIPES = [
+            // --- Расходники ---
             { result: 'hp_pot', count: 2, ingredients: [{ id: 'herb', count: 1 }, { id: 'slime_gel', count: 1 }] },
             { result: 'mp_pot', count: 2, ingredients: [{ id: 'herb', count: 2 }] },
+            { result: 'grand_elixir', count: 1, ingredients: [{ id: 'hp_pot', count: 1 }, { id: 'mp_pot', count: 1 }, { id: 'soul_crystal', count: 1 }] },
+            // --- Компоненты ---
+            { result: 'star_steel', count: 1, ingredients: [{ id: 'iron_ore', count: 3 }, { id: 'soul_crystal', count: 1 }] },
+            { result: 'soul_crystal', count: 1, ingredients: [{ id: 'bone_dust', count: 3 }, { id: 'slime_gel', count: 2 }] },
+            // --- Оружие: базовые и улучшения по цепочке ---
             { result: 'mystic_staff', count: 1, ingredients: [{ id: 'iron_ore', count: 3 }, { id: 'slime_gel', count: 2 }] },
             { result: 'caliburn_sword', count: 1, ingredients: [{ id: 'iron_ore', count: 4 }, { id: 'slime_gel', count: 1 }] },
             { result: 'elven_longbow', count: 1, ingredients: [{ id: 'iron_ore', count: 2 }, { id: 'herb', count: 3 }] },
             { result: 'octarine_rod', count: 1, ingredients: [{ id: 'soul_crystal', count: 2 }, { id: 'iron_ore', count: 3 }, { id: 'herb', count: 2 }] },
             { result: 'storm_bow', count: 1, ingredients: [{ id: 'soul_crystal', count: 2 }, { id: 'iron_ore', count: 3 }] },
-            { result: 'aghanim_scepter', count: 1, ingredients: [{ id: 'soul_crystal', count: 3 }, { id: 'iron_ore', count: 3 }] },
+            { result: 'ashforged_blade', count: 1, ingredients: [{ id: 'caliburn_sword', count: 1 }, { id: 'ash_sigil', count: 1 }, { id: 'star_steel', count: 2 }] },
+            { result: 'ash_recurve', count: 1, ingredients: [{ id: 'elven_longbow', count: 1 }, { id: 'ash_sigil', count: 1 }, { id: 'star_steel', count: 1 }, { id: 'shadow_silk', count: 1 }] },
+            { result: 'ash_scepter', count: 1, ingredients: [{ id: 'mystic_staff', count: 1 }, { id: 'ash_sigil', count: 1 }, { id: 'soul_crystal', count: 2 }] },
             { result: 'excalibur_true', count: 1, ingredients: [{ id: 'boss_heart', count: 1 }, { id: 'iron_ore', count: 3 }] },
             { result: 'codex_invoker', count: 1, ingredients: [{ id: 'boss_heart', count: 1 }, { id: 'soul_crystal', count: 2 }] },
             { result: 'nightfall_bow', count: 1, ingredients: [{ id: 'dracula_heart', count: 1 }, { id: 'vampire_fang', count: 3 }] },
-            { result: 'hellfire_signet', count: 1, ingredients: [{ id: 'hell_core', count: 1 }, { id: 'hell_ember', count: 3 }] }
+            // --- Броня ---
+            { result: 'bone_mail', count: 1, ingredients: [{ id: 'bone_dust', count: 4 }, { id: 'iron_ore', count: 2 }] },
+            { result: 'shadow_cloak', count: 1, ingredients: [{ id: 'shadow_silk', count: 3 }, { id: 'herb', count: 2 }] },
+            { result: 'warden_plate', count: 1, ingredients: [{ id: 'ash_sigil', count: 1 }, { id: 'star_steel', count: 2 }, { id: 'bone_dust', count: 3 }] },
+            { result: 'bloodweave_mantle', count: 1, ingredients: [{ id: 'blood_sigil', count: 1 }, { id: 'shadow_silk', count: 3 }, { id: 'vampire_fang', count: 2 }] },
+            { result: 'infernal_aegis', count: 1, ingredients: [{ id: 'inferno_sigil', count: 1 }, { id: 'hell_ember', count: 3 }, { id: 'demon_horn', count: 3 }] },
+            // --- Кольца ---
+            { result: 'ember_loop', count: 1, ingredients: [{ id: 'iron_ore', count: 2 }, { id: 'soul_crystal', count: 1 }, { id: 'slime_gel', count: 2 }] },
+            { result: 'aghanim_scepter', count: 1, ingredients: [{ id: 'soul_crystal', count: 3 }, { id: 'iron_ore', count: 3 }] },
+            { result: 'vampiric_band', count: 1, ingredients: [{ id: 'vampire_fang', count: 4 }, { id: 'blood_sigil', count: 1 }, { id: 'soul_crystal', count: 1 }] },
+            { result: 'hellfire_signet', count: 1, ingredients: [{ id: 'hell_core', count: 1 }, { id: 'hell_ember', count: 3 }] },
+            { result: 'ring_of_wardens', count: 1, ingredients: [{ id: 'ash_sigil', count: 1 }, { id: 'blood_sigil', count: 1 }, { id: 'inferno_sigil', count: 1 }, { id: 'star_steel', count: 2 }] }
         ];
 
         // ==================== СЕЙБЕР: ТОЛЬКО БЛИЖНИЙ БОЙ ====================
         // Ни один навык не выпускает снаряд. Ульта — долгий красивый каст и колоссальный удар перед собой.
         const SABER_ULT = {
-            castTime: lvl => Math.max(3.0, 5.5 - 0.7 * (lvl - 1)),   // Ур.1: 5.5с, Ур.2: 4.8с, Ур.3: 4.1с, Ур.4: 3.4с
-            baseDmg: lvl => 900 + 450 * lvl,                         // + 200% урона меча, затем * мощь навыков
-            reach: 130,                                              // центр удара — на 130px перед Сейбер
-            radius: 190,                                             // радиус поражения
-            swingTime: 0.3,                                          // финальный взмах вниз
+            castTime: lvl => Math.max(2.2, 3.6 - 0.45 * (lvl - 1)),   // Ур.1: 3.6с … Ур.4: 2.25с
+            baseDmg: lvl => 800 + 420 * lvl,                         // + 200% урона меча, затем * мощь навыков
+            length: 760,                                             // длина луча
+            width: 92,                                               // ширина луча
+            swingTime: 0.3,                                          // финальный взмах
             castDamageTaken: 0.75                                    // во время каста входящий урон x0.75
         };
+        const SABER_GIANT = { reach: 178, halfArc: 1.55, dmgMult: 1.35, swordLen: 118 };
         const SABER_SKILLS = {
             q: {
-                key: 'q', name: 'Strike Air', ruName: 'Удар Ветра (Незримый Воздух)',
-                icon: '🌪️', manaCost: 25, baseCd: 7.0,
-                desc: 'БЛИЖНИЙ БОЙ. Широкий рассекающий взмах Незримым Мечом по конусу перед собой: урон, отбрасывание и оглушение на 1.2 с.',
-                stats: l => `Урон: ${70 + 30 * l} + 60% урона меча • дальность 125 • оглушение 1.2с`
+                key: 'q', name: 'Ground Rend', ruName: 'Разлом и Волна',
+                icon: '🌋', manaCost: 25, baseCd: 7.0,
+                desc: 'Сейбер вонзает меч в землю и вырубает перед собой глубокий разлом. Из трещины вперёд вырывается энергетическая волна, ранящая всех врагов на пути.',
+                stats: l => `Разлом: ${60 + 22 * l} + 50% урона меча, оглушение 0.8с • Волна: ${70 + 30 * l} + 70% урона меча, дальность ${300 + 20 * l}`
             },
             w: {
                 key: 'w', name: 'Mana Burst Dash', ruName: 'Рывок Праны',
                 icon: '⚡', manaCost: 30, baseCd: 8.0,
-                desc: 'Рывок сквозь врагов к курсору с уроном по пути и короткой неуязвимостью. Главный способ сократить дистанцию — дальних атак у Сейбер нет.',
-                stats: l => `Урон: ${55 + 24 * l} + 50% урона меча • дистанция ${250 + 15 * l}`
+                desc: 'Блинк сквозь врагов к курсору с уроном по пути и короткой неуязвимостью. После рывка — кратковременное ускорение для манёвра или отхода.',
+                stats: l => `Урон: ${55 + 24 * l} + 50% урона меча • дистанция ${250 + 15 * l} • после рывка +${35 + 5 * l}% скорости на ${(2 + 0.25 * l).toFixed(1)}с`
             },
             e: {
-                key: 'e', name: 'Avalon & Charisma', ruName: 'Благословение Авалона',
-                icon: '🛡️', manaCost: 40, baseCd: 16.0,
-                desc: 'Исцеляет, повышает броню и усиливает удары меча на 25% с увеличенной дугой рассечения.',
-                stats: l => `Лечение: ${60 + 28 * l} + 6% макс. HP • броня +${6 + 2 * l} • длительность ${(8 + l).toFixed(0)}с`
+                key: 'e', name: 'Giant Sword Form', ruName: 'Колоссальный Клинок',
+                icon: '🗡️', manaCost: 40, baseCd: 16.0,
+                desc: 'Меч Сейбер вырастает в несколько раз. На время действия атаки бьют по огромной дуге с увеличенной дальностью и уроном.',
+                stats: l => `Длительность ${(6 + l).toFixed(0)}с • дальность удара ${SABER_GIANT.reach} (обычно 80) • дуга ~180° • урон меча +${Math.round((SABER_GIANT.dmgMult - 1) * 100)}% • броня +${2 + l}`
             },
             r: {
-                key: 'r', name: 'EXCALIBUR!', ruName: 'Экскалибур — Меч Обещанной Победы',
-                icon: '🗡️', manaCost: 100, baseCd: 45.0,
-                desc: 'Ультимейт ближнего боя. Сейбер поднимает меч вверх и собирает энергию (двигаться нельзя; S или ПКМ — отмена с возвратом половины маны), затем обрушивает сокрушительный удар перед собой.',
-                stats: l => `Каст: ${SABER_ULT.castTime(l).toFixed(1)}с • Урон: ${SABER_ULT.baseDmg(l)} + 200% урона меча • радиус ${SABER_ULT.radius} • оглушение 1.5с`
+                key: 'r', name: 'EXCALIBUR!', ruName: 'Экскалибур — Луч Обещанной Победы',
+                icon: '☀️', manaCost: 100, baseCd: 45.0,
+                desc: 'Ультимейт. Сейбер собирает свет в клинке (двигаться нельзя; S — отмена с возвратом половины маны) и выпускает направленный луч энергии прямо перед собой. После луча на земле остаются светящиеся осколки и разломы, жгущие врагов.',
+                stats: l => `Каст: ${SABER_ULT.castTime(l).toFixed(1)}с • Урон: ${SABER_ULT.baseDmg(l)} + 200% урона меча • луч ${SABER_ULT.length}×${SABER_ULT.width} • оглушение 1.5с • осколки 6с`
             }
         };
 
@@ -1873,11 +1923,16 @@
                 stats: l => `Прыжок: ${190 + 10 * l} • урон: 110% атаки + ${15 + 8 * l} • отскоков: ${2 + Math.floor(l / 2)} (-15% за отскок)`
             },
             r: {
-                key: 'r', name: 'Starfall Arrow', ruName: 'Стрела Звёзд',
-                icon: '🌠', manaCost: 70, baseCd: 28.0,
-                desc: 'Ультимейт. Прямая сверхдальняя стрела: чем дальше она пролетела до цели, тем выше урон и дольше оглушение.',
-                stats: l => `Урон: 200% атаки + ${160 + 90 * l} (до x2 от дистанции) • оглушение 0.6–3.5с • дальность 1100`
+                key: 'r', name: 'Unlimited Blade Works', ruName: 'Бесконечный Арсенал',
+                icon: '⚔️', manaCost: 90, baseCd: 40.0,
+                desc: 'Ультимейт. С неба на огромную область вокруг Арчера обрушиваются проекции клинков. Упавшие мечи остаются в земле: наступите на меч, чтобы подобрать его, и метните клавишей F в выделенную цель (ПКМ по врагу) — пробивает всех на пути.',
+                stats: l => `Клинков: ${22 + 6 * l} • урон каждого: 70% атаки + ${30 + 18 * l} • радиус 340 • бросок: 260% атаки + ${80 + 45 * l}, пробивает насквозь`
             }
+        };
+        // Стойка Арчера (клавиша D): лук ↔ парные клинки Канто и Бакуя
+        const ARCHER_STANCE = {
+            bladeRange: 74, bladeIntervalMult: 0.5, bladeDmgMult: 1.2,
+            ubwRadius: 340, ubwHitRadius: 44, swordLife: 18, maxCharges: 8, pickupRadius: 30
         };
 
         // ПОЛНЫЙ ПУЛ ИЗ 27 УНИКАЛЬНЫХ ЗАКЛИНАНИЙ ИНВОКЕРА ИЗ СТАРЫХ КАСТОМОК WARCRAFT 3 (DotA Allstars 6.1x)
@@ -2097,7 +2152,7 @@
         let worldDecor = [];
         let tileVariants = [];
 
-        function generateWorld() {
+        function generateLegacyWorld() {
             worldMap = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(0));
             worldDecor = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(null));
             tileVariants = Array.from({ length: MAP_H }, () => Array.from({ length: MAP_W }, () => Math.random()));
@@ -2246,7 +2301,7 @@
             { id: 'gawain', name: 'Сэр Гавейн', role: 'Королевский Оружейник', icon: '🤺', x: 52.5 * TILE_SIZE, y: 14.5 * TILE_SIZE, shopItems: ['hp_pot', 'mp_pot', 'caliburn_sword', 'elven_longbow', 'mystic_staff', 'camelot_plate', 'arcane_ring', 'aghanim_scepter'] },
             { id: 'kay', name: 'Сенешаль Кей', role: 'Мастер Королевской Алхимии', icon: '👑', x: 62.5 * TILE_SIZE, y: 14.5 * TILE_SIZE },
             // Охотник у ворот Замка Дракулы
-            { id: 'vanhelsing', name: 'Охотник Абрахам', role: 'Истребитель нежити у ворот замка', icon: '🕵️', x: 70.5 * TILE_SIZE, y: 28.3 * TILE_SIZE, shopItems: ['hp_pot', 'mp_pot', 'storm_bow', 'octarine_rod', 'caliburn_sword', 'camelot_plate', 'archmage_vestment'] }
+            { id: 'vanhelsing', name: 'Охотник Абрахам', role: 'Истребитель нежити у ворот замка', icon: '🕵️', x: 70.5 * TILE_SIZE, y: 28.3 * TILE_SIZE, shopItems: ['hp_pot', 'mp_pot', 'grand_elixir', 'storm_bow', 'octarine_rod', 'caliburn_sword', 'camelot_plate', 'archmage_vestment', 'bone_mail', 'shadow_cloak', 'ember_loop', 'star_steel'] }
         ];
 
         const QUEST_STAGES = [
@@ -2889,8 +2944,8 @@
             preUpdate25(dt); // каст Экскалибура, переходы между локациями, блокировка управления
 
             // Регенерация в безопасных зонах (Святилище или Королевство Камелот)
-            const inSanctuary = (player.x < 25 * TILE_SIZE && player.y < 29 * TILE_SIZE) ||
-                                (player.x >= 46 * TILE_SIZE && player.x <= 69 * TILE_SIZE && player.y <= 27 * TILE_SIZE);
+            const safeZ = playerZone();
+            const inSanctuary = safeZ === 'sanctuary' || safeZ === 'camelot';
             player.hp = Math.min(player.maxHp, player.hp + (player.hpRegen + (inSanctuary ? 5 : 0)) * dt);
             player.mp = Math.min(player.maxMp, player.mp + (player.mpRegen + (inSanctuary ? 6 : 0)) * dt);
 
@@ -2902,6 +2957,12 @@
             if (player.invokeCd > 0) player.invokeCd = Math.max(0, player.invokeCd - dt);
             if (player.invulnTime > 0) player.invulnTime = Math.max(0, player.invulnTime - dt);
 
+            if (player.giantGrow > 0) player.giantGrow -= dt;
+            if (player.saberHasteTimer > 0) {
+                player.saberHasteTimer = Math.max(0, player.saberHasteTimer - dt);
+                if (player.saberHasteTimer === 0) recalcPlayerStats();
+                else if (Math.random() < 0.5) particles.push({ x: player.x + (Math.random() - 0.5) * 20, y: player.y + 14, vx: -Math.cos(player.facingAngle) * 60, vy: -Math.sin(player.facingAngle) * 60, size: 2, color: '#7dd3fc', life: 0.3, maxLife: 0.3 });
+            }
             if (player.avalonBuffTimer > 0) {
                 player.avalonBuffTimer = Math.max(0, player.avalonBuffTimer - dt);
                 if (player.avalonBuffTimer === 0) recalcPlayerStats();
@@ -4351,6 +4412,20 @@
                 const swingOffset = player.slashAnimTime > 0 ? Math.sin(player.slashAnimTime * 25) * 1.4 : 0;
                 const swordAng = player.excaliburChargeTime > 0 ? -Math.PI / 2 : (player.facingAngle + swingOffset);
                 ctx.rotate(swordAng);
+                const giant = player.avalonBuffTimer > 0 && player.excaliburChargeTime <= 0;
+                if (giant) {
+                    // Колоссальный клинок: длина растёт с анимацией появления
+                    const g = 1 - Math.max(0, player.giantGrow || 0) / 0.45;
+                    const len = 38 + (SABER_GIANT.swordLen - 38) * g, bw = 3 + 7 * g;
+                    ctx.shadowColor = '#fde047'; ctx.shadowBlur = 22;
+                    const sg = ctx.createLinearGradient(10, 0, 10 + len, 0);
+                    sg.addColorStop(0, '#e0f2fe'); sg.addColorStop(0.7, '#fef9c3'); sg.addColorStop(1, '#ffffff');
+                    ctx.fillStyle = sg;
+                    ctx.beginPath(); ctx.moveTo(10, -bw); ctx.lineTo(10 + len - bw * 2, -bw); ctx.lineTo(10 + len, 0); ctx.lineTo(10 + len - bw * 2, bw); ctx.lineTo(10, bw); ctx.closePath(); ctx.fill();
+                    ctx.strokeStyle = '#ca8a04'; ctx.lineWidth = 1; ctx.stroke();
+                    ctx.strokeStyle = 'rgba(56,189,248,0.8)'; ctx.lineWidth = 1.2;
+                    ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(10 + len - bw * 2.5, 0); ctx.stroke();
+                } else {
                 ctx.strokeStyle = (player.avalonBuffTimer > 0 || player.excaliburChargeTime > 0) ? '#fef08a' : '#bae6fd';
                 ctx.lineWidth = player.excaliburChargeTime > 0 ? 5 : 3.2;
                 ctx.shadowColor = '#fde047';
@@ -4359,6 +4434,7 @@
                 ctx.moveTo(10, 0);
                 ctx.lineTo(38, 0);
                 ctx.stroke();
+                }
                 // Золотая гарда Экскалибура
                 ctx.strokeStyle = '#f59e0b';
                 ctx.lineWidth = 3;
@@ -4537,6 +4613,9 @@
                 else if (worldTimeHours >= 18 && worldTimeHours < 20) darkness = 0.34 + ((worldTimeHours - 18) / 2) * 0.24;
                 if (curW.id === 'storm') darkness += 0.1;
             }
+            // Арчер: мрачная кинематографичная гамма (глубже тени, багровый отлив по краям)
+            const archerMood = player.heroType === 'archer';
+            if (archerMood) darkness = Math.min(0.75, darkness + 0.12);
 
             const screenPx = player.x - camX;
             const screenPy = player.y - camY;
@@ -4546,6 +4625,13 @@
             grad.addColorStop(1, `rgba(2, 2, 5, ${Math.min(0.92, darkness + 0.25)})`);
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (archerMood) {
+                const rg = ctx.createRadialGradient(screenPx, screenPy, 160, screenPx, screenPy, Math.max(canvas.width, canvas.height) * 0.7);
+                rg.addColorStop(0, 'rgba(60, 0, 0, 0)');
+                rg.addColorStop(1, `rgba(70, 6, 10, ${0.22 + (player.ubwSky > 0 ? 0.25 : 0)})`);
+                ctx.fillStyle = rg;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
 
             // Ослепительная вспышка грома на весь экран
             if (lightningFlashAlpha > 0) {
@@ -5068,8 +5154,21 @@
             const list = document.getElementById('craftRecipesList');
             list.innerHTML = '';
 
-            CRAFT_RECIPES.forEach((rec, rIdx) => {
+            const groups = [['consumable', '🧪 Расходники'], ['material', '⚙️ Компоненты'], ['weapon', '⚔️ Оружие вашего героя'], ['armor', '🛡️ Броня'], ['ring', '💍 Кольца']];
+            const order = Object.fromEntries(groups.map(([g], i) => [g, i]));
+            const sorted = CRAFT_RECIPES.map((rec, rIdx) => ({ rec, rIdx }))
+                .filter(({ rec }) => { const d = ITEMS_DB[rec.result]; return !(d.cls && d.cls !== player.heroType); })
+                .sort((a, b) => order[ITEMS_DB[a.rec.result].type] - order[ITEMS_DB[b.rec.result].type]);
+            let lastGroup = null;
+            sorted.forEach(({ rec, rIdx }) => {
                 const resDef = ITEMS_DB[rec.result];
+                if (resDef.type !== lastGroup) {
+                    lastGroup = resDef.type;
+                    const h = document.createElement('div');
+                    h.className = 'text-xs font-bold uppercase tracking-wider text-amber-300 mt-2 mb-1';
+                    h.textContent = (groups.find(([g]) => g === resDef.type) || [0, resDef.type])[1];
+                    list.appendChild(h);
+                }
                 let canCraft = true;
                 const ingHtml = rec.ingredients.map(ing => {
                     const ingDef = ITEMS_DB[ing.id];
@@ -5085,7 +5184,7 @@
                     <div class="flex items-center gap-3">
                         <div class="text-3xl bg-slate-950 w-12 h-12 rounded-xl flex items-center justify-center border border-slate-700">${resDef.icon}</div>
                         <div>
-                            <div class="font-bold text-sm text-white">${resDef.name} ${rec.count > 1 ? `x${rec.count}` : ''}</div>
+                            <div class="font-bold text-sm text-white">${resDef.name} ${rec.count > 1 ? `x${rec.count}` : ''} <span class="text-[10px] uppercase opacity-70">${{ common: 'обычный', rare: 'редкий', epic: 'эпический', legendary: 'легендарный' }[resDef.rarity] || ''}</span></div>
                             <div class="text-xs text-slate-400 mb-1.5">${resDef.desc}</div>
                             <div class="flex flex-wrap gap-1.5">${ingHtml}</div>
                         </div>
@@ -5350,7 +5449,9 @@
             } else if (!isAnyModalOpen()) {
                 // Клавиши Сейбер (Q, W, E, R) ИЛИ Инвокера (Q, W, E, R, D, F)
                 if (player.heroType !== 'invoker') {
-                    if (e.code === 'KeyQ') castHeroSkill('q');
+                    if (player.heroType === 'archer' && e.code === 'KeyD') toggleArcherStance();
+                    else if (player.heroType === 'archer' && e.code === 'KeyF') throwUbwSword();
+                    else if (e.code === 'KeyQ') castHeroSkill('q');
                     else if (e.code === 'KeyW') castHeroSkill('w');
                     else if (e.code === 'KeyE') castHeroSkill('e');
                     else if (e.code === 'KeyR') castHeroSkill('r');
@@ -5602,10 +5703,15 @@
 
         function zoneAt(px, py) {
             const tx = px / TS, ty = py / TS;
-            if (tx >= EAST_X0) return ty < 32 ? 'castle' : 'hell';
-            if (ty >= 34) return 'abyss';
+            // Ярусы мира: верх — цитадель Камелота и высокогорье, середина — лес (слева Святилище, справа Замок Дракулы),
+            // ниже леса — Цитадель Бездны, в самом низу — скрытый ярус Ада (только через порталы)
+            if (ty >= WORLD_TIERS.hellRow) return 'hell';
             if (tx >= 46 && tx < 70 && ty >= 3 && ty < 28) return 'camelot';
-            if (tx < 25 && ty < 29) return 'sanctuary';
+            if (ty < WORLD_TIERS.midDY) return 'highlands';
+            const oy = ty - WORLD_TIERS.midDY; // координата в среднем ярусе
+            if (tx >= EAST_X0) return 'castle';
+            if (oy >= 34) return 'abyss';
+            if (tx < 25 && oy < 29) return 'sanctuary';
             return 'forest';
         }
         const playerZone = () => zoneAt(player.x, player.y);
@@ -5626,11 +5732,12 @@
         }
         const ZONE_INFO = {
             sanctuary: { label: '🏛️ Руины Святилища (Безопасно)', title: 'РУИНЫ СВЯТИЛИЩА', sub: 'Безопасная зона' },
-            camelot:   { label: '🏰 Королевство Камелот (Безопасно)', title: 'КОРОЛЕВСТВО КАМЕЛОТ', sub: 'Столица Короля Рыцарей' },
+            camelot:   { label: '🏰 Королевство Камелот (Безопасно)', title: 'КОРОЛЕВСТВО КАМЕЛОТ', sub: 'Цитадель на вершине мира' },
+            highlands: { label: '⛰️ Высокогорье Камелота', title: 'ВЫСОКОГОРЬЕ КАМЕЛОТА', sub: 'Верхний ярус мира' },
             forest:    { label: '🌲 Шепчущий Лес', title: 'ШЕПЧУЩИЙ ЛЕС', sub: 'Здесь не любят чужаков' },
             abyss:     { label: '🌋 Цитадель Бездны (Подземелье)', title: 'ЦИТАДЕЛЬ БЕЗДНЫ', sub: 'Владения Малакора' },
             castle:    { label: '🦇 Замок Дракулы', title: 'ЗАМОК ДРАКУЛЫ', sub: 'Ловушки, нежить и Граф в тронном зале' },
-            hell:      { label: '🔥 Ад — Преисподняя', title: 'ПРЕИСПОДНЯЯ', sub: 'Лавовые реки и сильнейшие демоны' }
+            hell:      { label: '🔥 Ад — Преисподняя (скрытый ярус)', title: 'ПРЕИСПОДНЯЯ', sub: 'Ярус под миром. Попасть сюда можно только через портал' }
         };
         function zoneLabel25(tx, ty) { return ZONE_INFO[zoneAt((tx + 0.5) * TS, (ty + 0.5) * TS)].label; }
 
@@ -5799,6 +5906,98 @@
             return null;
         }
 
+        // ---------- ВЕРТИКАЛЬНАЯ СТРУКТУРА МИРА ----------
+        // Старый план карты (128x64) генерируется как раньше, затем раскладывается по ярусам:
+        //   ряды 0..27   — ВЕРХНИЙ ярус: цитадель Камелота и высокогорье вокруг неё
+        //   ряды 28..91  — СРЕДНИЙ ярус: Шепчущий Лес по центру, Руины Святилища слева, Замок Дракулы справа,
+        //                  ниже леса — Цитадель Бездны
+        //   ряды 92..127 — СКРЫТЫЙ ярус Ада: отделён сплошной скалой, не виден на общей карте, вход только порталом
+        const WORLD_TIERS = { midDY: 28, hellDY: 64, hellRow: 92, height: 128 };
+        let legacyMap = null;
+
+        function legacyToNew(tx, ty) {
+            if (tx >= 46 && tx < 70 && ty >= 3 && ty < 28) return { x: tx, y: ty };       // Камелот остаётся наверху
+            if (tx >= 73 && ty >= 32) return { x: tx, y: ty + WORLD_TIERS.hellDY };        // Ад — на нижний ярус
+            return { x: tx, y: ty + WORLD_TIERS.midDY };                                     // всё остальное — средний ярус
+        }
+        const remapPt = o => { const n = legacyToNew(o.x, o.y); o.x = n.x; o.y = n.y; return o; };
+        const remapPx = o => { const n = legacyToNew(o.x / TS, o.y / TS); o.x = n.x * TS; o.y = n.y * TS; return o; };
+
+        function generateWorld() {
+            MAP_H = 64;
+            generateLegacyWorld();
+            const LM = worldMap, LD = worldDecor;
+            legacyMap = LM;
+            MAP_H = WORLD_TIERS.height;
+            const NM = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(3));
+            const ND = Array.from({ length: MAP_H }, () => Array(MAP_W).fill(null));
+            tileVariants = Array.from({ length: MAP_H }, () => Array.from({ length: MAP_W }, () => Math.random()));
+            for (let ly = 0; ly < 64; ly++) for (let lx = 0; lx < MAP_W; lx++) {
+                const n = legacyToNew(lx, ly);
+                if (n.y < 0 || n.y >= MAP_H) continue;
+                NM[n.y][n.x] = LM[ly][lx]; ND[n.y][n.x] = LD[ly][lx];
+            }
+            // Бывшее место Камелота в среднем ярусе зарастает лесом
+            for (let y = 31; y <= 55; y++) for (let x = 46; x <= 69; x++) {
+                NM[y][x] = Math.random() < 0.1 ? 3 : 4;
+                const r = Math.random();
+                ND[y][x] = NM[y][x] === 4 ? (r < 0.08 ? 'fern' : (r < 0.12 ? 'tuft' : (r < 0.14 ? 'mushroom' : null))) : null;
+            }
+            // ВЕРХНИЙ ЯРУС: высокогорное плато вокруг цитадели, обрыв над лесом
+            for (let y = 2; y <= 26; y++) for (let x = 24; x <= 100; x++) {
+                if (x >= 46 && x <= 69 && y >= 3 && y <= 27) continue;
+                NM[y][x] = Math.random() < 0.09 ? 3 : 0;
+                const r = Math.random();
+                ND[y][x] = NM[y][x] === 0 ? (r < 0.07 ? 'tuft' : (r < 0.1 ? 'flower' : (r < 0.125 ? 'boulder' : (r < 0.135 ? 'ruin_pillar' : null)))) : null;
+            }
+            // Горная дорога: от южных ворот Камелота вниз, через лес — к тракту на Замок Дракулы
+            for (let y = 27; y <= 58; y++) for (let x = 56; x <= 59; x++) {
+                if (y === 27 && (x < 56 || x > 59)) continue;
+                if ((x === 56 || x === 59) && y > 31) continue;
+                NM[y][x] = 1; ND[y][x] = null;
+            }
+            // Тропа от западных ворот Камелота по плато
+            for (let x = 30; x <= 45; x++) for (let y = 14; y <= 15; y++) { NM[y][x] = 1; ND[y][x] = null; }
+            ND[26][55] = 'torch'; ND[26][60] = 'torch'; ND[30][55] = 'torch'; ND[30][60] = 'torch';
+            worldMap = NM; worldDecor = ND;
+
+            // Ключевые точки, NPC, ловушки и порталы — в новые координаты
+            Object.values(CASTLE).forEach(remapPt);
+            Object.values(HELL).forEach(remapPt);
+            Object.values(HERO_DEFS).forEach(d => remapPt(d.home));
+            npcs.forEach(remapPx);
+            worldTraps.forEach(tr => { const n = legacyToNew(tr.tx, tr.ty); tr.tx = n.x; tr.ty = n.y; });
+            worldPortals.forEach(po => {
+                remapPx(po);
+                const t = legacyToNew(po.tx / TS, po.ty / TS); po.tx = t.x * TS; po.ty = t.y * TS;
+            });
+            const h = HERO_DEFS.invoker.home;
+            player.x = h.x * TS; player.y = h.y * TS;
+            R25.minimap = null;
+        }
+
+        // Поиск свободного тайла по старому плану карты (диапазоны в старых координатах), результат — в новых
+        function findFreeTileL(minX, maxX, minY, maxY) {
+            for (let tries = 0; tries < 100; tries++) {
+                const tx = Math.floor(minX + Math.random() * (maxX - minX));
+                const ty = Math.floor(minY + Math.random() * (maxY - minY));
+                const t = legacyMap[ty]?.[tx];
+                if (t === 0 || t === 4 || t === 5) { const n = legacyToNew(tx, ty); return { x: (n.x + 0.5) * TS, y: (n.y + 0.5) * TS }; }
+            }
+            const n = legacyToNew(35, 15);
+            return { x: n.x * TS, y: n.y * TS };
+        }
+
+        // Ближайший проходимый тайл к точке (в новых тайловых координатах)
+        function nearestFreeTile(x, y, allowed) {
+            for (let r = 0; r < 8; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+                if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+                const tx = Math.floor(x) + dx, ty = Math.floor(y) + dy;
+                if (allowed.includes(worldMap[ty]?.[tx]) && !worldDecor[ty]?.[tx]?.match?.(/pillar|statue|throne/)) return { x: (tx + 0.5) * TS, y: (ty + 0.5) * TS };
+            }
+            return { x: x * TS, y: y * TS };
+        }
+
         // ============================================================================
         // 17. ГЕРОИ: БАЛАНС ХАРАКТЕРИСТИК
         // ============================================================================
@@ -5807,8 +6006,8 @@
                        hello: '✡️ Архимаг Карл пробудился в Руинах Святилища!' },
             saber:   { title: 'Сейбер • Король Артур', short: 'Сейбер', home: { x: 57.5, y: 15.5 }, equip: { weapon: 'knight_sword', armor: 'camelot_mail', ring: null },
                        hello: '🏰 Сейбер прибыла в Королевство Камелот!' },
-            archer:  { title: 'Элиара • Арчер', short: 'Элиара', home: { x: 14, y: 18.5 }, equip: { weapon: 'hunter_bow', armor: 'ranger_leather', ring: null },
-                       hello: '🏹 Арчер Элиара вышла на охоту из Руин Святилища!' }
+            archer:  { title: 'Арчер • Страж Клинков', short: 'Арчер', home: { x: 14, y: 18.5 }, equip: { weapon: 'hunter_bow', armor: 'ranger_leather', ring: null },
+                       hello: '🏹 Арчер явился в Руины Святилища. Trace on.' }
         };
         const heroDef = () => HERO_DEFS[player.heroType] || HERO_DEFS.invoker;
         const diffCfg = () => DIFFICULTY_CONFIG[gameSettings.difficulty] || DIFFICULTY_CONFIG.normal;
@@ -5845,10 +6044,10 @@
                 player.maxMp = 110 + L * 15 + eq.mp;
                 player.hpRegen = +(4 + L * 0.45 + e * 0.6).toFixed(1);
                 player.mpRegen = +(3.5 + L * 0.25 + eq.mpRegen).toFixed(1);
-                player.handDmg = Math.round((30 + L * 6 + q * 4 + eq.hand) * (aval ? 1.25 : 1));
+                player.handDmg = Math.round((30 + L * 6 + q * 4 + eq.hand) * (aval ? SABER_GIANT.dmgMult : 1));
                 player.spellAmp = Math.round(r * 5 + eq.amp);
-                player.armor = Math.round(6 + L * 0.6 + e * 0.8 + eq.armor + (aval ? 6 + 2 * e : 0));
-                player.moveSpeed = Math.round(192 + w * 3);
+                player.armor = Math.round(6 + L * 0.6 + e * 0.8 + eq.armor + (aval ? 2 + e : 0));
+                player.moveSpeed = Math.round((192 + w * 3) * (player.saberHasteTimer > 0 ? 1 + (player.saberHastePct || 0) / 100 : 1));
                 player.cdrPct = Math.min(40, Math.round(w * 1.5 + eq.cdr));
                 player.attackInterval = Math.max(0.40, 0.64 - w * 0.02);
                 player.attackRange = 70;
@@ -5869,6 +6068,13 @@
                 player.attackRange = Math.round(420 + r * 20 + eq.range);
                 player.critChance = Math.min(50, Math.round(12 + L * 0.8 + r * 3 + eq.crit));
                 player.critMult = +(2.0 + r * 0.1).toFixed(1);
+                if (player.archerStance === 'blades') {
+                    // Ближний бой парными клинками: быстрые удары, малая дальность
+                    player.attackRange = ARCHER_STANCE.bladeRange;
+                    player.attackInterval = +(player.attackInterval * ARCHER_STANCE.bladeIntervalMult).toFixed(2);
+                    player.handDmg = Math.round(player.handDmg * ARCHER_STANCE.bladeDmgMult);
+                    player.armor += 3;
+                }
             } else {
                 // Инвокер: чистый кастер. Автоатак и физического урона нет — весь урон только от заклинаний.
                 const activeQ = player.activeOrbs.filter(o => o === 'q').length;
@@ -5937,7 +6143,7 @@
                 return;
             }
             if (player.basicAttackCd > 0) return;
-            if (player.heroType === 'saber') saberBasicAttack(); else archerBasicAttack();
+            if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
         }
 
         function saberBasicAttack() {
@@ -5946,8 +6152,9 @@
             player.slashAnimTime = 0.24;
             SoundFX.play('bolt');
             const ang = player.facingAngle;
-            const reach = aval ? 98 : 80;
-            const halfArc = aval ? 1.45 : 1.15;
+            const reach = aval ? SABER_GIANT.reach : 80;
+            const halfArc = aval ? SABER_GIANT.halfArc : 1.15;
+            if (aval) triggerScreenShake(2);
             activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang, radius: reach, color: aval ? '#fde047' : '#38bdf8', life: 0.18, maxLife: 0.18 });
             enemies.forEach(en => {
                 if (en.deadTimer > 0) return;
@@ -5996,6 +6203,116 @@
             fireArrow({ ang, range, dmg: shot.dmg, crit: shot.crit });
         }
 
+        // ---------- Арчер: стойки и клинки ----------
+        function toggleArcherStance() {
+            if (player.controlLock) return;
+            if ((player.stanceCd || 0) > 0) return;
+            player.stanceCd = 0.4;
+            player.archerStance = player.archerStance === 'blades' ? 'bow' : 'blades';
+            player.stanceAnim = 0.35;
+            player.bladeComboStep = 0; player.bladeSwing = 0;
+            player.basicAttackCd = Math.min(player.basicAttackCd, 0.1);
+            recalcPlayerStats();
+            SoundFX.play('orb');
+            spawnParticleBurst(player.x, player.y - 8, '#e0f2fe', 16);
+            spawnParticleBurst(player.x, player.y - 8, '#ef4444', 8);
+            spawnFloatingText(player.x, player.y - 38, player.archerStance === 'blades' ? '⚔️ TRACE ON — Канто и Бакуя' : '🏹 Лук', player.archerStance === 'blades' ? '#fecaca' : '#bae6fd');
+            updateInvokerBarUI();
+        }
+
+        function archerBladeAttack() {
+            // Комбо из трёх ударов: правый, левый, перекрёстный вихрь с рывком
+            player.bladeComboStep = (player.bladeComboTimer > 0 ? (player.bladeComboStep % 3) : 0) + 1;
+            player.bladeComboTimer = 1.0;
+            const step = player.bladeComboStep;
+            player.basicAttackCd = player.attackInterval * (step === 3 ? 1.6 : 1);
+            player.bladeSide = step === 1 ? 1 : -1;
+            player.bladeSwing = 1;
+            SoundFX.play('bolt');
+            let ax = mouseWorldX, ay = mouseWorldY;
+            const tgt = player.attackTarget;
+            if (tgt && tgt.deadTimer <= 0) { ax = tgt.x; ay = tgt.y; }
+            const ang = Math.atan2(ay - player.y, ax - player.x);
+            player.facingAngle = ang;
+            let reach = 84, halfArc = 1.2, mult = 1;
+            if (step === 3) {
+                // Акробатический рывок вперёд и круговой удар обоими клинками
+                for (let s2 = 0; s2 < 5; s2++) tryMoveEntity(player, Math.cos(ang) * 9, Math.sin(ang) * 9);
+                player.leapAnim = 0.25;
+                reach = 96; halfArc = Math.PI; mult = 1.8;
+                triggerScreenShake(4);
+                activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang: ang + Math.PI, radius: reach, color: '#ef4444', life: 0.22, maxLife: 0.22 });
+            }
+            activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang, radius: reach, color: step === 2 ? '#52525b' : '#f4f4f5', life: 0.16, maxLife: 0.16 });
+            enemies.forEach(en => {
+                if (en.deadTimer > 0) return;
+                const d = Math.hypot(en.x - player.x, en.y - player.y);
+                if (d > reach + en.radius) return;
+                if (d > 30 && Math.abs(angDiff(Math.atan2(en.y - player.y, en.x - player.x), ang)) > halfArc) return;
+                const crit = Math.random() * 100 < player.critChance;
+                damageEnemy(en, Math.round(player.handDmg * mult * (crit ? player.critMult : 1)), false, Math.cos(ang) * 14, Math.sin(ang) * 14, step === 2 ? '#a1a1aa' : '#fecaca', { crit });
+            });
+        }
+
+        function throwUbwSword() {
+            if (player.controlLock) return;
+            if (!player.ubwCharges) { showToast('Нет клинков: подберите мечи после ульта (R)', 'error'); return; }
+            let tgt = player.attackTarget && player.attackTarget.deadTimer <= 0 ? player.attackTarget : null;
+            if (!tgt) {
+                // Без захвата цели — берём врага ближе всего к курсору
+                let best = 160;
+                enemies.forEach(en => { if (en.deadTimer > 0) return; const d = Math.hypot(en.x - mouseWorldX, en.y - mouseWorldY); if (d < best) { best = d; tgt = en; } });
+                if (tgt) player.attackTarget = tgt;
+            }
+            if (!tgt) { showToast('Выделите цель: ПКМ по врагу', 'error'); return; }
+            const dist = Math.hypot(tgt.x - player.x, tgt.y - player.y);
+            if (dist > 900) { showToast('Цель слишком далеко', 'error'); return; }
+            player.ubwCharges--;
+            const lvl = Math.max(1, getEffOrbLevel('r'));
+            const ampMult = 1 + player.spellAmp / 100;
+            const crit = Math.random() * 100 < player.critChance;
+            const dmg = Math.round((player.handDmg * 2.6 + (80 + lvl * 45) * ampMult) * (crit ? player.critMult : 1));
+            const ang = Math.atan2(tgt.y - player.y, tgt.x - player.x);
+            player.facingAngle = ang; player.castAnimTime = 0.2;
+            const sp = 1350;
+            projectiles.push({
+                kind: 'ubw_blade', x: player.x + Math.cos(ang) * 20, y: player.y + Math.sin(ang) * 20, sx: player.x, sy: player.y,
+                vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, radius: 12, fromPlayer: true, isSpell: false,
+                color: '#fecaca', dmg, crit, pierce: true, homing: tgt, life: 1.4, hitIds: new Set(), seed: Math.floor(Math.random() * 1000)
+            });
+            SoundFX.play('tornado');
+            triggerScreenShake(3);
+            spawnParticleBurst(player.x, player.y - 6, '#fecaca', 10);
+            updateInvokerBarUI();
+        }
+
+        function updateArcherState(dt) {
+            if (player.heroType !== 'archer') return;
+            if (player.stanceAnim > 0) player.stanceAnim -= dt;
+            if (player.stanceCd > 0) player.stanceCd -= dt;
+            if (player.bladeSwing > 0) player.bladeSwing = Math.max(0, player.bladeSwing - dt * 5);
+            if (player.bladeComboTimer > 0) player.bladeComboTimer -= dt;
+            if (player.ubwSky > 0) player.ubwSky -= dt;
+            // Подбор воткнувшихся клинков
+            for (let i = playerFx.length - 1; i >= 0; i--) {
+                const f = playerFx[i];
+                if (f.type !== 'ubw_sword') continue;
+                if (Math.hypot(f.x - player.x, f.y - player.y) <= ARCHER_STANCE.pickupRadius + player.radius) {
+                    if ((player.ubwCharges || 0) >= ARCHER_STANCE.maxCharges) {
+                        if (!player.chargeFullHintCd || player.chargeFullHintCd <= 0) { player.chargeFullHintCd = 2; spawnFloatingText(player.x, player.y - 40, `Клинков максимум (${ARCHER_STANCE.maxCharges})`, '#cbd5e1'); }
+                        continue;
+                    }
+                    player.ubwCharges = (player.ubwCharges || 0) + 1;
+                    playerFx.splice(i, 1);
+                    SoundFX.play('coin');
+                    spawnParticleBurst(f.x, f.y - 10, '#e0f2fe', 8);
+                    spawnFloatingText(player.x, player.y - 40, `+⚔️ клинок (${player.ubwCharges}) — F`, '#fecaca');
+                    updateInvokerBarUI();
+                }
+            }
+            if (player.chargeFullHintCd > 0) player.chargeFullHintCd -= dt;
+        }
+
         function castHeroSkill(key) {
             if (player.heroType === 'saber') castSaberSkillImpl(key);
             else if (player.heroType === 'archer') castArcherSkill(key);
@@ -6025,25 +6342,40 @@
             const tx = mouseWorldX, ty = mouseWorldY;
 
             if (key === 'q') {
-                // Q — Удар Ветра: конус ближнего боя перед собой (без снаряда)
-                SoundFX.play('tornado');
-                triggerScreenShake(7);
+                // Q — Разлом и Волна: меч вырубает трещину в земле, из неё вперёд вырывается энергетическая волна
+                SoundFX.play('meteor');
+                triggerScreenShake(9);
                 player.slashAnimTime = 0.35;
-                const dmg = Math.round((70 + lvl * 30) * ampMult + player.handDmg * 0.6);
-                const reach = 125;
-                activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang, radius: reach, color: '#7dd3fc', life: 0.3, maxLife: 0.3 });
-                activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang, radius: reach * 0.7, color: '#e0f2fe', life: 0.24, maxLife: 0.24 });
+                const rendDmg = Math.round((60 + lvl * 22) * ampMult + player.handDmg * 0.5);
+                const waveDmg = Math.round((70 + lvl * 30) * ampMult + player.handDmg * 0.7);
+                const rendLen = 120;
+                // Трещина: зубчатая линия перед Сейбер, остаётся на земле
+                const pts = [];
+                for (let i = 0; i <= 9; i++) {
+                    const d = 14 + (rendLen / 9) * i, j = (i === 0 || i === 9) ? 0 : (Math.random() - 0.5) * 14;
+                    pts.push([player.x + Math.cos(ang) * d - Math.sin(ang) * j, player.y + Math.sin(ang) * d + Math.cos(ang) * j]);
+                }
+                playerFx.push({ type: 'ground_rift', pts, w: 9, glow: '#38bdf8', life: 5, maxLife: 5 });
+                for (let i = 1; i < pts.length; i += 2) addGroundDecal(pts[i][0], pts[i][1], 16, 'scorch');
                 enemies.forEach(en => {
                     if (en.deadTimer > 0) return;
-                    const d = Math.hypot(en.x - player.x, en.y - player.y);
-                    if (d > reach + en.radius) return;
-                    if (d > 30 && Math.abs(angDiff(Math.atan2(en.y - player.y, en.x - player.x), ang)) > 1.05) return;
-                    if (!en.isBoss) tryMoveEntity(en, Math.cos(ang) * 70, Math.sin(ang) * 70);
-                    en.stunTimer = Math.max(en.stunTimer, 1.2);
-                    damageEnemy(en, dmg, false, Math.cos(ang) * 20, Math.sin(ang) * 20, '#7dd3fc');
+                    const rx = en.x - player.x, ry = en.y - player.y;
+                    const along = rx * Math.cos(ang) + ry * Math.sin(ang), perp = Math.abs(-rx * Math.sin(ang) + ry * Math.cos(ang));
+                    if (along < -10 || along > rendLen + en.radius || perp > 34 + en.radius) return;
+                    en.stunTimer = Math.max(en.stunTimer, 0.8);
+                    damageEnemy(en, rendDmg, false, Math.cos(ang) * 10, Math.sin(ang) * 10, '#7dd3fc');
                 });
-                spawnParticleRing(player.x + Math.cos(ang) * 60, player.y + Math.sin(ang) * 60, 70, '#38bdf8', 22);
-                spawnFloatingText(player.x, player.y - 32, '🌪️ STRIKE AIR!', '#7dd3fc');
+                for (let i = 0; i < pts.length; i++) {
+                    particles.push({ x: pts[i][0], y: pts[i][1], vx: (Math.random() - 0.5) * 80, vy: -120 - Math.random() * 120, size: 3, color: '#78716c', life: 0.5, maxLife: 0.5 });
+                }
+                // Энергетическая волна из конца разлома
+                const end = pts[pts.length - 1], wsp = 620, wrange = 300 + lvl * 20;
+                projectiles.push({
+                    kind: 'saber_wave', x: end[0], y: end[1], sx: end[0], sy: end[1], ang,
+                    vx: Math.cos(ang) * wsp, vy: Math.sin(ang) * wsp, radius: 34, fromPlayer: true, isSpell: false,
+                    color: '#7dd3fc', dmg: waveDmg, pierce: true, life: wrange / wsp, maxLife: wrange / wsp, hitIds: new Set()
+                });
+                spawnFloatingText(player.x, player.y - 32, '🌋 РАЗЛОМ!', '#7dd3fc');
             } else if (key === 'w') {
                 // W — Рывок Праны
                 SoundFX.play('emp');
@@ -6065,17 +6397,21 @@
                     });
                 }
                 player.moveTargetX = null; player.moveTargetY = null;
-                spawnFloatingText(player.x, player.y - 32, '⚡ MANA BURST!', '#38bdf8');
-            } else if (key === 'e') {
-                // E — Авалон
-                SoundFX.play('levelup');
-                const heal = Math.round(60 + lvl * 28 + player.maxHp * 0.06);
-                player.avalonBuffTimer = 8 + lvl;
-                player.invulnTime = Math.max(player.invulnTime, 0.6);
+                // После блинка — кратковременное ускорение
+                player.saberHasteTimer = 2 + 0.25 * lvl;
+                player.saberHastePct = 35 + 5 * lvl;
                 recalcPlayerStats();
-                player.hp = Math.min(player.maxHp, player.hp + heal);
-                spawnParticleRing(player.x, player.y, 95, '#fde047', 30);
-                spawnFloatingText(player.x, player.y - 34, `🛡️ АВАЛОН (+${heal} HP)!`, '#fde047');
+                spawnParticleRing(player.x, player.y, 46, '#7dd3fc', 18);
+                spawnFloatingText(player.x, player.y - 32, `⚡ MANA BURST! +${player.saberHastePct}% скорость`, '#38bdf8');
+            } else if (key === 'e') {
+                // E — Колоссальный Клинок: меч вырастает в разы, удары бьют по огромной дуге
+                SoundFX.play('levelup'); SoundFX.play('invoke');
+                player.avalonBuffTimer = 6 + lvl;
+                player.giantGrow = 0.45;
+                recalcPlayerStats();
+                triggerScreenShake(6);
+                spawnParticleRing(player.x, player.y, SABER_GIANT.reach, '#fde047', 36);
+                spawnFloatingText(player.x, player.y - 34, '🗡️ КОЛОССАЛЬНЫЙ КЛИНОК!', '#fde047');
             } else if (key === 'r') {
                 // R — ЭКСКАЛИБУР: начинаем долгий каст. Кулдаун запустится в момент удара.
                 const dur = SABER_ULT.castTime(lvl);
@@ -6128,27 +6464,42 @@
             player.ultCast = null;
             player.excaliburChargeTime = 0;
             player.saberCooldowns.r = +(SABER_SKILLS.r.baseCd * skillCdFactor(c.lvl)).toFixed(1);
-            const ix = player.x + Math.cos(c.ang) * SABER_ULT.reach, iy = player.y + Math.sin(c.ang) * SABER_ULT.reach;
-            const R = SABER_ULT.radius;
+            const L = SABER_ULT.length, W = SABER_ULT.width;
+            const ca = Math.cos(c.ang), sa = Math.sin(c.ang);
+            // Направленный луч: поражает всех в полосе перед Сейбер
             enemies.forEach(en => {
                 if (en.deadTimer > 0) return;
-                const d = Math.hypot(en.x - ix, en.y - iy);
-                if (d > R + en.radius) return;
-                const falloff = 1 - 0.4 * Math.min(1, d / R); // 100% в эпицентре, 60% на краю
+                const rx = en.x - player.x, ry = en.y - player.y;
+                const along = rx * ca + ry * sa, perp = Math.abs(-rx * sa + ry * ca);
+                if (along < 0 || along > L + en.radius || perp > W / 2 + en.radius) return;
+                const falloff = 1 - 0.3 * Math.min(1, along / L);
                 en.stunTimer = Math.max(en.stunTimer, 1.5);
-                damageEnemy(en, Math.round(c.dmg * falloff), true, en.x - player.x, en.y - player.y, '#fef08a', { crit: true });
+                damageEnemy(en, Math.round(c.dmg * falloff), true, ca, sa, '#fef08a', { crit: true });
             });
-            playerFx.push({ type: 'excalibur', x: ix, y: iy, ang: c.ang, radius: R, life: 1.1, maxLife: 1.1 });
-            addGroundDecal(ix, iy, R * 0.8, 'scorch');
-            for (let a = 0; a < 6; a++) addGroundDecal(ix + Math.cos(a) * R * 0.6, iy + Math.sin(a) * R * 0.6, 60, 'scorch');
-            spawnParticleRing(ix, iy, R, '#fef08a', 60);
-            spawnParticleRing(ix, iy, R * 0.6, '#ffffff', 40);
-            spawnParticleBurst(ix, iy, '#fde047', 60);
+            playerFx.push({ type: 'excalibur_beam', x: player.x, y: player.y, ang: c.ang, len: L, width: W, life: 1.2, maxLife: 1.2 });
+            // Последствия: разломы вдоль луча и светящиеся осколки, которые жгут врагов
+            const shardDmg = Math.round(c.dmg * 0.04);
+            for (let i = 0; i < 3; i++) {
+                const off = (i - 1) * W * 0.32, pts = [];
+                for (let k = 0; k <= 14; k++) {
+                    const d = 30 + (L - 40) * k / 14, j = off + (Math.random() - 0.5) * 18;
+                    pts.push([player.x + ca * d - sa * j, player.y + sa * d + ca * j]);
+                }
+                playerFx.push({ type: 'ground_rift', pts, w: i === 1 ? 12 : 7, glow: '#fde047', life: 8, maxLife: 8 });
+            }
+            for (let i = 0; i < 26; i++) {
+                const d = 40 + Math.random() * (L - 40), j = (Math.random() - 0.5) * W * 0.9;
+                const x = player.x + ca * d - sa * j, y = player.y + sa * d + ca * j;
+                if (isTileBlocked(Math.floor(x / TS), Math.floor(y / TS))) continue;
+                playerFx.push({ type: 'light_shard', x, y, h: 8 + Math.random() * 14, rot: (Math.random() - 0.5) * 0.9, dmg: shardDmg, tick: Math.random() * 0.5, life: 6, maxLife: 6 });
+            }
+            for (let d = 60; d < L; d += 70) addGroundDecal(player.x + ca * d, player.y + sa * d, 40, 'scorch');
+            spawnParticleBurst(player.x + ca * 40, player.y + sa * 40, '#fde047', 50);
             triggerScreenShake(24);
             lightningFlashAlpha = 0.6;
             player.invulnTime = Math.max(player.invulnTime, 0.5);
             SoundFX.play('sunstrike'); SoundFX.play('meteor'); SoundFX.play('thunder');
-            spawnFloatingText(player.x, player.y - 50, '🗡️ EXCALIBUR!!!', '#fef08a');
+            spawnFloatingText(player.x, player.y - 50, '☀️ EXCALIBUR!!!', '#fef08a');
             updateInvokerBarUI();
         }
 
@@ -6218,16 +6569,21 @@
                 });
                 spawnFloatingText(player.x, player.y - 30, '↩️ ОТСКОК!', '#bef264');
             } else if (key === 'r') {
-                // R — Стрела Звёзд: прямой сверхдальний выстрел, сила растёт с дистанцией
-                SoundFX.play('sunstrike');
-                triggerScreenShake(6);
-                const shot = rollArcherShot(2.0, (160 + lvl * 90) * ampMult);
-                fireArrow({
-                    ang, range: 1100, speed: 980, flat: true, radius: 12, dmg: shot.dmg, crit: shot.crit,
-                    color: '#c4b5fd', glow: true, star: true, stunByDist: true
-                });
-                spawnParticleRing(player.x, player.y, 70, '#c4b5fd', 24);
-                spawnFloatingText(player.x, player.y - 34, '🌠 STARFALL ARROW!', '#ddd6fe');
+                // R — Бесконечный Арсенал: дождь проекций клинков по огромной области
+                SoundFX.play('sunstrike'); SoundFX.play('thunder');
+                triggerScreenShake(10);
+                player.ubwSky = 3.2;
+                const count = 22 + lvl * 6;
+                const each = Math.round(player.handDmg * 0.7 + (30 + lvl * 18) * ampMult);
+                const R = ARCHER_STANCE.ubwRadius;
+                playerFx.push({ type: 'ubw_circle', x: player.x, y: player.y, radius: R, life: 3.2, maxLife: 3.2 });
+                for (let i = 0; i < count; i++) {
+                    const a = Math.random() * Math.PI * 2, r = 40 + Math.sqrt(Math.random()) * (R - 40);
+                    const delay = 0.35 + (i / count) * 1.6 + Math.random() * 0.15;
+                    playerFx.push({ type: 'ubw_fall', x: player.x + Math.cos(a) * r, y: player.y + Math.sin(a) * r, delay, maxDelay: delay, dmg: each, seed: Math.floor(Math.random() * 1000), tilt: (Math.random() - 0.5) * 0.5 });
+                }
+                spawnParticleRing(player.x, player.y, R, '#fca5a5', 60);
+                spawnFloatingText(player.x, player.y - 40, '⚔️ UNLIMITED BLADE WORKS', '#fecaca');
             }
             updateInvokerBarUI();
         }
@@ -6249,33 +6605,42 @@
             goblin:    { name: 'Охотник за Магами', icon: '👺', hp: 150, dmg: 20, armor: 2, mres: 0, speed: 132, xp: 45, gold: [12, 24], radius: 16, aggroRange: 260, attackRange: 38, color: '#eab308',
                          drops: [{ id: 'iron_ore', chance: 0.6 }, { id: 'hp_pot', chance: 0.15 }] },
             skeleton:  { name: 'Костяной Центурион', icon: '💀', hp: 280, dmg: 32, armor: 5, mres: 0.1, speed: 128, xp: 85, gold: [20, 38], radius: 17, aggroRange: 290, attackRange: 40, color: '#cbd5e1',
-                         drops: [{ id: 'iron_ore', chance: 0.65 }, { id: 'soul_crystal', chance: 0.4 }, { id: 'archmage_vestment', chance: 0.05 }] },
+                         drops: [{ id: 'iron_ore', chance: 0.65 }, { id: 'soul_crystal', chance: 0.4 }, { id: 'bone_dust', chance: 0.4 }, { id: 'archmage_vestment', chance: 0.05 }] },
             dark_mage: { name: 'Адепт Пустоты', icon: '🧛', hp: 210, dmg: 38, armor: 1, mres: 0.25, speed: 105, xp: 98, gold: [24, 46], radius: 17, aggroRange: 340, attackRange: 220, ranged: true, color: '#a855f7',
-                         drops: [{ id: 'soul_crystal', chance: 0.6 }, { id: 'mp_pot', chance: 0.4 }] },
+                         drops: [{ id: 'soul_crystal', chance: 0.6 }, { id: 'mp_pot', chance: 0.4 }, { id: 'shadow_silk', chance: 0.2 }] },
             boss:      { name: 'Малакор, Повелитель Пепла', icon: '👹', hp: 2600, dmg: 58, armor: 8, mres: 0.2, speed: 118, xp: 700, gold: [250, 400], radius: 28, aggroRange: 440, attackRange: 58, isBoss: true, respawn: 120, color: '#ef4444',
-                         drops: [{ id: 'boss_heart', chance: 1.0 }, { id: 'soul_crystal', chance: 1.0 }] },
+                         drops: [{ id: 'boss_heart', chance: 1.0 }, { id: 'soul_crystal', chance: 1.0 }, { id: 'malakor_ashguard', chance: 0.35 }, { id: 'malakor_eye', chance: 0.3 }, { id: 'star_steel', chance: 1.0 }] },
+            // --- Мини-боссы (стражи перед комнатами главных боссов) ---
+            ash_warden:   { name: 'Игнар, Привратник Пепла', icon: '🛡️', hp: 1300, dmg: 50, armor: 7, mres: 0.15, speed: 112, xp: 380, gold: [120, 180], radius: 22, aggroRange: 330, attackRange: 54, slam: true, isBoss: true, miniBoss: true, respawn: 150, color: '#f97316',
+                            drops: [{ id: 'ash_sigil', chance: 1 }, { id: 'hp_pot', chance: 1 }, { id: 'iron_ore', chance: 1 }, { id: 'bone_mail', chance: 0.15 }, { id: 'ember_loop', chance: 0.15 }] },
+            crimson_warden: { name: 'Сангвин, Кровавый Привратник', icon: '🩸', hp: 3400, dmg: 72, armor: 11, mres: 0.2, speed: 140, xp: 1100, gold: [300, 450], radius: 21, aggroRange: 320, attackRange: 48, leap: true, lifesteal: 0.3, attackTime: 1.0, isBoss: true, miniBoss: true, respawn: 180, color: '#be123c',
+                            drops: [{ id: 'blood_sigil', chance: 1 }, { id: 'shadow_silk', chance: 1 }, { id: 'vampire_fang', chance: 1 }, { id: 'vampiric_band', chance: 0.15 }, { id: 'bloodweave_mantle', chance: 0.1 }] },
+            infernal_gatekeeper: { name: 'Моргот, Страж Врат Бездны', icon: '⛓️', hp: 6800, dmg: 105, armor: 15, mres: 0.3, speed: 115, xp: 2600, gold: [600, 900], radius: 27, aggroRange: 360, attackRange: 66, slam: true, isBoss: true, miniBoss: true, respawn: 240, color: '#ea580c',
+                            drops: [{ id: 'inferno_sigil', chance: 1 }, { id: 'demon_horn', chance: 1 }, { id: 'demon_horn', chance: 1 }, { id: 'hell_ember', chance: 1 }, { id: 'infernal_aegis', chance: 0.08 }] },
 
             // --- Миньоны Замка Дракулы ---
             bat:          { name: 'Нетопырь-кровосос', icon: '🦇', hp: 150, dmg: 24, armor: 0, mres: 0, speed: 185, xp: 60, gold: [10, 18], radius: 12, aggroRange: 320, attackRange: 30, erratic: true, attackTime: 0.9, lifesteal: 0.5, color: '#7c3aed',
-                            drops: [{ id: 'vampire_fang', chance: 0.12 }] },
+                            drops: [{ id: 'vampire_fang', chance: 0.12 }, { id: 'shadow_silk', chance: 0.2 }] },
             ghoul:        { name: 'Могильный Упырь', icon: '🧟', hp: 420, dmg: 44, armor: 6, mres: 0, speed: 120, xp: 130, gold: [26, 44], radius: 17, aggroRange: 300, attackRange: 40, lifesteal: 0.3, color: '#84cc16',
-                            drops: [{ id: 'vampire_fang', chance: 0.3 }, { id: 'soul_crystal', chance: 0.25 }, { id: 'hp_pot', chance: 0.2 }] },
+                            drops: [{ id: 'vampire_fang', chance: 0.3 }, { id: 'soul_crystal', chance: 0.25 }, { id: 'bone_dust', chance: 0.3 }, { id: 'hp_pot', chance: 0.2 }] },
             gargoyle:     { name: 'Каменная Горгулья', icon: '🗿', hp: 480, dmg: 46, armor: 14, mres: 0.1, speed: 100, xp: 170, gold: [30, 52], radius: 17, aggroRange: 380, attackRange: 260, ranged: true, projColor: '#94a3b8', projSpeed: 300, dmgKind: 'phys', color: '#94a3b8',
                             drops: [{ id: 'iron_ore', chance: 0.7 }, { id: 'soul_crystal', chance: 0.3 }] },
             blood_knight: { name: 'Рыцарь Крови', icon: '⚔️', hp: 640, dmg: 58, armor: 11, mres: 0.15, speed: 126, xp: 190, gold: [36, 60], radius: 18, aggroRange: 320, attackRange: 46, color: '#dc2626',
                             drops: [{ id: 'vampire_fang', chance: 0.45 }, { id: 'hp_pot', chance: 0.25 }, { id: 'camelot_plate', chance: 0.05 }] },
             dracula:      { name: 'Граф Дракула', icon: '🧛', hp: 7000, dmg: 90, armor: 12, mres: 0.25, speed: 135, xp: 3000, gold: [900, 1300], radius: 24, aggroRange: 420, attackRange: 56, isBoss: true, respawn: 300, color: '#dc2626',
-                            drops: [{ id: 'dracula_heart', chance: 1 }, { id: 'dracula_cape', chance: 1 }, { id: 'vampire_fang', chance: 1 }, { id: 'vampire_fang', chance: 1 }] },
+                            drops: [{ id: 'dracula_heart', chance: 1 }, { id: 'dracula_cape', chance: 1 }, { id: 'vampire_fang', chance: 1 }, { id: 'vampire_fang', chance: 1 }, { id: 'grand_elixir', chance: 1 }],
+                            classDrops: { saber: 'clarent_blood', archer: 'crimson_moon_bow', invoker: 'blood_grimoire' }, classDropChance: 0.5 },
 
             // --- Демоны Ада ---
             imp:       { name: 'Огненный Бес', icon: '👿', hp: 380, dmg: 50, armor: 4, mres: 0.3, speed: 150, xp: 220, gold: [40, 70], radius: 13, aggroRange: 380, attackRange: 250, ranged: true, projColor: '#fb923c', projSpeed: 330, color: '#f97316',
                          drops: [{ id: 'hell_ember', chance: 0.25 }, { id: 'mp_pot', chance: 0.3 }] },
             hellhound: { name: 'Адская Гончая', icon: '🐺', hp: 720, dmg: 68, armor: 6, mres: 0.2, speed: 182, xp: 290, gold: [50, 85], radius: 17, aggroRange: 400, attackRange: 40, leap: true, attackTime: 1.0, color: '#ea580c',
-                         drops: [{ id: 'hell_ember', chance: 0.35 }, { id: 'hp_pot', chance: 0.2 }] },
+                         drops: [{ id: 'hell_ember', chance: 0.35 }, { id: 'demon_horn', chance: 0.25 }, { id: 'hp_pot', chance: 0.2 }] },
             pit_demon: { name: 'Демон-Палач', icon: '😈', hp: 1500, dmg: 104, armor: 14, mres: 0.3, speed: 112, xp: 500, gold: [90, 150], radius: 22, aggroRange: 360, attackRange: 64, slam: true, color: '#b91c1c',
-                         drops: [{ id: 'hell_ember', chance: 0.6 }, { id: 'soul_crystal', chance: 0.5 }, { id: 'hp_pot', chance: 0.4 }] },
+                         drops: [{ id: 'hell_ember', chance: 0.6 }, { id: 'demon_horn', chance: 0.5 }, { id: 'soul_crystal', chance: 0.5 }, { id: 'hp_pot', chance: 0.4 }] },
             hell_lord: { name: "Ваал'Гор, Владыка Преисподней", icon: '👹', hp: 14000, dmg: 125, armor: 16, mres: 0.3, speed: 120, xp: 8000, gold: [2000, 3000], radius: 34, aggroRange: 480, attackRange: 74, isBoss: true, respawn: 420, color: '#f97316',
-                         drops: [{ id: 'hell_core', chance: 1 }, { id: 'hell_ember', chance: 1 }, { id: 'hell_ember', chance: 1 }] }
+                         drops: [{ id: 'hell_core', chance: 1 }, { id: 'hell_ember', chance: 1 }, { id: 'hell_ember', chance: 1 }, { id: 'grand_elixir', chance: 1 }],
+                         classDrops: { saber: 'excalibur_morgan', archer: 'hellstring_bow', invoker: 'staff_of_ruin' }, classDropChance: 1.0 }
         };
 
         function createEnemy(type, x, y, opts) {
@@ -6304,53 +6669,81 @@
             enemyHazards = [];
             playerFx = [];
             projectiles = [];
-            const E = (type, x, y) => enemies.push(createEnemy(type, x * TS, y * TS));
+            // L — координаты по старому плану (переводятся в ярусы), E — уже в новых координатах
+            const E = (type, x, y) => { const e = createEnemy(type, x * TS, y * TS); enemies.push(e); return e; };
+            const L = (type, x, y) => { const n = legacyToNew(x, y); return E(type, n.x, n.y); };
 
             for (let i = 0; i < 18; i++) {
-                const pos = findFreeTile(28, 60, 3, 31);
+                const pos = findFreeTileL(28, 60, 3, 31);
                 groundLoot.push({ uid: Math.random(), x: pos.x, y: pos.y, kind: 'herb_node', itemId: 'herb', count: 1, respawnTimer: 0 });
             }
+            // Травы и на высокогорье
+            for (let i = 0; i < 6; i++) {
+                const pos = findFreeTileOf(26, 98, 3, 25, [0]);
+                if (pos) groundLoot.push({ uid: Math.random(), x: pos.x, y: pos.y, kind: 'herb_node', itemId: 'herb', count: 1, respawnTimer: 0 });
+            }
             [
-                { x: 56, y: 6, tier: 'forest' }, { x: 34, y: 28, tier: 'forest' },
-                { x: 58, y: 56, tier: 'dungeon' }, { x: 10, y: 58, tier: 'dungeon' },
-                { x: 101.5, y: 26.5, tier: 'castle' }, { x: 78.5, y: 4.5, tier: 'castle' },
-                { x: 120.5, y: 38.5, tier: 'hell' }, { x: 78.5, y: 55.5, tier: 'hell' }
-            ].forEach(c => groundLoot.push({ uid: Math.random(), x: c.x * TS, y: c.y * TS, kind: 'chest', tier: c.tier, opened: false }));
+                { x: 56, y: 40, tier: 'forest' }, { x: 34, y: 56, tier: 'forest' }, { x: 90, y: 6, tier: 'forest' },
+                { x: 58, y: 84, tier: 'dungeon' }, { x: 10, y: 86, tier: 'dungeon' },
+                { x: 101.5, y: 54.5, tier: 'castle' }, { x: 78.5, y: 32.5, tier: 'castle' },
+                { x: 120.5, y: 102.5, tier: 'hell' }, { x: 78.5, y: 119.5, tier: 'hell' }
+            ].forEach(c => { const p = nearestFreeTile(c.x, c.y, [0, 1, 4, 5, T_CFLOOR, T_GRAVE, T_HELL]); groundLoot.push({ uid: Math.random(), x: p.x, y: p.y, kind: 'chest', tier: c.tier, opened: false }); });
 
             for (let i = 0; i < 15; i++) {
-                const pos = findFreeTile(28, 61, 3, 31);
+                const pos = findFreeTileL(28, 61, 3, 31);
                 enemies.push(createEnemy(i % 2 === 1 ? 'goblin' : 'slime', pos.x, pos.y));
             }
+            // Высокогорье: гоблины-разведчики на плато
+            for (let i = 0; i < 6; i++) {
+                const pos = findFreeTileOf(26, 98, 3, 25, [0], [[57, 15, 14]]);
+                if (pos) enemies.push(createEnemy('goblin', pos.x, pos.y));
+            }
             for (let i = 0; i < 15; i++) {
-                const pos = findFreeTile(28, 60, 36, 61);
+                const pos = findFreeTileL(28, 60, 36, 61);
                 enemies.push(createEnemy(i % 3 === 0 ? 'dark_mage' : 'skeleton', pos.x, pos.y));
             }
-            E('boss', 13, 48);
+            const malakor = L('boss', 13, 48);
+            // Мини-босс: Привратник Пепла охраняет подход к арене Малакора
+            const g1p = nearestFreeTile(22.5, 76.5, [5]);
+            const ashWarden = E('ash_warden', g1p.x / TS, g1p.y / TS);
+            malakor.guardian = ashWarden;
 
             // --- Замок Дракулы ---
             [['ghoul', 80.5, 24.5], ['ghoul', 87.5, 26.5], ['ghoul', 90.5, 23.5], ['bat', 82.5, 22.5], ['bat', 86.5, 29.5], ['bat', 78.5, 25.5],
              ['blood_knight', 80.5, 15.5], ['blood_knight', 87.5, 15.5], ['ghoul', 82.5, 12.5], ['ghoul', 86.5, 18.5], ['bat', 80.5, 12.5], ['bat', 89.5, 18.5], ['gargoyle', 78.5, 18.5], ['gargoyle', 89.5, 11.5],
              ['gargoyle', 89.5, 4.5], ['gargoyle', 79.5, 8.5], ['blood_knight', 84.5, 6.5], ['bat', 82.5, 4.5], ['bat', 86.5, 8.5],
              ['ghoul', 97.5, 24.5], ['ghoul', 100.5, 27.5], ['ghoul', 95.5, 26.5], ['bat', 101.5, 23.5],
-             ['blood_knight', 104.5, 13.5], ['blood_knight', 108.5, 17.5], ['gargoyle', 108.5, 11.5], ['gargoyle', 104.5, 18.5]
-            ].forEach(([t, x, y]) => E(t, x, y));
-            E('dracula', CASTLE.dracula.x, CASTLE.dracula.y);
+             ['gargoyle', 108.5, 11.5], ['gargoyle', 104.5, 18.5]
+            ].forEach(([t, x, y]) => L(t, x, y));
+            const dracula = E('dracula', CASTLE.dracula.x, CASTLE.dracula.y);
+            // Мини-босс: Кровавый Привратник в преддверии тронного зала
+            const g2p = nearestFreeTile(106.5, 42.5, [T_CFLOOR, T_CARPET]);
+            dracula.guardian = E('crimson_warden', g2p.x / TS, g2p.y / TS);
 
-            // --- Ад ---
-            const avoid = [[HELL.arrival.x, HELL.arrival.y, 8], [HELL.boss.x, HELL.boss.y, 8]];
+            // --- Ад (скрытый нижний ярус) ---
+            const hy = WORLD_TIERS.hellDY;
+            const avoid = [[HELL.arrival.x, HELL.arrival.y, 8], [HELL.boss.x, HELL.boss.y, 9]];
             [['imp', 9], ['hellhound', 8], ['pit_demon', 7]].forEach(([type, n]) => {
                 for (let i = 0; i < n; i++) {
-                    const pos = findFreeTileOf(75, 124, 34, 60, [T_HELL], avoid);
+                    const pos = findFreeTileOf(75, 124, 34 + hy, 60 + hy, [T_HELL], avoid);
                     if (pos) enemies.push(createEnemy(type, pos.x, pos.y));
                 }
             });
-            E('hell_lord', HELL.boss.x, HELL.boss.y);
+            const lord = E('hell_lord', HELL.boss.x, HELL.boss.y);
+            // Мини-босс: Страж Врат Бездны на тропе к арене Владыки
+            const g3p = nearestFreeTile(109.5, 52.5 + hy, [T_HELL, T_HBRIDGE]);
+            lord.guardian = E('infernal_gatekeeper', g3p.x / TS, g3p.y / TS);
         }
 
         function damageEnemy(en, dmg, isSpell, knockX = 0, knockY = 0, customColor = null, opts) {
             if (en.deadTimer > 0) return;
             if (en.invuln > 0) {
                 if (!en.invulnTextCd || en.invulnTextCd <= 0) { en.invulnTextCd = 0.5; spawnFloatingText(en.x, en.y - 30, 'НЕУЯЗВИМ', '#94a3b8'); }
+                return;
+            }
+            if (en.guardian && en.guardian.deadTimer <= 0 && en.guardian.hp > 0) {
+                // Главный босс под печатью, пока жив его страж-мини-босс
+                if (!en.invulnTextCd || en.invulnTextCd <= 0) { en.invulnTextCd = 0.8; spawnFloatingText(en.x, en.y - 34, `🔒 ПЕЧАТЬ: сначала победите «${en.guardian.name}»`, '#fca5a5'); }
                 return;
             }
             if (en.isBoss) en.engaged = true;
@@ -6418,6 +6811,18 @@
             }
             checkQuestProgression();
 
+            // Уникальное оружие босса под класс героя (у Владыки Ада — гарантированно)
+            const cd = en.tpl.classDrops && en.tpl.classDrops[player.heroType];
+            if (cd && Math.random() <= (en.tpl.classDropChance || 0)) {
+                groundLoot.push({ uid: Math.random(), x: en.x, y: en.y + 18, kind: 'item', itemId: cd, count: 1 });
+                showToast(`🌟 Уникальный трофей: ${ITEMS_DB[cd].icon} ${ITEMS_DB[cd].name}!`, 'gold');
+            }
+            if (en.tpl.miniBoss) {
+                const sealed = enemies.find(o => o.guardian === en && o.deadTimer <= 0);
+                zoneBanner = { title: 'СТРАЖ ПОВЕРЖЕН', sub: sealed ? `Печать с «${sealed.name}» снята — путь открыт` : 'Путь открыт', life: 4, maxLife: 4, color: '#fde68a' };
+                if (sealed) showToast(`🔓 Печать снята: ${sealed.name} теперь уязвим!`, 'gold');
+                triggerScreenShake(12);
+            }
             en.drops.forEach(drop => {
                 if (Math.random() <= drop.chance) {
                     groundLoot.push({ uid: Math.random(), x: en.x + (Math.random() - 0.5) * 34, y: en.y + (Math.random() - 0.5) * 34, kind: 'item', itemId: drop.id, count: 1 });
@@ -6449,7 +6854,7 @@
             if (player.hp <= 0) {
                 player.ultCast = null;
                 player.excaliburChargeTime = 0;
-                player.avalonBuffTimer = 0; player.alacrityTimer = 0; player.ghostWalkTimer = 0; player.lightningShieldTimer = 0;
+                player.avalonBuffTimer = 0; player.saberHasteTimer = 0; player.alacrityTimer = 0; player.ghostWalkTimer = 0; player.lightningShieldTimer = 0;
                 recalcPlayerStats();
                 player.hp = player.maxHp;
                 player.mp = player.maxMp;
@@ -6797,6 +7202,31 @@
                         }
                     }
 
+                    if (en.tpl.miniBoss && !en.announced) {
+                        en.announced = true;
+                        zoneBanner = { title: en.name.toUpperCase(), sub: 'Мини-босс • Страж перед логовом босса', life: 3.2, maxLife: 3.2, color: en.color };
+                        SoundFX.play('thunder');
+                    }
+                    if (en.tpl.miniBoss && en.disarmTimer <= 0) {
+                        en.specialCd -= dt;
+                        if (en.specialCd <= 0) {
+                            const toP = Math.atan2(player.y - en.y, player.x - en.x);
+                            if (en.type === 'ash_warden') {
+                                en.specialCd = 5;
+                                SoundFX.play('meteor');
+                                for (let a = 0; a < 8; a++) enemyShoot(en, (a / 8) * Math.PI * 2 + en.wob, 220, Math.round(en.dmg * 0.55), '#fb923c', 'magic', 9, 2.2);
+                            } else if (en.type === 'crimson_warden') {
+                                en.specialCd = 4.5;
+                                for (let k = -2; k <= 2; k++) enemyShoot(en, toP + k * 0.2, 340, Math.round(en.dmg * 0.6), '#be123c', 'phys', 8, 1.8);
+                            } else if (en.type === 'infernal_gatekeeper') {
+                                en.specialCd = 5.5;
+                                for (let k = 0; k < 4; k++) {
+                                    const a = Math.random() * Math.PI * 2, r = k === 0 ? 0 : 70 + Math.random() * 60;
+                                    addHazard(player.x + Math.cos(a) * r, player.y + Math.sin(a) * r, 78, 1.1, Math.round(en.dmg * 0.9), '#ef4444', 'magic');
+                                }
+                            }
+                        }
+                    }
                     // Малакор: кольцо огненных сфер
                     if (en.type === 'boss' && en.disarmTimer <= 0) {
                         en.specialCd -= dt;
@@ -6828,6 +7258,8 @@
             let ph = '';
             if (activeBoss.type === 'dracula') ph = ['', 'Фаза I — Граф', 'Фаза II — Повелитель Ночи', 'Фаза III — Истинный Облик'][activeBoss.phase];
             else if (activeBoss.type === 'hell_lord') ph = activeBoss.phase === 2 ? 'Фаза II — Ярость Преисподней' : 'Фаза I';
+            if (activeBoss.tpl.miniBoss) ph = 'Мини-босс • Страж логова';
+            if (activeBoss.guardian && activeBoss.guardian.deadTimer <= 0) ph = `🔒 Под печатью стража: ${activeBoss.guardian.name}`;
             document.getElementById('bossPhaseText').textContent = ph;
         }
 
@@ -6867,6 +7299,20 @@
             if (p.slow) { en.slowTimer = p.slow.dur; en.slowMult = p.slow.mult; }
             if (p.hitIds) p.hitIds.add(en.uid);
 
+            if (p.kind === 'saber_wave') {
+                spawnParticleBurst(en.x, en.y, '#7dd3fc', 8);
+                return false; // волна проходит насквозь
+            }
+            if (p.kind === 'ubw_blade') {
+                // Пробивающий бросок: оглушение, отбрасывание, летит дальше сквозь врагов
+                en.stunTimer = Math.max(en.stunTimer, en === p.homing ? 1.0 : 0.4);
+                if (!en.isBoss) tryMoveEntity(en, p.vx * 0.03, p.vy * 0.03);
+                spawnParticleRing(en.x, en.y, 46, '#fecaca', 16);
+                triggerScreenShake(5);
+                if (en === p.homing) p.life = Math.min(p.life, 0.22);
+                return false;
+            }
+
             if (p.bounces > 0) {
                 // Рикошет: ищем ближайшую ещё не задетую цель
                 let next = null, best = 270;
@@ -6902,6 +7348,16 @@
                     p.z = p.arcH * 4 * pr * (1 - pr); // парабола полёта
                     landed = pr >= 1;
                     if (p.glow && Math.random() < 0.7) particles.push({ x: p.x, y: p.y - p.z, vx: (Math.random() - 0.5) * 30, vy: (Math.random() - 0.5) * 30, size: p.star ? 4 : 2.5, color: p.color, life: 0.25, maxLife: 0.25 });
+                } else if (p.kind === 'saber_wave') {
+                    if (Math.random() < 0.8) particles.push({ x: p.x + (Math.random() - 0.5) * 50 * Math.abs(Math.sin(p.ang)), y: p.y + (Math.random() - 0.5) * 50 * Math.abs(Math.cos(p.ang)), vx: p.vx * 0.15, vy: p.vy * 0.15 - 30, size: 3, color: Math.random() < 0.5 ? '#e0f2fe' : '#38bdf8', life: 0.3, maxLife: 0.3 });
+                } else if (p.kind === 'ubw_blade') {
+                    // Наведение на захваченную цель, пока она не поражена
+                    const t = p.homing;
+                    if (t && t.deadTimer <= 0 && !p.hitIds.has(t.uid)) {
+                        const sp = Math.hypot(p.vx, p.vy), a = Math.atan2(t.y - p.y, t.x - p.x);
+                        p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp;
+                    }
+                    if (Math.random() < 0.9) particles.push({ x: p.x, y: p.y, vx: -p.vx * 0.05, vy: -p.vy * 0.05, size: 2.5, color: Math.random() < 0.5 ? '#fecaca' : '#e0f2fe', life: 0.22, maxLife: 0.22 });
                 } else if (Math.random() < 0.75) {
                     particles.push({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 25, vy: (Math.random() - 0.5) * 25, size: 4, color: p.color, life: 0.18, maxLife: 0.18 });
                 }
@@ -6975,6 +7431,7 @@
             if (player.runeFx) { player.runeFx.life -= dt; if (player.runeFx.life <= 0) player.runeFx = null; }
             if (player.leapAnim > 0) player.leapAnim -= dt;
             if (player.bowRecoil > 0) player.bowRecoil -= dt;
+            updateArcherState(dt);
             if (player.portalAnim < 1 && player.draculaKilled) player.portalAnim = Math.min(1, (player.portalAnim || 0) + dt * 0.5);
         }
 
@@ -7021,6 +7478,33 @@
                         });
                         spawnParticleBurst(f.x, f.y, '#a8a29e', 5);
                         playerFx[i] = { type: 'stuck_arrow', x: f.x, y: f.y, ang: Math.PI / 2 - 0.25, life: 2.2, maxLife: 2.2 };
+                    }
+                } else if (f.type === 'light_shard') {
+                    // Осколки Экскалибура жгут врагов рядом
+                    f.tick -= dt; f.life -= dt;
+                    if (f.tick <= 0) {
+                        f.tick = 0.5;
+                        enemies.forEach(en => { if (en.deadTimer <= 0 && Math.hypot(en.x - f.x, en.y - f.y) <= 30 + en.radius) damageEnemy(en, f.dmg, true, 0, 0, '#fde047'); });
+                    }
+                    if (f.life <= 0) playerFx.splice(i, 1);
+                } else if (f.type === 'ubw_fall') {
+                    f.delay -= dt;
+                    if (f.delay <= 0) {
+                        enemies.forEach(en => {
+                            if (en.deadTimer > 0) return;
+                            if (Math.hypot(en.x - f.x, en.y - f.y) <= ARCHER_STANCE.ubwHitRadius + en.radius) {
+                                const crit = Math.random() * 100 < player.critChance;
+                                en.stunTimer = Math.max(en.stunTimer, 0.3);
+                                damageEnemy(en, Math.round(f.dmg * (crit ? player.critMult : 1)), false, en.x - f.x, en.y - f.y, '#fecaca', { crit });
+                            }
+                        });
+                        spawnParticleBurst(f.x, f.y, '#d6d3d1', 6);
+                        addGroundDecal(f.x, f.y, 14, 'scorch');
+                        if (Math.random() < 0.3) triggerScreenShake(2);
+                        // Меч остаётся в земле — его можно подобрать
+                        const blocked = isTileBlocked(Math.floor(f.x / TS), Math.floor(f.y / TS));
+                        if (blocked) playerFx.splice(i, 1);
+                        else playerFx[i] = { type: 'ubw_sword', x: f.x, y: f.y, seed: f.seed, tilt: f.tilt, life: ARCHER_STANCE.swordLife, maxLife: ARCHER_STANCE.swordLife };
                     }
                 } else {
                     f.life -= dt;
@@ -7150,7 +7634,23 @@
                     <div id="pipsArcher${K}" class="level-pips"></div>
                 </div>`;
             });
-            html += `<div class="h-12 w-[2px] bg-stone-800 mx-0.5 self-center relative z-20"></div>`;
+            html += `<div class="h-12 w-[2px] bg-stone-800 mx-0.5 self-center relative z-20"></div>
+                <div class="flex flex-col items-center relative z-20">
+                    <button onclick="toggleArcherStance()" class="relative w-13 h-13 sm:w-15 sm:h-15 archer-btn-skill rounded-xl flex flex-col items-center justify-center group" title="D — Смена стойки: лук (дальний бой) ↔ парные клинки Канто и Бакуя (ближний бой, быстрые комбо)">
+                        <span class="hotkey-badge">D</span>
+                        <span id="archerStanceIcon" class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🏹</span>
+                        <span id="archerStanceName" class="text-[9px] font-rpg font-bold text-rose-200 mt-0.5">Лук</span>
+                    </button>
+                    <span class="text-[9px] font-rpg text-rose-200 mt-1">Стойка</span>
+                </div>
+                <div class="flex flex-col items-center relative z-20">
+                    <button onclick="throwUbwSword()" class="relative w-13 h-13 sm:w-15 sm:h-15 archer-btn-skill rounded-xl flex flex-col items-center justify-center group" title="F — Метнуть подобранный клинок в выделенную цель (ПКМ по врагу). Пробивает насквозь.">
+                        <span class="hotkey-badge">F</span>
+                        <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🗡️</span>
+                        <span id="archerSwordCharges" class="text-[10px] font-bold text-rose-300 mt-0.5">x0</span>
+                    </button>
+                    <span class="text-[9px] font-rpg text-rose-200 mt-1">Бросок</span>
+                </div>`;
             [['hp', '1', '🧪', 'countHpPotArcher', 'text-rose-400', 'Кровь'], ['mp', '2', '⚗️', 'countMpPotArcher', 'text-cyan-400', 'Мана']].forEach(([kind, hk, ic, id, col, lbl]) => {
                 html += `
                 <div class="flex flex-col items-center relative z-20">
@@ -7184,6 +7684,13 @@
                     if (btn) btn.classList.toggle('hidden', !(hasPts && player.orbLevels[k] < max));
                     renderLevelPips(`pips${P}${K}`, player.orbLevels[k], max, cls);
                 });
+                if (h === 'archer') {
+                    const blades = player.archerStance === 'blades';
+                    const ic = document.getElementById('archerStanceIcon'), nm = document.getElementById('archerStanceName'), ch = document.getElementById('archerSwordCharges');
+                    if (ic) ic.textContent = blades ? '⚔️' : '🏹';
+                    if (nm) nm.textContent = blades ? 'Клинки' : 'Лук';
+                    if (ch) ch.textContent = `x${player.ubwCharges || 0}`;
+                }
                 return;
             }
 
@@ -7210,8 +7717,8 @@
         function syncCharModalLabels() {
             const sets = {
                 invoker: ['Quas (Лёд)', 'Wex (Шторм)', 'Exort (Огонь)', 'Invoke (Призыв)'],
-                saber: ['Q — Strike Air', 'W — Рывок Праны', 'E — Авалон', 'R — Экскалибур'],
-                archer: ['Q — Замедляющая стрела', 'W — Залп', 'E — Отскок', 'R — Стрела Звёзд']
+                saber: ['Q — Разлом и Волна', 'W — Рывок Праны', 'E — Колоссальный Клинок', 'R — Луч Экскалибура'],
+                archer: ['Q — Замедляющая стрела', 'W — Залп', 'E — Отскок', 'R — Бесконечный Арсенал']
             }[player.heroType] || [];
             ['charQuasLvl', 'charWexLvl', 'charExortLvl', 'charInvokeLvl'].forEach((id, i) => {
                 const lab = document.getElementById(id)?.previousElementSibling;
@@ -7237,10 +7744,11 @@
                 activeOrbs: ['q', 'q', 'q'], invokedSpells: ['qqq', 'eee'],
                 spellCooldowns: {}, saberCooldowns: { q: 0, w: 0, e: 0, r: 0 },
                 invokeCd: 0, basicAttackCd: 0,
+                archerStance: 'bow', ubwCharges: 0, bladeComboStep: 0, bladeSwing: 0, ubwSky: 0,
                 moveTargetX: null, moveTargetY: null, attackTarget: null, interactTargetGoal: null,
                 questStage: 0, questKills: 0, bossKilled: false, draculaKilled: false, hellLordKilled: false,
                 portalAnim: 0, checkpointZone: null, ultCast: null, runeFx: null, controlLock: false,
-                ghostWalkTimer: 0, alacrityTimer: 0, lightningShieldTimer: 0, avalonBuffTimer: 0, excaliburChargeTime: 0, invulnTime: 0,
+                ghostWalkTimer: 0, alacrityTimer: 0, lightningShieldTimer: 0, avalonBuffTimer: 0, saberHasteTimer: 0, giantGrow: 0, excaliburChargeTime: 0, invulnTime: 0,
                 x: def.home.x * TS, y: def.home.y * TS,
                 equipment: Object.assign({}, def.equip),
                 inventory: [{ id: 'hp_pot', count: 3 }, { id: 'mp_pot', count: 3 }]
@@ -7272,7 +7780,7 @@
                     equipment: player.equipment, inventory: player.inventory,
                     questStage: player.questStage, questKills: player.questKills,
                     bossKilled: player.bossKilled, draculaKilled: !!player.draculaKilled, hellLordKilled: !!player.hellLordKilled,
-                    checkpointZone: player.checkpointZone || null,
+                    checkpointZone: player.checkpointZone || null, mapVer: 2,
                     worldTimeHours
                 };
                 localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -7287,7 +7795,10 @@
                 const data = JSON.parse(raw);
                 const diff = data.difficulty;
                 delete data.difficulty;
+                const oldLayout = !data.mapVer;
+                delete data.mapVer;
                 Object.assign(player, data);
+                if (oldLayout) remapPx(player); // сохранение со старой картой: переносим героя в новые ярусы
                 if (!HERO_DEFS[player.heroType]) player.heroType = 'invoker';
                 if (typeof data.worldTimeHours === 'number') worldTimeHours = data.worldTimeHours;
                 delete player.worldTimeHours;
@@ -7529,34 +8040,64 @@
         }
 
         function buildArcherSprite() {
+            // Арчер: багровый плащ с высоким воротником, чёрный торс с рунами, седые волосы. Мрачная палитра, контрастные тени.
             return makeCanvas(68, 70, g => {
-                // Колчан за спиной
-                g.fillStyle = '#78350f'; g.save(); g.translate(46, 22); g.rotate(0.45); g.fillRect(-4, -12, 8, 26); g.restore();
-                g.strokeStyle = '#fde68a'; g.lineWidth = 1.5;
-                [[50, 6], [53, 8], [47, 5]].forEach(([x, y]) => { g.beginPath(); g.moveTo(x - 4, y + 10); g.lineTo(x, y); g.stroke(); });
-                // Лесной плащ с капюшоном
-                const cg = g.createLinearGradient(34, 20, 34, 64);
-                cg.addColorStop(0, '#166534'); cg.addColorStop(1, '#052e16');
-                g.fillStyle = cg;
-                g.beginPath(); g.moveTo(19, 24); g.lineTo(49, 24); g.lineTo(54, 62); g.lineTo(14, 62); g.closePath(); g.fill();
-                g.strokeStyle = '#a3e635'; g.lineWidth = 1.4; g.stroke();
-                // Кожаный доспех и пояс
-                const lg = g.createLinearGradient(22, 26, 46, 56);
-                lg.addColorStop(0, '#a16207'); lg.addColorStop(1, '#451a03');
-                g.fillStyle = lg;
-                g.beginPath(); g.moveTo(23, 25); g.lineTo(45, 25); g.lineTo(43, 46); g.lineTo(25, 46); g.closePath(); g.fill();
-                g.fillStyle = '#1c1917'; g.fillRect(24, 42, 20, 4);
-                g.fillStyle = '#facc15'; g.fillRect(32, 42, 4, 4);
-                g.fillStyle = '#3f6212';
-                g.beginPath(); g.moveTo(25, 46); g.lineTo(43, 46); g.lineTo(47, 60); g.lineTo(21, 60); g.closePath(); g.fill();
-                // Лицо, глаза и капюшон
-                g.fillStyle = '#f5d0a9'; g.beginPath(); g.arc(34, 17, 7, 0, Math.PI * 2); g.fill();
-                g.fillStyle = '#84cc16'; g.fillRect(30.5, 16, 2.3, 2.3); g.fillRect(35.2, 16, 2.3, 2.3);
-                g.fillStyle = '#14532d';
-                g.beginPath(); g.arc(34, 15, 9, Math.PI * 0.95, Math.PI * 2.05); g.lineTo(44, 22); g.lineTo(40, 14); g.lineTo(34, 9); g.lineTo(28, 14); g.lineTo(24, 22); g.closePath(); g.fill();
-                // Рыжая коса
-                g.strokeStyle = '#ea580c'; g.lineWidth = 3;
-                g.beginPath(); g.moveTo(27, 20); g.quadraticCurveTo(22, 30, 25, 38); g.stroke();
+                // Длинные полы плаща за спиной (глубокий багровый, складки ткани)
+                const back = g.createLinearGradient(14, 28, 54, 68);
+                back.addColorStop(0, '#5c0a12'); back.addColorStop(0.55, '#3b0509'); back.addColorStop(1, '#14020a');
+                g.fillStyle = back;
+                g.beginPath(); g.moveTo(20, 30); g.lineTo(48, 30); g.lineTo(57, 66); g.lineTo(46, 63); g.lineTo(40, 68); g.lineTo(34, 63); g.lineTo(27, 68); g.lineTo(21, 63); g.lineTo(11, 66); g.closePath(); g.fill();
+                g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 1.2;
+                [[25, 36, 19, 62], [34, 36, 34, 64], [43, 36, 49, 62]].forEach(([x1, y1, x2, y2]) => { g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo((x1 + x2) / 2 + 2, (y1 + y2) / 2, x2, y2); g.stroke(); });
+                g.strokeStyle = 'rgba(190,30,40,0.35)'; g.lineWidth = 0.8;
+                [[28, 38, 24, 60], [40, 38, 44, 60]].forEach(([x1, y1, x2, y2]) => { g.beginPath(); g.moveTo(x1, y1); g.quadraticCurveTo((x1 + x2) / 2 - 2, (y1 + y2) / 2, x2, y2); g.stroke(); });
+                // Чёрные штаны и сапоги
+                g.fillStyle = '#0b0b0f'; g.fillRect(26, 48, 7, 14); g.fillRect(35, 48, 7, 14);
+                g.fillStyle = '#1c1c22'; g.fillRect(25, 58, 8, 5); g.fillRect(35, 58, 8, 5);
+                // Чёрный облегающий торс с текстурой
+                const torso = g.createLinearGradient(24, 26, 44, 50);
+                torso.addColorStop(0, '#26262e'); torso.addColorStop(0.5, '#0d0d12'); torso.addColorStop(1, '#050507');
+                g.fillStyle = torso;
+                g.beginPath(); g.moveTo(24, 26); g.lineTo(44, 26); g.lineTo(42, 49); g.lineTo(26, 49); g.closePath(); g.fill();
+                g.strokeStyle = 'rgba(255,255,255,0.06)'; g.lineWidth = 0.6;
+                for (let y = 29; y < 49; y += 3) { g.beginPath(); g.moveTo(25, y); g.lineTo(43, y); g.stroke(); }
+                // Светящиеся белые магические линии (руны) по торсу
+                g.save(); g.shadowColor = '#bfe9ff'; g.shadowBlur = 4; g.strokeStyle = '#e8f6ff'; g.lineWidth = 1;
+                g.beginPath();
+                g.moveTo(34, 27); g.lineTo(34, 34); g.lineTo(30, 38); g.lineTo(30, 46);
+                g.moveTo(34, 34); g.lineTo(38, 38); g.lineTo(38, 46);
+                g.moveTo(27, 30); g.lineTo(31, 32); g.moveTo(41, 30); g.lineTo(37, 32);
+                g.stroke(); g.restore();
+                // Пояс с пряжками
+                g.fillStyle = '#18181b'; g.fillRect(25, 46, 18, 3.5);
+                g.fillStyle = '#9ca3af'; g.fillRect(32.5, 46, 3, 3.5);
+                // Багровая юбка-набедренник плаща
+                const hip = g.createLinearGradient(22, 48, 22, 60);
+                hip.addColorStop(0, '#8b0f1c'); hip.addColorStop(1, '#3d0610');
+                g.fillStyle = hip;
+                g.beginPath(); g.moveTo(25, 49); g.lineTo(21, 60); g.lineTo(28, 57); g.lineTo(30, 49); g.closePath(); g.fill();
+                g.beginPath(); g.moveTo(43, 49); g.lineTo(47, 60); g.lineTo(40, 57); g.lineTo(38, 49); g.closePath(); g.fill();
+                // Багровые рукава плаща (плечи)
+                const sl = g.createLinearGradient(14, 26, 22, 44);
+                sl.addColorStop(0, '#9f1239'); sl.addColorStop(0.5, '#6b0b17'); sl.addColorStop(1, '#2a0408');
+                g.fillStyle = sl;
+                g.beginPath(); g.moveTo(24, 26); g.lineTo(16, 30); g.lineTo(15, 43); g.lineTo(21, 44); g.lineTo(24, 33); g.closePath(); g.fill();
+                g.beginPath(); g.moveTo(44, 26); g.lineTo(52, 30); g.lineTo(53, 43); g.lineTo(47, 44); g.lineTo(44, 33); g.closePath(); g.fill();
+                g.fillStyle = '#0b0b0f'; g.fillRect(15, 42, 6, 4); g.fillRect(47, 42, 6, 4); // чёрные перчатки
+                // Высокий воротник плаща
+                g.fillStyle = '#7a0d18';
+                g.beginPath(); g.moveTo(24, 27); g.lineTo(26, 18); g.lineTo(30, 24); g.lineTo(34, 26); g.lineTo(38, 24); g.lineTo(42, 18); g.lineTo(44, 27); g.closePath(); g.fill();
+                g.strokeStyle = '#c0182b'; g.lineWidth = 0.8; g.stroke();
+                // Лицо (смуглая кожа, жёсткие тени)
+                g.fillStyle = '#a0704e'; g.beginPath(); g.arc(34, 16, 6.6, 0, Math.PI * 2); g.fill();
+                g.fillStyle = 'rgba(30,10,5,0.45)'; g.beginPath(); g.arc(36.5, 17.5, 5, -0.4, 1.6); g.fill();
+                g.fillStyle = '#d4d4d8'; g.fillRect(30.6, 15.6, 2.2, 1.6); g.fillRect(35.4, 15.6, 2.2, 1.6); // стальные глаза
+                // Седые зачёсанные назад волосы — острые пряди
+                g.fillStyle = '#e7e5e4';
+                g.beginPath(); g.moveTo(27, 15); g.lineTo(28, 9); g.lineTo(25, 6); g.lineTo(31, 7); g.lineTo(31, 3); g.lineTo(35, 7); g.lineTo(38, 2); g.lineTo(39, 7); g.lineTo(44, 5); g.lineTo(41, 10); g.lineTo(42, 15); g.lineTo(38, 11); g.lineTo(31, 11); g.closePath(); g.fill();
+                g.fillStyle = '#a8a29e'; g.beginPath(); g.moveTo(31, 11); g.lineTo(35, 7.5); g.lineTo(38, 11); g.closePath(); g.fill();
+                // Контурный свет (rim light) по плечу
+                g.strokeStyle = 'rgba(255,120,120,0.35)'; g.lineWidth = 1; g.beginPath(); g.moveTo(52, 30); g.lineTo(53, 42); g.stroke();
             });
         }
 
@@ -7856,8 +8397,23 @@
         }
 
         // ---------- существа ----------
+        // Мини-боссы рисуются на основе существующих тел, крупнее и с аурой своего цвета
+        const MINIBOSS_BODIES = { ash_warden: ['gargoyle', 1.45], crimson_warden: ['blood_knight', 1.35], infernal_gatekeeper: ['pit_demon', 1.4] };
         function drawEnemyBody25(c, en, now, bob) {
             const tp = en.type;
+            const mb = MINIBOSS_BODIES[tp];
+            if (mb) {
+                c.save();
+                c.globalCompositeOperation = 'lighter';
+                const ag = c.createRadialGradient(0, 0, 4, 0, 0, 34);
+                ag.addColorStop(0, en.color + '66'); ag.addColorStop(1, en.color + '00');
+                c.fillStyle = ag; c.beginPath(); c.arc(0, 0, 34 + Math.sin(now * 0.006) * 3, 0, Math.PI * 2); c.fill();
+                c.restore();
+                c.save(); c.scale(mb[1], mb[1]);
+                drawEnemyBody25(c, Object.assign({}, en, { type: mb[0], phase: 1, state: 'chase' }), now, bob);
+                c.restore();
+                return;
+            }
             if (tp === 'bat') {
                 const flap = Math.sin(now * 0.03 + en.uid * 9) * 8;
                 c.fillStyle = '#2e1065';
@@ -8101,6 +8657,50 @@
                     c.restore();
                 } else if (f.type === 'volley_arrow' && f.delay < 0.5) {
                     c.fillStyle = `rgba(0,0,0,${0.5 - f.delay})`; c.beginPath(); c.ellipse(f.x, f.y, 6 - f.delay * 6, 3 - f.delay * 3, 0, 0, Math.PI * 2); c.fill();
+                } else if (f.type === 'ground_rift') {
+                    // Глубокая трещина в грунте со светящимися краями
+                    const a = Math.min(1, f.life / 1.2);
+                    c.save(); c.globalAlpha = a; c.lineCap = 'round'; c.lineJoin = 'round';
+                    const path = () => { c.beginPath(); f.pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); };
+                    c.strokeStyle = 'rgba(28,25,23,0.9)'; c.lineWidth = f.w + 6; path(); c.stroke();
+                    c.strokeStyle = '#0c0a09'; c.lineWidth = f.w; path(); c.stroke();
+                    c.globalCompositeOperation = 'lighter';
+                    c.shadowColor = f.glow; c.shadowBlur = 12;
+                    c.strokeStyle = f.glow; c.globalAlpha = a * (0.45 + 0.25 * Math.sin(now * 0.008 + f.w)); c.lineWidth = Math.max(1.5, f.w * 0.3); path(); c.stroke();
+                    c.restore();
+                } else if (f.type === 'light_shard') {
+                    const a = Math.min(1, f.life / 1.0), pulse = 0.6 + 0.4 * Math.sin(now * 0.01 + f.x);
+                    c.save(); c.globalAlpha = a; c.translate(f.x, f.y);
+                    c.fillStyle = 'rgba(0,0,0,0.35)'; c.beginPath(); c.ellipse(3, 1, 6, 2, 0, 0, Math.PI * 2); c.fill();
+                    c.globalCompositeOperation = 'lighter';
+                    const hg = c.createRadialGradient(0, -f.h / 2, 1, 0, -f.h / 2, 18);
+                    hg.addColorStop(0, `rgba(254,240,138,${0.55 * pulse})`); hg.addColorStop(1, 'rgba(253,224,71,0)');
+                    c.fillStyle = hg; c.beginPath(); c.arc(0, -f.h / 2, 18, 0, Math.PI * 2); c.fill();
+                    c.rotate(f.rot);
+                    c.fillStyle = `rgba(255,251,235,${0.75 + 0.25 * pulse})`;
+                    c.beginPath(); c.moveTo(0, -f.h); c.lineTo(3.5, -f.h * 0.35); c.lineTo(0, 0); c.lineTo(-3.5, -f.h * 0.35); c.closePath(); c.fill();
+                    c.restore();
+                } else if (f.type === 'ubw_fall' && f.delay < 0.6) {
+                    const k = 1 - f.delay / 0.6;
+                    c.fillStyle = `rgba(0,0,0,${0.5 * k})`; c.beginPath(); c.ellipse(f.x, f.y, 4 + k * 6, 2 + k * 2.5, 0, 0, Math.PI * 2); c.fill();
+                } else if (f.type === 'ubw_circle') {
+                    // Огненный круг «реальности мрамора» по границе области
+                    const p = f.life / f.maxLife;
+                    c.save(); c.globalAlpha = Math.min(1, p * 3) * 0.8;
+                    c.strokeStyle = '#ef4444'; c.lineWidth = 3; c.shadowColor = '#f97316'; c.shadowBlur = 14;
+                    c.beginPath(); c.arc(f.x, f.y, f.radius * (1 - p * 0.15 + 0.15), 0, Math.PI * 2); c.stroke();
+                    c.globalAlpha *= 0.35; c.fillStyle = '#450a0a'; c.fill();
+                    c.restore();
+                } else if (f.type === 'ubw_sword') {
+                    const a = Math.min(1, f.life / 1.2);
+                    const pulse = 0.5 + Math.sin(now * 0.006 + f.seed) * 0.5;
+                    c.save(); c.globalAlpha = a;
+                    c.fillStyle = 'rgba(0,0,0,0.45)'; c.beginPath(); c.ellipse(f.x + 6, f.y + 2, 10, 3, 0.2, 0, Math.PI * 2); c.fill();
+                    c.strokeStyle = `rgba(254,202,202,${0.25 + pulse * 0.35})`; c.lineWidth = 1.5;
+                    c.beginPath(); c.ellipse(f.x, f.y + 1, 14, 5, 0, 0, Math.PI * 2); c.stroke();
+                    c.translate(f.x, f.y); c.rotate(Math.PI + f.tilt);
+                    c.translate(0, -26); drawProjectedSword(c, 0.75, f.seed);
+                    c.restore();
                 } else if (f.type === 'stuck_arrow') {
                     c.save(); c.globalAlpha = Math.min(1, f.life / 0.6); c.translate(f.x, f.y); c.rotate(f.ang + Math.PI);
                     c.strokeStyle = '#a16207'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(0, 0); c.lineTo(13, -6); c.stroke();
@@ -8109,6 +8709,15 @@
                 }
             });
             enemies.forEach(en => {
+                if (en.guardian && en.deadTimer <= 0 && en.guardian.deadTimer <= 0) {
+                    // Печать стража: вращающийся круг рун и цепей вокруг неуязвимого босса
+                    c.save(); c.translate(en.x, en.y + 6);
+                    c.strokeStyle = `rgba(252,165,165,${0.55 + Math.sin(now * 0.005) * 0.2})`; c.lineWidth = 2;
+                    c.beginPath(); c.ellipse(0, 0, en.radius + 18, (en.radius + 18) * 0.45, 0, 0, Math.PI * 2); c.stroke();
+                    c.setLineDash([6, 5]); c.lineDashOffset = -now * 0.02;
+                    c.beginPath(); c.ellipse(0, 0, en.radius + 28, (en.radius + 28) * 0.45, 0, 0, Math.PI * 2); c.stroke();
+                    c.restore();
+                }
                 if (en.type === 'dracula' && en.deadTimer <= 0 && en.state === 'dive_tele') {
                     // Телеграф пикирования Дракулы
                     c.save(); c.strokeStyle = `rgba(239,68,68,${0.35 + Math.sin(now * 0.03) * 0.2})`; c.lineWidth = 44; c.lineCap = 'round';
@@ -8121,7 +8730,27 @@
         function drawOverFX25(c, now) {
             c.save(); c.globalCompositeOperation = 'lighter';
             playerFx.forEach(f => {
-                if (f.type === 'volley_arrow' && f.delay < 0.5) {
+                if (f.type === 'excalibur_beam') {
+                    // Направленный луч Экскалибура
+                    const p = f.life / f.maxLife, grow = Math.min(1, (1 - p) * 6);
+                    const w = f.width * (0.35 + 0.65 * p), len = f.len * grow;
+                    c.save(); c.translate(f.x, f.y - 10); c.rotate(f.ang);
+                    const bg = c.createLinearGradient(0, -w, 0, w);
+                    bg.addColorStop(0, 'rgba(245,158,11,0)'); bg.addColorStop(0.3, `rgba(253,224,71,${0.75 * p})`);
+                    bg.addColorStop(0.5, `rgba(255,255,255,${p})`); bg.addColorStop(0.7, `rgba(253,224,71,${0.75 * p})`); bg.addColorStop(1, 'rgba(245,158,11,0)');
+                    c.fillStyle = bg; c.fillRect(0, -w, len, w * 2);
+                    c.fillStyle = `rgba(255,255,255,${0.9 * p})`; c.fillRect(0, -w * 0.12, len, w * 0.24);
+                    const eg = c.createRadialGradient(len, 0, 2, len, 0, w * 1.4);
+                    eg.addColorStop(0, `rgba(255,255,255,${p})`); eg.addColorStop(1, 'rgba(253,224,71,0)');
+                    c.fillStyle = eg; c.beginPath(); c.arc(len, 0, w * 1.4, 0, Math.PI * 2); c.fill();
+                    c.restore();
+                } else if (f.type === 'ubw_fall' && f.delay < 0.6) {
+                    const h = (f.delay / 0.6) * 520;
+                    c.save(); c.translate(f.x, f.y - h); c.rotate(Math.PI + f.tilt);
+                    c.strokeStyle = 'rgba(254,202,202,0.35)'; c.lineWidth = 3; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -60); c.stroke();
+                    c.translate(0, -26); drawProjectedSword(c, 0.8, f.seed);
+                    c.restore();
+                } else if (f.type === 'volley_arrow' && f.delay < 0.5) {
                     const h = (f.delay / 0.5) * 430;
                     c.strokeStyle = '#fde68a'; c.lineWidth = 2;
                     c.beginPath(); c.moveTo(f.x - 5, f.y - h - 24); c.lineTo(f.x, f.y - h); c.stroke();
@@ -8224,6 +8853,25 @@
         // ---------- снаряды ----------
         function drawProjectiles25(c, now) {
             projectiles.forEach(p => {
+                if (p.kind === 'saber_wave') {
+                    // Полумесяц энергии, слегка гаснущий к концу полёта
+                    const k = Math.max(0, p.life / p.maxLife);
+                    c.save(); c.translate(p.x, p.y); c.rotate(p.ang); c.globalCompositeOperation = 'lighter';
+                    c.shadowColor = '#38bdf8'; c.shadowBlur = 18;
+                    c.strokeStyle = `rgba(125,211,252,${0.5 + 0.5 * k})`; c.lineWidth = 10;
+                    c.beginPath(); c.arc(-18, 0, 40, -1.0, 1.0); c.stroke();
+                    c.strokeStyle = `rgba(255,255,255,${0.7 * k + 0.3})`; c.lineWidth = 4;
+                    c.beginPath(); c.arc(-16, 0, 40, -0.85, 0.85); c.stroke();
+                    c.restore();
+                    return;
+                }
+                if (p.kind === 'ubw_blade') {
+                    c.save(); c.translate(p.x, p.y - 8); c.rotate(Math.atan2(p.vy, p.vx) + Math.PI / 2);
+                    c.shadowColor = '#fca5a5'; c.shadowBlur = 16;
+                    c.translate(0, 14); drawProjectedSword(c, 0.9, p.seed);
+                    c.restore();
+                    return;
+                }
                 if (p.kind === 'arrow') {
                     // Тень стрелы на земле + сама стрела на высоте дуги, наклонённая по траектории
                     const sp = Math.hypot(p.vx, p.vy) || 1;
@@ -8324,26 +8972,130 @@
                 c.restore();
                 c.save(); c.globalAlpha = 0.25 + prog * 0.35;
                 c.strokeStyle = '#fef08a'; c.lineWidth = 2; c.setLineDash([10, 8]);
-                c.beginPath(); c.arc(Math.cos(cst.ang) * SABER_ULT.reach, Math.sin(cst.ang) * SABER_ULT.reach, SABER_ULT.radius, 0, Math.PI * 2); c.stroke();
+                c.rotate(cst.ang); c.strokeRect(0, -SABER_ULT.width / 2, SABER_ULT.length, SABER_ULT.width);
                 c.restore();
             }
+        }
+
+        // ---------- Арчер: оружие ----------
+        function drawArcherBow(c, now) {
+            // Чёрный изогнутый техно-магический лук с тонкими светящимися линиями
+            c.save(); c.rotate(player.facingAngle);
+            const ready = player.basicAttackCd <= 0;
+            const draw = player.bowRecoil > 0 ? 0 : (ready ? 1 : Math.max(0, 1 - player.basicAttackCd / Math.max(0.01, player.attackInterval)));
+            const pull = -3 + draw * 13;
+            const tipX = 6, tipY = 22;
+            // Корпус лука: асимметричные угловатые плечи
+            c.fillStyle = '#09090b'; c.strokeStyle = '#27272a'; c.lineWidth = 1;
+            [-1, 1].forEach(sg => {
+                c.beginPath();
+                c.moveTo(14, 0); c.lineTo(20, sg * 5); c.lineTo(19, sg * 13); c.lineTo(tipX + 4, sg * (tipY - 2)); c.lineTo(tipX, sg * tipY);
+                c.lineTo(tipX + 2, sg * (tipY - 4)); c.lineTo(16, sg * 12); c.lineTo(17, sg * 5); c.lineTo(12, 0); c.closePath(); c.fill(); c.stroke();
+            });
+            c.fillStyle = '#18181b'; c.fillRect(10, -3.5, 6, 7); // рукоять
+            // Светящиеся жилы по плечам лука
+            c.save(); c.globalCompositeOperation = 'lighter'; c.shadowColor = '#7dd3fc'; c.shadowBlur = 6;
+            c.strokeStyle = `rgba(186,230,253,${0.55 + draw * 0.45})`; c.lineWidth = 0.9;
+            [-1, 1].forEach(sg => { c.beginPath(); c.moveTo(16, sg * 2); c.lineTo(18.2, sg * 6); c.lineTo(17.4, sg * 12.5); c.lineTo(tipX + 3, sg * (tipY - 3)); c.stroke(); });
+            c.restore();
+            // Тетива: при натяжении — магическая нить света
+            const sx = tipX, sy = tipY;
+            c.strokeStyle = draw > 0.5 ? '#e0f2fe' : '#a1a1aa'; c.lineWidth = draw > 0.5 ? 1.3 : 0.9;
+            if (draw > 0.5) { c.shadowColor = '#bae6fd'; c.shadowBlur = 8; }
+            c.beginPath(); c.moveTo(sx, -sy); c.lineTo(sx - pull, 0); c.lineTo(sx, sy); c.stroke();
+            c.shadowBlur = 0;
+            if (draw > 0.15) {
+                // Проецируемая стрела-клинок: светящийся след и частицы энергии
+                const ax = sx - pull;
+                c.save(); c.globalCompositeOperation = 'lighter';
+                const lg = c.createLinearGradient(ax, 0, 42, 0);
+                lg.addColorStop(0, 'rgba(125,211,252,0)'); lg.addColorStop(0.6, `rgba(186,230,253,${0.5 * draw})`); lg.addColorStop(1, `rgba(255,255,255,${draw})`);
+                c.strokeStyle = lg; c.lineWidth = 2.2; c.beginPath(); c.moveTo(ax, 0); c.lineTo(40, 0); c.stroke();
+                c.fillStyle = `rgba(255,255,255,${draw})`; c.beginPath(); c.moveTo(45, 0); c.lineTo(38, -3); c.lineTo(38, 3); c.closePath(); c.fill();
+                const hg = c.createRadialGradient(ax, 0, 0, ax, 0, 9 * draw + 2);
+                hg.addColorStop(0, `rgba(224,242,254,${draw})`); hg.addColorStop(1, 'rgba(56,189,248,0)');
+                c.fillStyle = hg; c.beginPath(); c.arc(ax, 0, 9 * draw + 2, 0, Math.PI * 2); c.fill();
+                c.restore();
+                if (draw >= 1 && Math.random() < 0.35 * (gameSettings.particleMult || 1)) {
+                    const fa = player.facingAngle, px = player.x + Math.cos(fa) * ax, py = player.y + Math.sin(fa) * ax;
+                    particles.push({ x: px + (Math.random() - 0.5) * 6, y: py - 6 + (Math.random() - 0.5) * 6, vx: Math.cos(fa) * 40 + (Math.random() - 0.5) * 30, vy: Math.sin(fa) * 40 - 20, size: 1.8, color: Math.random() < 0.5 ? '#e0f2fe' : '#7dd3fc', life: 0.35, maxLife: 0.35 });
+                }
+            }
+            c.restore();
+        }
+
+        function drawFalchion(c, white) {
+            // Парный клинок-фальшион: белый (Бакуя) и чёрный (Канто) с узором черепахового панциря
+            c.fillStyle = white ? '#f4f4f5' : '#0a0a0c';
+            c.strokeStyle = white ? '#a1a1aa' : '#3f3f46'; c.lineWidth = 0.8;
+            c.beginPath(); c.moveTo(0, -2); c.lineTo(22, -3.5); c.quadraticCurveTo(30, -2, 31, 2); c.lineTo(22, 3); c.lineTo(0, 2.5); c.closePath(); c.fill(); c.stroke();
+            c.strokeStyle = white ? 'rgba(220,38,38,0.65)' : 'rgba(220,38,38,0.8)'; c.lineWidth = 0.7;
+            for (let x = 5; x < 22; x += 5) { c.beginPath(); c.moveTo(x, -1.5); c.lineTo(x + 2.5, 0); c.lineTo(x, 1.5); c.lineTo(x - 2.5, 0); c.closePath(); c.stroke(); }
+            c.fillStyle = '#52525b'; c.fillRect(-2, -4, 2.5, 8); // гарда
+            c.fillStyle = white ? '#d4d4d8' : '#18181b'; c.fillRect(-8, -1.5, 6, 3); // рукоять
+        }
+
+        function drawArcherBlades(c, now) {
+            const sw = player.bladeSwing || 0; // 0..1 фаза текущего удара
+            const side = player.bladeSide || 1;
+            c.save(); c.rotate(player.facingAngle);
+            [[1, true], [-1, false]].forEach(([sg, white]) => {
+                const active = sw > 0 && (player.bladeComboStep === 3 || sg === side);
+                const swing = active ? (1 - sw) : 0;
+                const base = sg * (0.9 - swing * 1.9);
+                c.save(); c.translate(4, sg * 10); c.rotate(base);
+                if (active) {
+                    c.save(); c.globalCompositeOperation = 'lighter';
+                    c.strokeStyle = white ? `rgba(255,255,255,${sw * 0.8})` : `rgba(239,68,68,${sw * 0.7})`; c.lineWidth = 3;
+                    c.beginPath(); c.arc(0, 0, 30, -sg * 0.9, sg * 0.4, sg < 0); c.stroke(); c.restore();
+                }
+                drawFalchion(c, white);
+                c.restore();
+            });
+            c.restore();
+        }
+
+        function drawProjectedSword(c, sc, seed) {
+            // Проекция клинка из «бесконечного арсенала»: разные силуэты по seed
+            c.save(); c.scale(sc, sc);
+            const kind = seed % 4;
+            const L = [34, 40, 30, 44][kind], W = [3, 4, 5, 3][kind];
+            c.fillStyle = ['#d4d4d8', '#a1a1aa', '#e4e4e7', '#71717a'][kind];
+            c.strokeStyle = '#3f3f46'; c.lineWidth = 0.8;
+            c.beginPath(); c.moveTo(-W, 0); c.lineTo(-W * 0.8, -L); c.lineTo(0, -L - 6); c.lineTo(W * 0.8, -L); c.lineTo(W, 0); c.closePath(); c.fill(); c.stroke();
+            c.fillStyle = ['#7f1d1d', '#a16207', '#1e3a8a', '#3f3f46'][kind];
+            c.fillRect(-W - 5, -1, W * 2 + 10, 3);
+            c.fillStyle = '#27272a'; c.fillRect(-1.6, 2, 3.2, 10);
+            c.fillStyle = c.fillStyle; c.beginPath(); c.arc(0, 13, 2.2, 0, Math.PI * 2); c.fill();
+            c.restore();
         }
 
         // Рисуется поверх героя
         function drawHeroOverFX(c, now, bobY) {
             const h = player.heroType;
             if (h === 'archer') {
-                // Лук в руках: тетива натянута, когда выстрел готов
-                c.save(); c.rotate(player.facingAngle);
-                const ready = player.basicAttackCd <= 0, pull = player.bowRecoil > 0 ? -3 : (ready ? 7 : 2);
-                c.strokeStyle = '#92400e'; c.lineWidth = 3; c.beginPath(); c.arc(12, 0, 17, -1.15, 1.15); c.stroke();
-                const ex = 12 + Math.cos(1.15) * 17, ey = Math.sin(1.15) * 17;
-                c.strokeStyle = '#f5f5f4'; c.lineWidth = 1; c.beginPath(); c.moveTo(ex, -ey); c.lineTo(ex - pull, 0); c.lineTo(ex, ey); c.stroke();
-                if (ready) {
-                    c.strokeStyle = '#a16207'; c.lineWidth = 1.8; c.beginPath(); c.moveTo(ex - pull, 0); c.lineTo(34, 0); c.stroke();
-                    c.fillStyle = '#e7e5e4'; c.beginPath(); c.moveTo(38, 0); c.lineTo(32, -3); c.lineTo(32, 3); c.closePath(); c.fill();
+                if (player.archerStance === 'blades') drawArcherBlades(c, now);
+                else drawArcherBow(c, now);
+                if (player.stanceAnim > 0) {
+                    // Вспышка проекции при смене стойки
+                    const k = player.stanceAnim / 0.35;
+                    c.save(); c.globalCompositeOperation = 'lighter';
+                    c.strokeStyle = `rgba(191,233,255,${k})`; c.lineWidth = 2;
+                    c.beginPath(); c.arc(0, -6, 30 + (1 - k) * 22, 0, Math.PI * 2); c.stroke();
+                    for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + now * 0.004; c.beginPath(); c.moveTo(Math.cos(a) * 14, -6 + Math.sin(a) * 14); c.lineTo(Math.cos(a) * (34 + (1 - k) * 20), -6 + Math.sin(a) * (34 + (1 - k) * 20)); c.stroke(); }
+                    c.restore();
                 }
-                c.restore();
+                if (player.ubwCharges > 0) {
+                    // Подобранные клинки парят за спиной
+                    c.save();
+                    for (let i = 0; i < player.ubwCharges; i++) {
+                        const a = -Math.PI / 2 + (i - (player.ubwCharges - 1) / 2) * 0.32;
+                        c.save(); c.translate(Math.cos(a) * 30, -10 + Math.sin(a) * 30 + Math.sin(now * 0.004 + i) * 2); c.rotate(a + Math.PI / 2);
+                        drawProjectedSword(c, 0.55, i);
+                        c.restore();
+                    }
+                    c.restore();
+                }
             }
             const cst = player.ultCast;
             if (cst) {
@@ -8467,25 +9219,35 @@
             10: '#e7e5e4', 11: '#2563eb', 12: '#f59e0b', 13: '#3b3355', 14: '#12101a', 15: '#7f1d1d', 16: '#71717a', 17: '#431407', 18: '#1f4d36', 19: '#64748b', 20: '#57534e', 21: '#1c0a05', 22: '#57534e' };
         function renderMinimap() {
             if (!R25.minimap) {
-                R25.minimap = makeCanvas(MAP_W, MAP_H, g => {
-                    for (let y = 0; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) { g.fillStyle = MINIMAP_COLORS[worldMap[y][x]] || '#000'; g.fillRect(x, y, 1, 1); }
-                });
+                // Общая карта показывает только наземный мир. Ад — скрытый ярус: его карта видна, лишь когда герой внутри.
+                const hr = WORLD_TIERS.hellRow;
+                R25.minimap = {
+                    over: makeCanvas(MAP_W, hr, g => {
+                        for (let y = 0; y < hr; y++) for (let x = 0; x < MAP_W; x++) { g.fillStyle = MINIMAP_COLORS[worldMap[y][x]] || '#000'; g.fillRect(x, y, 1, 1); }
+                    }),
+                    hell: makeCanvas(MAP_W, MAP_H - hr, g => {
+                        for (let y = hr; y < MAP_H; y++) for (let x = 0; x < MAP_W; x++) { g.fillStyle = MINIMAP_COLORS[worldMap[y][x]] || '#000'; g.fillRect(x, y - hr, 1, 1); }
+                    })
+                };
             }
+            const inHell = playerZone() === 'hell';
+            const row0 = inHell ? WORLD_TIERS.hellRow : 0, rows = inHell ? MAP_H - WORLD_TIERS.hellRow : WORLD_TIERS.hellRow;
             const W = minimapCanvas.width, H = minimapCanvas.height;
-            const scale = Math.min(W / MAP_W, H / MAP_H), oy = (H - MAP_H * scale) / 2, ox = (W - MAP_W * scale) / 2;
+            const scale = Math.min(W / MAP_W, H / rows), oy = (H - rows * scale) / 2, ox = (W - MAP_W * scale) / 2;
             miniCtx.fillStyle = '#090d16';
             miniCtx.fillRect(0, 0, W, H);
             miniCtx.imageSmoothingEnabled = false;
-            miniCtx.drawImage(R25.minimap, ox, oy, MAP_W * scale, MAP_H * scale);
-            const mx = wx => ox + (wx / TS) * scale, my = wy => oy + (wy / TS) * scale;
+            miniCtx.drawImage(inHell ? R25.minimap.hell : R25.minimap.over, ox, oy, MAP_W * scale, rows * scale);
+            const mx = wx => ox + (wx / TS) * scale, my = wy => oy + (wy / TS - row0) * scale;
+            const sameTier = wy => (wy / TS >= WORLD_TIERS.hellRow) === inHell;
             enemies.forEach(en => {
-                if (en.deadTimer > 0) return;
+                if (en.deadTimer > 0 || !sameTier(en.y)) return;
                 miniCtx.fillStyle = en.isBoss ? '#facc15' : '#ef4444';
                 const s = en.isBoss ? 4 : 2;
                 miniCtx.fillRect(mx(en.x) - s / 2, my(en.y) - s / 2, s, s);
             });
-            npcs.forEach(n => { miniCtx.fillStyle = '#38bdf8'; miniCtx.fillRect(mx(n.x) - 1.5, my(n.y) - 1.5, 3, 3); });
-            worldPortals.forEach(po => { if (po.isOpen()) { miniCtx.fillStyle = po.color; miniCtx.beginPath(); miniCtx.arc(mx(po.x), my(po.y), 3, 0, Math.PI * 2); miniCtx.fill(); } });
+            npcs.forEach(n => { if (!sameTier(n.y)) return; miniCtx.fillStyle = '#38bdf8'; miniCtx.fillRect(mx(n.x) - 1.5, my(n.y) - 1.5, 3, 3); });
+            worldPortals.forEach(po => { if (po.isOpen() && sameTier(po.y)) { miniCtx.fillStyle = po.color; miniCtx.beginPath(); miniCtx.arc(mx(po.x), my(po.y), 3, 0, Math.PI * 2); miniCtx.fill(); } });
             miniCtx.fillStyle = '#ffffff';
             miniCtx.beginPath(); miniCtx.arc(mx(player.x), my(player.y), 3, 0, Math.PI * 2); miniCtx.fill();
             miniCtx.strokeStyle = 'rgba(255,255,255,0.5)'; miniCtx.lineWidth = 1;
