@@ -87,6 +87,37 @@ const Tex3D = {
         H = this.heights(S2, (x, y) => { const b = brick(x, y); const chip = f2(x / 9, y / 9, 56.9, 3, 45) * 6; const mortar = Math.min(1, Math.max(0, b.edge - chip * 0.6) / 5); const crack = Math.abs(f2(x / 40, y / 40, 12.8, 3, 46 + (b.id % 7)) - 0.5) < 0.012 ? -0.4 : 0; return mortar * (0.55 + f2(x / 14, y / 14, 36.57, 4, 41 + (b.id % 5)) * 0.45) + crack; });
         T.stoneN = this.normal(H, S2, 4.5);
         T.stone = this.paint(S2, (x, y) => { const b = brick(x, y), i = y * S2 + x; const tone = 0.68 + this.hash(b.id, 3, 5) * 0.26; const inMortar = H[i] < 0.2; const moss = inMortar && f2(x / 20, y / 20, 25.6, 2, 47) > 0.55; const v = (inMortar ? 0.42 : tone) * (0.85 + f2(x / 20, y / 20, 25.6, 3, 44) * 0.25) * ao(H, i); return moss ? [v * 0.7, v * 0.95, v * 0.55] : [v, v * 0.98, v * 0.95]; });
+        // Гравировка лат: филигранные завитки и окантовка (карта нормалей)
+        {
+            const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+            g.fillStyle = '#808080'; g.fillRect(0, 0, 512, 512); g.strokeStyle = '#2a2a2a'; g.lineCap = 'round';
+            for (let row = 0; row < 4; row++) for (let col = 0; col < 4; col++) {
+                const cx = col * 128 + 64, cy = row * 128 + 64; g.lineWidth = 3;
+                for (let s2 = -1; s2 <= 1; s2 += 2) { g.beginPath(); for (let k = 0; k < 60; k++) { const a = k * 0.18, r = 4 + k * 0.75; const x = cx + s2 * Math.cos(a) * r, y = cy + Math.sin(a) * r * 0.8; k ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }
+                g.lineWidth = 2; g.beginPath(); g.moveTo(cx - 50, cy + 52); g.quadraticCurveTo(cx, cy + 30, cx + 50, cy + 52); g.stroke();
+            }
+            g.lineWidth = 6; g.strokeStyle = '#3a3a3a'; for (let i = 0; i <= 512; i += 128) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 512); g.stroke(); }
+            const d = g.getImageData(0, 0, 512, 512).data, H2 = new Float32Array(512 * 512);
+            for (let i = 0; i < H2.length; i++) H2[i] = d[i * 4] / 255 + this.fbm((i % 512) / 40, Math.floor(i / 512) / 40, 12.8, 2, 37) * 0.2;
+            T.engraveN = this.normal(H2, 512, 3.5);
+        }
+        // Рваный край и прорехи плаща (карта прозрачности)
+        {
+            const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+            g.fillStyle = '#fff'; g.fillRect(0, 0, 256, 256); g.fillStyle = '#000';
+            g.beginPath(); g.moveTo(0, 256); for (let x = 0; x <= 256; x += 6) g.lineTo(x, 256 - 6 - Math.abs(Math.sin(x * 0.11)) * 22 - this.hash(x, 1, 9) * 26); g.lineTo(256, 256); g.fill();
+            for (let i = 0; i < 9; i++) { const x = this.hash(i, 2, 4) * 240 + 8, y = 150 + this.hash(i, 3, 4) * 70; g.beginPath(); g.ellipse(x, y, 3 + this.hash(i, 5, 4) * 6, 2 + this.hash(i, 6, 4) * 5, this.hash(i, 7, 4) * 3, 0, 7); g.fill(); }
+            T.capeA = this.tex(c, false); T.capeA.wrapS = T.capeA.wrapT = THREE.ClampToEdgeWrapping;
+        }
+        // Трещины в латах Павшего Рыцаря (карта свечения)
+        {
+            const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+            g.fillStyle = '#000'; g.fillRect(0, 0, 512, 512); g.strokeStyle = '#ff2a20'; g.lineCap = 'round'; g.shadowColor = '#ff2a20'; g.shadowBlur = 6;
+            let sd = 9; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+            const crack = (x, y, a, n, w) => { g.lineWidth = w; g.beginPath(); g.moveTo(x, y); for (let i = 0; i < n; i++) { a += (r() - 0.5) * 0.9; x += Math.cos(a) * 9; y += Math.sin(a) * 9; g.lineTo(x, y); if (w > 1.2 && r() < 0.12) { g.stroke(); crack(x, y, a + (r() - 0.5) * 2, n * 0.5, w * 0.6); g.beginPath(); g.moveTo(x, y); g.lineWidth = w; } } g.stroke(); };
+            for (let i = 0; i < 14; i++) crack(r() * 512, r() * 512, r() * 6.28, 14 + r() * 16, 2.6);
+            T.knightGlow = this.tex(c, true);
+        }
         // Кора деревьев: вертикальные борозды
         H = this.heights(S, (x, y) => { const r = f(x / 6, y / 40, 42.666, 3, 51); return Math.pow(Math.abs(Math.sin(x / S * Math.PI * 2 * 9 + r * 6)), 0.6) * 0.6 + r * 0.4; });
         T.barkN = this.normal(H, S, 4.5);
@@ -141,6 +172,10 @@ G3.KIND = {
     rock:    { metalness: 0, roughness: 0.93, n: 'leafN', ns: 1.2, env: 0.3 },
     leaf:    { metalness: 0, roughness: 0.8, n: 'leafN', map: 'leaf', ns: 0.9, env: 0.3 },
     gem:     { metalness: 0.2, roughness: 0.12, env: 1.8 },
+    engraved: { metalness: 0.85, roughness: 0.4, n: 'engraveN', rm: 'metalR', mm: 'metalM', map: 'metal', ns: 1.1, env: 0.95 },
+    engravedGold: { metalness: 1.0, roughness: 0.32, n: 'engraveN', rm: 'metalR', ns: 1.0, env: 1.1 },
+    cape:    { metalness: 0, roughness: 0.92, n: 'clothN', map: 'cloth', ns: 0.9, env: 0.3, alpha: 'capeA' },
+    knightPlate: { metalness: 0.75, roughness: 0.5, n: 'engraveN', rm: 'metalR', map: 'metal', ns: 0.7, env: 0.6, glow: 'knightGlow' },
     plain:   { metalness: 0, roughness: 0.7, env: 0.5 }
 };
 G3.mat = function (color, opts) {
@@ -153,6 +188,8 @@ G3.mat = function (color, opts) {
     if (K.n && T[K.n]) { p.normalMap = T[K.n]; p.normalScale = new THREE.Vector2(K.ns, K.ns); }
     if (K.rm && T[K.rm]) p.roughnessMap = T[K.rm];
     if (K.mm && T[K.mm]) p.metalnessMap = T[K.mm];
+    if (K.alpha && T[K.alpha]) { p.alphaMap = T[K.alpha]; p.alphaTest = 0.5; }
+    if (K.glow && T[K.glow]) { p.emissiveMap = T[K.glow]; p.emissive = new THREE.Color(0xff2a20); p.emissiveIntensity = 2.2; }
     if (K.map && T[K.map]) p.map = T[K.map];
     const m = new THREE.MeshStandardMaterial(Object.assign(p, o));
     if (!unique) { m.userData.cached = true; G3.matCache.set(key, m); }

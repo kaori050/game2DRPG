@@ -55,14 +55,14 @@ const Models3D = {
     //    ears, beard, collar, wings, eyes, skull, weapon, offhand, bulk, scale, armor (корпус — металл), boots, belt
     humanoid(o) {
         const B = this, root = new THREE.Group(), body = new THREE.Group(), rig = { kind: 'biped' };
-        const bk = o.bulk || 1, skinK = o.skull ? 'bone' : 'skin', bodyK = o.armor ? 'metal' : 'cloth';
+        const bk = o.bulk || 1, skinK = o.skull ? 'bone' : 'skin', armK = o.armK || 'metal', bodyK = o.armor ? armK : 'cloth';
         root.add(body); rig.body = body;
         const skin = o.skin || 0xe0b090;
         // Ноги: бедро, голень, сапог; шарнир в тазу
         rig.legs = [-1, 1].map(s => {
             const p = B.pivot(s * 0.095 * bk, 0.47, 0);
-            p.add(B.at(B.m(B.capsGeo(0.068 * bk, 0.17), o.legs || 0x3a3a46, o.armor ? 'metal' : 'cloth'), 0, -0.12, 0));
-            p.add(B.at(B.m(B.capsGeo(0.056 * bk, 0.13), o.legs || 0x3a3a46, o.armor ? 'metal' : 'cloth'), 0, -0.29, 0));
+            p.add(B.at(B.m(B.capsGeo(0.068 * bk, 0.17), o.legs || 0x3a3a46, o.armor ? armK : 'cloth'), 0, -0.12, 0));
+            p.add(B.at(B.m(B.capsGeo(0.056 * bk, 0.13), o.legs || 0x3a3a46, o.armor ? armK : 'cloth'), 0, -0.29, 0));
             p.add(B.at(B.m(B.rboxGeo(0.12 * bk, 0.13, 0.21 * bk, 0.045), o.boots || 0x2a2018, o.armor ? 'dark' : 'leather'), 0, -0.4, 0.03));
             if (o.armor) p.add(B.at(B.m(B.sphGeo(0.05, 1, 0.8, 0.9), o.shoulders || o.body || 0x8a8a94, 'metal'), 0, -0.21, 0.05));
             body.add(p); return p;
@@ -73,11 +73,13 @@ const Models3D = {
         body.add(B.at(B.m(B.cylGeo(0.045, 0.05, 0.08), skin, skinK), 0, 0.9, 0));
         if (o.chest) {
             // Нагрудник: выпуклая пластина по форме груди + окантовка
-            const c = B.m(B.geo('chestplate', () => new THREE.SphereGeometry(0.16, 28, 16, Math.PI * 0.08, Math.PI * 0.84, Math.PI * 0.22, Math.PI * 0.5)), o.chest, o.chestK || 'metal', { side: THREE.DoubleSide });
+            const c = B.m(B.geo('chestplate', () => new THREE.SphereGeometry(0.16, 28, 16, Math.PI * 0.08, Math.PI * 0.84, Math.PI * 0.22, Math.PI * 0.5)), o.chest, o.chestK === 'metal' || !o.chestK ? 'engraved' : (o.chestK === 'gold' ? 'engravedGold' : o.chestK), { side: THREE.DoubleSide });
             c.scale.set(1.12 * bk, 1.05, 0.62 * bk); c.position.set(0, 0.7, 0.0); body.add(c);
         }
         const belt = B.m(B.geo('belt', () => new THREE.TorusGeometry(0.14, 0.022, 10, 32)), o.belt || 0x3a2a1a, 'leather'); belt.rotation.x = Math.PI / 2; belt.position.y = 0.48; belt.scale.set(bk, bk * 0.74, 1); body.add(belt);
         body.add(B.at(B.m(B.rboxGeo(0.06, 0.05, 0.02, 0.01), 0xd4a020, 'gold'), 0, 0.48, 0.105 * bk));
+        // Кожаная перевязь через грудь (со строчкой) и пряжка
+        if (o.strap) { const st = B.m(B.rboxGeo(0.05, 0.5, 0.02, 0.008), o.strapC || 0x3a2414, 'leather'); st.position.set(0.02, 0.7, 0.125 * bk); st.rotation.z = 0.62; body.add(st); body.add(B.at(B.m(B.rboxGeo(0.04, 0.035, 0.022, 0.006), 0xc8ccd4, 'metal'), 0.05, 0.66, 0.135 * bk, 0, 0, 0.62)); }
         // Набедренные пластины (тассеты)
         if (o.tassets || o.armor) for (let i = 0; i < 4; i++) { const a = (i - 1.5) * 0.55; const t = B.m(B.rboxGeo(0.1, 0.13, 0.018, 0.008), o.shoulders || o.chest || 0x8a8a94, 'metal'); t.position.set(Math.sin(a) * 0.15 * bk, 0.4, Math.cos(a) * 0.11 * bk); t.rotation.set(0.25, a, 0); body.add(t); }
         // Ножны на левом бедре
@@ -94,13 +96,13 @@ const Models3D = {
         }
         // Наплечники: слоистые полусферы
         if (o.shoulders) [-1, 1].forEach(s => {
-            const a = B.m(B.sphGeo(0.075, 1.25, 0.8, 1.15, 'top'), o.shoulders, o.shoulderK || 'metal', { side: THREE.DoubleSide }); a.position.set(s * 0.2 * bk, 0.84, 0); a.rotation.z = -s * 0.45; a.scale.multiplyScalar(bk); body.add(a);
+            const a = B.m(B.sphGeo(0.075, 1.25, 0.8, 1.15, 'top'), o.shoulders, (o.shoulderK || 'metal') === 'metal' ? 'engraved' : (o.shoulderK === 'gold' ? 'engravedGold' : o.shoulderK), { side: THREE.DoubleSide }); a.position.set(s * 0.2 * bk, 0.84, 0); a.rotation.z = -s * 0.45; a.scale.multiplyScalar(bk); body.add(a);
             const b = B.m(B.sphGeo(0.062, 1.25, 0.8, 1.15, 'top'), o.shoulders, o.shoulderK || 'metal', { side: THREE.DoubleSide }); b.position.set(s * 0.235 * bk, 0.795, 0); b.rotation.z = -s * 0.75; b.scale.multiplyScalar(bk); body.add(b);
         });
         // Руки: плечо, предплечье (наруч), кисть; шарнир в плече
         rig.arms = [-1, 1].map(s => {
             const p = B.pivot(s * 0.215 * bk, 0.83, 0);
-            p.add(B.at(B.m(B.capsGeo(0.05 * bk, 0.12), o.arms || o.body || 0x6b6b7a, o.armor ? 'metal' : 'cloth'), 0, -0.1, 0));
+            p.add(B.at(B.m(B.capsGeo(0.05 * bk, 0.12), o.arms || o.body || 0x6b6b7a, o.armor ? armK : 'cloth'), 0, -0.1, 0));
             p.add(B.at(B.m(B.capsGeo(0.047 * bk, 0.1), o.bracers || o.arms || o.body || 0x6b6b7a, o.armor ? 'metal' : 'leather'), 0, -0.24, 0));
             p.add(B.at(B.m(B.sphGeo(0.05 * bk, 1, 1.1, 0.9), o.gloves || skin, o.gloves ? 'leather' : skinK), 0, -0.34, 0));
             p.add(B.at(B.m(B.capsGeo(0.015, 0.03), o.gloves || skin, o.gloves ? 'leather' : skinK), -s * 0.035, -0.33, 0.03, 0.4, 0, s * 0.5));
@@ -159,7 +161,7 @@ const Models3D = {
         // Плащ: изогнутая ткань с волнистым краем
         if (o.cape) {
             const g = B.geo('cape' + bk, () => { const g = new THREE.PlaneGeometry(0.44 * bk, 0.78, 12, 20), pa = g.attributes.position; for (let i = 0; i < pa.count; i++) { const x = pa.getX(i), y = pa.getY(i); pa.setZ(i, -x * x * 2.2 + (y < -0.25 ? Math.sin(x * 30) * 0.02 : 0)); pa.setY(i, y - 0.39); pa.setX(i, x * (1 + (-y + 0.39) * 0.25)); } g.computeVertexNormals(); return g; });
-            const cp = B.m(g, o.cape, 'cloth', { side: THREE.DoubleSide }); cp.rotation.y = Math.PI;
+            const cp = B.m(g, o.cape, 'cape', { side: THREE.DoubleSide }); cp.rotation.y = Math.PI;
             const cpv = B.pivot(0, 0.89, -0.11 * bk); cpv.add(cp); cpv.rotation.x = 0.18; body.add(cpv); rig.cape = cpv;
             [-1, 1].forEach(s => body.add(B.at(B.m(B.sphGeo(0.022), 0xd4a020, 'gold'), s * 0.13 * bk, 0.88, -0.06 * bk)));
         }
@@ -314,14 +316,14 @@ const Models3D = {
             const o = { skin: alter ? 0xe8dcd8 : 0xf3cfaa, body: alter ? 0x15151c : 0x2a4aa0, arms: alter ? 0x15151c : 0x2a4aa0, bracers: alter ? 0x2a2a34 : 0xc8d0e0,
                 chest: alter ? 0x2a2a34 : 0xc8d0e0, chestK: alter ? 'dark' : 'metal', legs: alter ? 0x15151c : 0x2a4aa0, robe: alter ? 0x15151c : 0x2848b0, shoulders: alter ? 0x2a2a34 : 0xc8d0e0,
                 shoulderK: alter ? 'dark' : 'metal', hair: alter ? 0xf0ecd8 : 0xf2d070, bun: true, eyes: alter ? 0xffd040 : null, weapon: sw, belt: alter ? 0x5a0a14 : 0x3a2414,
-                boots: alter ? 0x1a1a22 : 0xa8b0c4, gloves: alter ? 0x2a2a34 : 0xc8d0e0, scabbard: true, tassets: true };
+                boots: alter ? 0x1a1a22 : 0xa8b0c4, gloves: alter ? 0x2a2a34 : 0xc8d0e0, scabbard: true, tassets: true, strap: true };
             if (!alter) Object.assign(o, pal);
             return H.humanoid(o);
         }
         if (type === 'archer') {
             const blades = st.stance === 'blades';
             return H.humanoid(Object.assign({ skin: 0xc89870, body: 0x1a1a1e, arms: 0xa01818, bracers: 0x2a2a30, legs: 0x1a1a1e, robe: 0xa01818, chest: 0x2a2a30, chestK: 'leather',
-                shoulders: 0xb02020, shoulderK: 'cloth', hair: 0xf0f0f0, spiky: true, belt: 0x3a3a3a, boots: 0x2a2a2a, gloves: 0x1a1a1e, quiver: !blades, pouch: true },
+                shoulders: 0xb02020, shoulderK: 'cloth', hair: 0xf0f0f0, spiky: true, belt: 0x3a3a3a, boots: 0x2a2a2a, gloves: 0x1a1a1e, quiver: !blades, pouch: true, strap: true, strapC: 0x2a2a2a },
                 pal, { weapon: blades ? H.sword(0x202024, 0x101010, 0.42) : null, offhand: blades ? H.sword(0xe8e8f0, 0xc0c0c8, 0.42) : H.bow(0x2a2a2a) }));
         }
         if (type === 'knight') return H.knight(st);
@@ -351,7 +353,7 @@ const Models3D = {
             for (let i = 0; i < 5; i++) weapon.add(H.at(H.m(H.sphGeo(0.016 + Math.random() * 0.012, 1, 1.6, 0.6), 0x5a0006, 'gem', { emissive: 0x3a0004 }), (Math.random() - 0.5) * 0.04, 0.2 + i * (d.len || 0.55) / 6, 0.01));
         }
         const m = H.humanoid({ armor: true, bulk: 1.25, skin: 0x0e0b0e, body: 0x0c0c10, arms: 0x0b0b0e, legs: 0x09090c, chest: 0x121216, chestK: 'dark', shoulders: 0x101014, shoulderK: 'dark',
-            boots: 0x08080a, gloves: 0x0b0b0e, bracers: 0x111115, belt: 0x2a0004, cape: 0x2a0306, weapon, tassets: true });
+            boots: 0x08080a, gloves: 0x0b0b0e, bracers: 0x111115, belt: 0x2a0004, cape: 0x2a0306, weapon, tassets: true, armK: 'knightPlate', strap: true, strapC: 0x1a0a0a });
         const { body, head, arms, legs } = m.rig;
         // Закрытый готический шлем с прорезью, из которой бьёт красный свет
         head.add(H.at(H.m(H.sphGeo(0.135, 1, 1.12, 1.08), 0x0c0c10, 'dark'), 0, 0.03, 0));

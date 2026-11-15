@@ -81,8 +81,8 @@ const SoulsHUD = {
     loop(now) {
         const dt = Math.min(0.05, ((now - (this.lt || now)) / 1000) || 0.016); this.lt = now;
         if (typeof player !== 'undefined' && typeof gameState !== 'undefined' && gameState === 'playing') {
-            const ht = player.heroType;
-            if (document.body.dataset.hero !== ht) document.body.dataset.hero = ht;
+            const ht = player.heroType, theme = player.charId === 'mordred' ? 'mordred' : ht;
+            if (document.body.dataset.hero !== theme) document.body.dataset.hero = theme;
             const hp = this.orbs.hp, mp = this.orbs.mp;
             this.step(hp, player.hp / Math.max(1, player.maxHp), dt, this.LIQ.blood);
             hp.val.textContent = Math.ceil(player.hp); hp.sub.textContent = '/ ' + player.maxHp;

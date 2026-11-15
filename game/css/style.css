@@ -566,6 +566,7 @@ img.ia-img.ia-big, .gacha-card .gi img.ia-img { width: 1.25em; height: 1.25em; }
 }
 body[data-hero="saber"]   { --accent: #e3b84a; --accent-dk: #7a5a14; --accent-glow: rgba(240,200,90,.32); --accent-txt: #f1dfa8; }
 body[data-hero="archer"]  { --accent: #c4323c; --accent-dk: #5a1016; --accent-glow: rgba(220,40,50,.3); --accent-txt: #f0c4c4; }
+body[data-hero="mordred"] { --accent: #e0303a; --accent-dk: #5a0a10; --accent-glow: rgba(240,50,60,.34); --accent-txt: #f6c8c8; }
 body[data-hero="knight"]  { --accent: #d8202c; --accent-dk: #4a0408; --accent-glow: rgba(255,30,40,.38); --accent-txt: #f3b9b9; }
 body[data-hero="invoker"] { --accent: #b9a2e8; --accent-dk: #3e2a66; --accent-glow: rgba(180,140,255,.3); --accent-txt: #e3d8fb; }
 
@@ -611,7 +612,7 @@ body[data-hero="invoker"] { --accent: #b9a2e8; --accent-dk: #3e2a66; --accent-gl
 .souls-frame { position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px); overflow: visible; pointer-events: none; }
 .souls-frame .sf-gem { fill: var(--accent); filter: drop-shadow(0 0 3px var(--accent)); }
 .souls-frame .orn { display: none; }
-body[data-hero="saber"] .orn-saber, body[data-hero="archer"] .orn-archer, body[data-hero="knight"] .orn-knight, body[data-hero="invoker"] .orn-invoker { display: inline; }
+body[data-hero="saber"] .orn-saber, body[data-hero="mordred"] .orn-saber, body[data-hero="archer"] .orn-archer, body[data-hero="knight"] .orn-knight, body[data-hero="invoker"] .orn-invoker { display: inline; }
 body[data-hero="saber"] .souls-frame .sf-thorns, body[data-hero="saber"] .souls-frame .sf-crest { fill: url(#gold_hp); }
 .orn-knight .crack { stroke: #ff2a2a; stroke-width: 1.6; filter: drop-shadow(0 0 3px #ff1a1a) drop-shadow(0 0 6px #b00010); animation: crackGlow 1.6s ease-in-out infinite; }
 .orn-knight .crack-thin { stroke-width: .9; }
@@ -638,3 +639,21 @@ body[data-hero="saber"] .souls-frame .sf-thorns, body[data-hero="saber"] .souls-
     transition: opacity .35s, transform .35s, border-color .2s; }
 .fs-btn:hover { opacity: 1; border-color: var(--metal); color: var(--metal-hi); }
 body.is-fullscreen .fs-btn { opacity: 0; transform: scale(.7); pointer-events: none; }
+
+/* ===================== КИНО: полосы и титр ===================== */
+#cineBars { position: fixed; inset: 0; z-index: 80; pointer-events: none; }
+#cineBars .cb-top, #cineBars .cb-bot { position: absolute; left: 0; right: 0; height: 0; background: #000; transition: height .7s cubic-bezier(.4,0,.2,1); }
+#cineBars .cb-top { top: 0; } #cineBars .cb-bot { bottom: 0; }
+#cineBars.on .cb-top, #cineBars.on .cb-bot { height: 11vh; }
+#cineBars .cb-title { position: absolute; left: 0; right: 0; bottom: 14vh; text-align: center; opacity: 0; transform: translateY(10px); transition: opacity 1s, transform 1.2s; }
+#cineBars.show-title .cb-title { opacity: 1; transform: none; }
+#cineBars .cb-title b { display: block; font-family: 'Cinzel', Georgia, serif; font-size: clamp(28px, 4vw, 54px); font-weight: 900; letter-spacing: .14em; color: var(--metal-hi, #eef1f5); text-shadow: 0 0 24px var(--accent-glow, rgba(255,255,255,.3)), 0 2px 6px #000; }
+#cineBars .cb-title span { display: block; margin-top: 4px; font-size: 13px; letter-spacing: .5em; text-transform: uppercase; color: var(--accent-txt, #dfe3ea); }
+#cineBars .cb-skip { position: absolute; right: 18px; bottom: calc(11vh - 26px); font-size: 11px; color: rgba(220,225,232,.45); opacity: 0; transition: opacity .6s; }
+#cineBars.on .cb-skip { opacity: 1; }
+#cineBars.no-skip .cb-skip { display: none; }
+body > *:not(#gl3d):not(#gameCanvas):not(#cineBars):not(script) { transition: opacity .6s; }
+body.cine-on > *:not(#gl3d):not(#gameCanvas):not(#cineBars):not(script):not(#mainMenuOverlay) { opacity: 0 !important; pointer-events: none !important; }
+
+/* Мордред: золотая филигрань Сейбер окрашена в багрянец — силуэт Кларента */
+body[data-hero="mordred"] .souls-frame .orn-saber { filter: hue-rotate(-45deg) saturate(2.2) brightness(.95); }

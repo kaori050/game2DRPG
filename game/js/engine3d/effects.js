@@ -2,8 +2,19 @@
 // ЭФФЕКТЫ: снаряды, частицы, заклинания, опасные зоны, добыча и сундуки, точки интереса, порталы
 // + Labels3D: подписи, урон, полоски здоровья и экранные эффекты поверх 3D
 // ============================================================================
-const colCache = new Map();
+const colCache = new Map(), redCache = new Map();
+// Мордред: эффекты Сейбер в багровом пламени — голубые/бирюзовые и жёлтые/золотые тона переводятся в красные
+function redShift(hex) {
+    let r = redCache.get(hex); if (r !== undefined) return r;
+    const c = new THREE.Color(hex), hsl = {}; c.getHSL(hsl);
+    if (hsl.s > 0.25 && ((hsl.h > 0.42 && hsl.h < 0.72) || (hsl.h > 0.09 && hsl.h < 0.2))) c.setHSL(hsl.h > 0.42 ? 0.995 : 0.02, Math.min(1, hsl.s * 1.05), hsl.l * 0.95);
+    r = c.getHex(); redCache.set(hex, r); return r;
+}
 function col3(s) {
+    const v = col3raw(s);
+    return (typeof player !== 'undefined' && player.charId === 'mordred' && player.heroType === 'saber') ? redShift(v) : v;
+}
+function col3raw(s) {
     if (typeof s === 'number') return s;
     if (!s) return 0xffffff;
     let c = colCache.get(s);
@@ -126,16 +137,61 @@ const FX3D = {
             }
             case 'cache': { const m = new THREE.Mesh(new THREE.DodecahedronGeometry(0.4, 0), G3.mat(0x6a6058, { flatShading: true })); m.position.y = 0.2; m.scale.set(1.2, 0.6, 1); m.castShadow = true; g.add(m); break; }
             case 'portal': {
-                const ring = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.12, 8, 32), G3.mat(0x2a2030, { emissive: c, emissiveIntensity: 0.6 })); ring.position.y = 1.2; g.add(ring);
-                const swirl = new THREE.Mesh(new THREE.CircleGeometry(0.92, 32), this.basic(c, { opacity: 0.55 })); swirl.position.y = 1.2; g.add(swirl);
-                const gl = B.glow(c, 3.2); gl.position.y = 1.2; g.add(gl);
-                g.userData = { ring, swirl, gl }; break;
+                // Готическая арка: колонны, стрельчатый свод из камня, рунические знаки, замковый камень-кристалл
+                const W = 1.25, Hc = 2.4, apex = 4.0, stone = G3.mat(0x3a3640, { k: 'stone' }), dark = G3.mat(0x1c1a22, { k: 'stone' });
+                const col = new THREE.LatheGeometry([[0.0, 0], [0.34, 0], [0.34, 0.18], [0.24, 0.26], [0.2, 0.32], [0.18, Hc - 0.3], [0.26, Hc - 0.18], [0.3, Hc], [0.0, Hc]].map(p => new THREE.Vector2(p[0], p[1])), 20);
+                [-1, 1].forEach(sd => { const m = new THREE.Mesh(col, stone); m.position.x = sd * W; m.castShadow = true; g.add(m);
+                    const bowl = new THREE.Mesh(new THREE.LatheGeometry([[0.05, 0], [0.22, 0.05], [0.28, 0.2], [0.25, 0.22]].map(p => new THREE.Vector2(p[0], p[1])), 16), dark); bowl.position.set(sd * W, Hc, 0); g.add(bowl); });
+                const archPts = []; for (let i = 0; i <= 24; i++) { const k = i / 24, ang = k * Math.PI; const side = k < 0.5 ? -1 : 1, kk = k < 0.5 ? k * 2 : (1 - k) * 2;
+                    archPts.push(new THREE.Vector3(side * W * (1 - Math.sin(kk * Math.PI / 2)) * 1, Hc + (apex - Hc) * Math.sin(kk * Math.PI / 2) * (1 - 0.15 * (1 - kk)), 0)); }
+                archPts.forEach(p => { p.x = p.x; });
+                const archCurve = new THREE.CatmullRomCurve3(archPts);
+                const arch = new THREE.Mesh(new THREE.TubeGeometry(archCurve, 48, 0.17, 10), stone); arch.castShadow = true; g.add(arch);
+                const archIn = new THREE.Mesh(new THREE.TubeGeometry(archCurve, 48, 0.05, 6), G3.mat(0x0a0a0c, { k: 'dark', emissive: c, emissiveIntensity: 0.8 })); archIn.position.z = 0.14; g.add(archIn);
+                const key = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), G3.mat(c, { k: 'gem', emissive: c, emissiveIntensity: 2 })); key.position.set(0, apex + 0.05, 0.12); key.scale.y = 1.5; g.add(key);
+                // Руны вдоль свода
+                const runes = [];
+                for (let i = 1; i < 12; i++) { const p = archCurve.getPoint(i / 12); const r = new THREE.Sprite(new THREE.SpriteMaterial({ map: FX3D.runeSprite(i), color: c, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); r.position.set(p.x, p.y, 0.2); r.scale.setScalar(0.28); g.add(r); runes.push(r); }
+                // Вихрь тёмной материи в проёме арки
+                const vm = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide,
+                    uniforms: { t: { value: 0 }, c: { value: new THREE.Color(c) }, op: { value: 1 }, noise: { value: Tex3D.T.fog } },
+                    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+                    fragmentShader: `uniform float t, op; uniform vec3 c; uniform sampler2D noise; varying vec2 vUv;
+                        void main(){
+                            vec2 p = vec2((vUv.x - 0.5) * 2.0, vUv.y);           // x: -1..1, y: 0..1 (низ..верх)
+                            float yA = ${(Hc / apex).toFixed(3)};                  // где начинается свод
+                            float k = clamp((p.y - yA) / (1.0 - yA), 0.0, 1.0), halfW = 1.0 - pow(k, 1.3);
+                            float edge = smoothstep(0.0, 0.08, halfW - abs(p.x)) * smoothstep(0.0, 0.03, p.y) * step(p.y, 1.0);
+                            if (edge <= 0.001) discard;
+                            vec2 q = vec2(p.x * 0.62, (p.y - 0.45) * 1.25); float r = length(q), a = atan(q.y, q.x);
+                            float sw = a + r * 6.0 - t * 1.7;
+                            float n = texture2D(noise, vec2(sw * 0.16, r * 0.8 - t * 0.12)).r, n2 = texture2D(noise, vec2(sw * 0.31 + 0.5, r * 1.7 - t * 0.2)).r;
+                            float fil = smoothstep(0.55, 0.85, n * n2 * 1.9);
+                            vec3 col = mix(vec3(0.02, 0.0, 0.04), c * 0.25, n) + c * fil * 1.6 + vec3(1.0) * pow(max(0.0, 1.0 - r * 2.4), 3.0) * 0.9;
+                            col += c * pow(1.0 - clamp(halfW - abs(p.x), 0.0, 1.0), 6.0) * 0.8;     // свечение по краю проёма
+                            gl_FragColor = vec4(col, edge * op * (0.88 + 0.12 * n));
+                        }` });
+                const vortex = new THREE.Mesh(new THREE.PlaneGeometry(W * 2 - 0.2, apex - 0.05), vm); vortex.position.set(0, (apex - 0.05) / 2, 0); vortex.renderOrder = 4; g.add(vortex);
+                const gl = B.glow(c, 4.5); gl.position.set(0, 1.8, 0.3); g.add(gl);
+                g.userData = { vortex, vm, runes, gl, key, W, Hc, apex, col: c };
+                break;
             }
         }
         this.scene.add(g);
         return g;
     },
     // Объект эффекта, привязанный к игровому объекту
+    runeSprite(i) {
+        this.runeTexs = this.runeTexs || [];
+        if (!this.runeTexs[i % 6]) {
+            const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+            g.strokeStyle = '#fff'; g.lineWidth = 5; g.lineCap = 'round'; g.shadowColor = '#fff'; g.shadowBlur = 8;
+            let sd = i * 7 + 3; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+            g.beginPath(); g.moveTo(32, 8); g.lineTo(32, 56); for (let k = 0; k < 3; k++) { const y = 12 + r() * 36, s2 = r() < 0.5 ? -1 : 1; g.moveTo(32, y); g.lineTo(32 + s2 * (10 + r() * 10), y + (r() - 0.5) * 22); } g.stroke();
+            this.runeTexs[i % 6] = new THREE.CanvasTexture(c);
+        }
+        return this.runeTexs[i % 6];
+    },
     get(src, kind) {
         let o = this.live.get(src);
         if (!o || o.userData.kind !== kind) { if (o) this.kill(src, o); o = this.build(kind, src); o.userData.kind = kind; this.live.set(src, o); }
@@ -173,7 +229,7 @@ const FX3D = {
         // Экскалибур: пока идёт сбор энергии — полоса-руна на земле, столб света и стягивание энергии к мечу
         const uc = player.ultCast;
         if (uc && !uc.swing) {
-            const col = player.saberAlter ? 0xff2a30 : 0xffe060, L = SABER_ULT.length / T, W = SABER_ULT.width / T, k = uc.t / uc.dur;
+            const col = saberRed() ? 0xff2a30 : 0xffe060, L = SABER_ULT.length / T, W = SABER_ULT.width / T, k = uc.t / uc.dur;
             const a = Math.atan2(Math.cos(uc.ang), Math.sin(uc.ang)), hp = AnimFX.heroPos();
             this.runeAt(uc, col, px, pz, 0, k, { rect: true, ang: a, w: W, len: L, crack: 0.7 });
             this.runeAt(uc, col, px, pz, 1.8, k, { tag: 'circle', spin: 3 });
@@ -377,12 +433,27 @@ const FX3D = {
         }
         if (typeof worldPortals !== 'undefined') for (const pt of worldPortals) {
             if (!near(pt.x, pt.y, 30)) continue;
-            const o = this.get(pt, 'portal'), open = pt.isOpen();
-            o.position.set(pt.x / T, 0, pt.y / T);
-            o.userData.swirl.rotation.z = t * 2; o.userData.swirl.visible = open; o.userData.gl.visible = open;
-            if (open) this.lights.push({ x: pt.x / T, z: pt.y / T, h: 1.4, c: col3(pt.color) });
+            const o = this.get(pt, 'portal'), open = pt.isOpen(), U = o.userData, px2 = pt.x / T, pz2 = pt.y / T, gy = World3D.hAt(px2, pz2), c = col3(pt.color);
+            o.position.set(px2, 0, pz2);
+            U.vm.uniforms.t.value = t; U.vm.uniforms.op.value += ((open ? 1 : 0.0) - U.vm.uniforms.op.value) * Math.min(1, dt * 2);
+            U.vortex.visible = U.vm.uniforms.op.value > 0.02; U.gl.visible = open; U.gl.material.opacity = 0.35 + Math.sin(t * 2) * 0.1;
+            U.runes.forEach((r, i) => { r.material.opacity = open ? 0.55 + 0.45 * Math.sin(t * 3 + i * 0.7) : 0.12; });
+            U.key.rotation.y = t * 1.5;
+            this.runeAt(pt, c, px2, pz2 + 0.2, 2.4, open ? 1 : 0.15, { tag: 'base', spin: 0.4, op: open ? 0.9 : 0.25 });
+            if (open) {
+                this.lights.push({ x: px2, z: pz2, h: 1.8, c });
+                if (Math.hypot(px2 - px, pz2 - pz) < 22) {
+                    // Мистическое пламя в чашах на колоннах
+                    [-1, 1].forEach(sd => AnimFX.emit({ x: px2 + sd * U.W, y: gy + U.Hc + 0.2, z: pz2, n: 2, color: [c, 0xffffff, c], speed: 0.25, up: 1.6, life: 0.7, size: 0.16, sizeEnd: 0.02, grav: -1.2, drag: 1.5, r: 0.08 }));
+                    // Искры затягивает в вихрь
+                    if (Math.random() < 0.7) { const a = Math.random() * Math.PI, rr = 1.6 + Math.random() * 0.8; AnimFX.emit({ x: px2 + Math.cos(a) * rr, y: gy + 1.8 + Math.sin(a) * rr * 0.9, z: pz2 + 0.15, n: 1, color: [c, 0xffffff], speed: 0.1, life: 0.9, size: 0.06, grav: 0, drag: 0.5, pull: { x: px2, y: gy + 1.8, z: pz2, k: 3 } }); }
+                    // Обволакивающий туман у основания
+                    if (Math.random() < 0.5) AnimFX.emit({ x: px2 + (Math.random() - 0.5) * 3.4, y: gy + 0.2, z: pz2 + (Math.random() - 0.3) * 1.6, n: 1, color: [new THREE.Color(c).multiplyScalar(0.18).getHex()], speed: 0.15, life: 2.6, size: 0.9, sizeEnd: 1.8, grav: -0.05, drag: 0.6 });
+                }
+            }
         }
         if (typeof Knight3D !== 'undefined') Knight3D.fxRunes();
+        if (typeof Cinema !== 'undefined') Cinema.fxRunes();
         for (const [src, o] of this.live) {
             if (!this.seen.has(src)) { this.kill(src, o); continue; }
             if (o.userData.kind !== 'rift') o.position.y += World3D.hAt(o.position.x, o.position.z);  // эффекты следуют рельефу

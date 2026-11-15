@@ -66,7 +66,7 @@ const AnimFX = {
                 vertexShader: `attribute vec3 aColor; attribute float aSize; attribute float aAlpha; uniform float uScale; varying vec3 vC; varying float vA;
                     void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = aSize * uScale / max(0.1, -mv.z); vC = aColor; vA = aAlpha; }`,
                 fragmentShader: additive
-                    ? `varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.0, d); a *= a; gl_FragColor = vec4(vC * (a * vA * 1.8) + vec3(a * a * vA * 0.6), 1.0); }`
+                    ? `varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.0, d); a *= a; float br = max(vC.r, max(vC.g, vC.b)); gl_FragColor = vec4(vC * (a * vA * 1.8) + vec3(a * a * vA * 0.6) * br * br, 1.0); }`
                     : `varying vec3 vC; varying float vA; void main(){ vec2 q = gl_PointCoord - 0.5; float d = length(q); float a = smoothstep(0.5, 0.32, d) * vA; if (a < 0.02) discard; float hl = smoothstep(0.22, 0.0, length(q + vec2(0.12, 0.14))); gl_FragColor = vec4(vC + hl * 0.35, a); }`
             });
             const pts = new THREE.Points(g, mat); pts.frustumCulled = false; pts.renderOrder = additive ? 10 : 9; scene.add(pts);
@@ -186,6 +186,14 @@ const AnimFX = {
             if (o.pull) { P.pull[i * 4] = o.pull.x; P.pull[i * 4 + 1] = o.pull.y; P.pull[i * 4 + 2] = o.pull.z; P.pull[i * 4 + 3] = o.pull.k || 8; } else P.pull[i * 4 + 3] = 0;
         }
     },
+    // Магический сигил: вертикальный рунный круг перед героем (каст Арчера); раскрывается, вращается и гаснет
+    sigil(x, y, z, yaw, color, size = 1, life = 0.8) {
+        if (!this.sigGeo) { this.sigGeo = new THREE.PlaneGeometry(2, 2); this.sigils = []; }
+        const m = this.rune(color, { spin: 2.5 }); m.geometry = this.sigGeo; m.userData.rune.uProg.value = 1;
+        m.position.set(x, y, z); m.rotation.set(0, yaw, 0); m.scale.setScalar(0.01); this.scene.add(m);
+        this.sigils.push({ m, t: 0, life, size });
+        this.emit({ x, y, z, n: 24, color: [color, 0xffffff], speed: 1.6, life: 0.5, size: 0.06, grav: 0, drag: 2 });
+    },
     // Брызги крови: тёмно-алые капли летят веером по направлению удара, падают и остаются на земле
     blood(x, y, z, n = 20, dx = 0, dz = 0) {
         this.emit({ gore: true, stick: true, x, y, z, n: Math.round(n), color: [0x6a0006, 0x4a0004, 0x9a0a12, 0x2a0002], speed: 2.6, up: 1.8, life: 1.6, size: 0.075, sizeEnd: 0.05, grav: 11, drag: 1.2, dir: (dx || dz) ? [dx, 0.5, dz] : null, spread: 1.4 });
@@ -210,19 +218,24 @@ const AnimFX = {
 
     // ---------- шлейфы ----------
     // Подать текущие точки оружия (основание и кончик); шлейф тянется, затухает и сам удаляется
+    // Шлейф: лента из трёх рядов (основание → середина → кончик) с градиентом цвета.
+    // opts.grad = [цвет у основания, в середине, у кончика]; без него градиент строится из одного цвета (кончик — белое ядро).
     trail(key, base, tip, color, opts = {}) {
         let tr = this.trails.get(key);
         if (!tr) {
             const L = opts.len || 26, g = new THREE.BufferGeometry();
-            g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(L * 6), 3).setUsage(THREE.DynamicDrawUsage));
-            g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(L * 6), 3).setUsage(THREE.DynamicDrawUsage));
-            const idx = []; for (let i = 0; i < L - 1; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } g.setIndex(idx);
+            g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(L * 9), 3).setUsage(THREE.DynamicDrawUsage));
+            g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(L * 9), 3).setUsage(THREE.DynamicDrawUsage));
+            const idx = []; for (let i = 0; i < L - 1; i++) for (let r = 0; r < 2; r++) { const a = i * 3 + r, b = a + 3; idx.push(a, a + 1, b, a + 1, b + 1, b); } g.setIndex(idx);
             const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false }));
             m.frustumCulled = false; m.renderOrder = 8; this.scene.add(m);
-            tr = { m, L, s: [], color: new THREE.Color(), life: opts.life || 0.2, min: opts.minSpeed || 2.5, full: opts.fullSpeed || 9, core: opts.core === undefined ? 0.5 : opts.core, idle: 0 };
+            tr = { m, L, s: [], c: [new THREE.Color(), new THREE.Color(), new THREE.Color()], life: opts.life || 0.2, min: opts.minSpeed || 2.5, full: opts.fullSpeed || 9, idle: 0 };
             this.trails.set(key, tr);
         }
-        tr.color.setHex(color); tr.touched = true; tr.always = !!opts.always;
+        const G = opts.grad;
+        if (G) { tr.c[0].setHex(G[0]); tr.c[1].setHex(G[1]); tr.c[2].setHex(G[2]); }
+        else { tr.c[1].setHex(color); tr.c[0].copy(tr.c[1]).multiplyScalar(0.25); tr.c[2].copy(tr.c[1]).lerp(new THREE.Color(1, 1, 1), opts.core === undefined ? 0.5 : opts.core); }
+        tr.touched = true; tr.always = !!opts.always; tr.sparks = opts.sparks || 0; tr.inner = opts.inner === undefined ? 0.35 : opts.inner;
         const now = Engine3D.t, s = tr.s, last = s[s.length - 1];
         if (last) {
             const dTip = last.t.distanceTo(tip), sp = dTip / Math.max(1e-3, now - last.time);
@@ -238,6 +251,8 @@ const AnimFX = {
                 }
             }
             s.push({ b: base.clone(), t: tip.clone(), time: now, sp });
+            // Искры срываются с кончика быстрого клинка
+            if (tr.sparks && sp > tr.full * 0.7 && Math.random() < tr.sparks) this.emit({ x: tip.x, y: tip.y, z: tip.z, n: 2, color: [tr.c[2].getHex(), tr.c[1].getHex(), 0xffffff], speed: 1.6, life: 0.35, size: 0.045, grav: 5, drag: 1.5 });
         } else s.push({ b: base.clone(), t: tip.clone(), time: now, sp: 0 });
         while (s.length > tr.L) s.shift();
     },
@@ -248,18 +263,18 @@ const AnimFX = {
             while (s.length && now - s[0].time > tr.life) s.shift();
             if (!tr.touched && !s.length) { this.scene.remove(tr.m); tr.m.geometry.dispose(); tr.m.material.dispose(); this.trails.delete(key); continue; }
             tr.touched = false;
-            const pos = tr.m.geometry.attributes.position.array, col = tr.m.geometry.attributes.color.array, n = s.length;
+            const pos = tr.m.geometry.attributes.position.array, col = tr.m.geometry.attributes.color.array, n = s.length, C = tr.c;
             for (let i = 0; i < tr.L; i++) {
-                const smp = s[Math.min(n - 1, i)] || null, o = i * 6;
-                if (!smp || i >= n) { pos.fill(0, o, o + 6); col.fill(0, o, o + 6); if (n) { const l = s[n - 1]; pos[o] = l.b.x; pos[o + 1] = l.b.y; pos[o + 2] = l.b.z; pos[o + 3] = l.b.x; pos[o + 4] = l.b.y; pos[o + 5] = l.b.z; } continue; }
-                const age = (now - smp.time) / tr.life, fade = Math.pow(Math.max(0, 1 - age), 1.6) * (i / Math.max(1, n - 1));
-                const spk = tr.always ? 1 : Math.max(0, Math.min(1, (smp.sp - tr.min) / (tr.full - tr.min)));
-                const a = fade * spk, w = a * tr.core;
-                // Основание шлейфа тусклее, кончик ярче и белее (энергетическое ядро)
-                const b = smp.b.clone().lerp(smp.t, 0.35);
-                pos[o] = b.x; pos[o + 1] = b.y; pos[o + 2] = b.z; pos[o + 3] = smp.t.x; pos[o + 4] = smp.t.y; pos[o + 5] = smp.t.z;
-                col[o] = tr.color.r * a * 0.25; col[o + 1] = tr.color.g * a * 0.25; col[o + 2] = tr.color.b * a * 0.25;
-                col[o + 3] = Math.min(1.5, tr.color.r * a + w); col[o + 4] = Math.min(1.5, tr.color.g * a + w); col[o + 5] = Math.min(1.5, tr.color.b * a + w);
+                const o = i * 9;
+                if (i >= n) { const l = s[n - 1]; for (let r = 0; r < 3; r++) { pos[o + r * 3] = l ? l.b.x : 0; pos[o + r * 3 + 1] = l ? l.b.y : 0; pos[o + r * 3 + 2] = l ? l.b.z : 0; } col.fill(0, o, o + 9); continue; }
+                const smp = s[i], age = (now - smp.time) / tr.life, fade = Math.pow(Math.max(0, 1 - age), 1.5) * (i / Math.max(1, n - 1));
+                const a = fade * (tr.always ? 1 : Math.max(0, Math.min(1, (smp.sp - tr.min) / (tr.full - tr.min))));
+                const b = smp.b.clone().lerp(smp.t, tr.inner), m = b.clone().lerp(smp.t, 0.62);
+                pos[o] = b.x; pos[o + 1] = b.y; pos[o + 2] = b.z; pos[o + 3] = m.x; pos[o + 4] = m.y; pos[o + 5] = m.z; pos[o + 6] = smp.t.x; pos[o + 7] = smp.t.y; pos[o + 8] = smp.t.z;
+                // Основание тусклое, середина — основной цвет, кончик — самый яркий (энергетическое ядро)
+                col[o] = C[0].r * a * 0.4; col[o + 1] = C[0].g * a * 0.4; col[o + 2] = C[0].b * a * 0.4;
+                col[o + 3] = C[1].r * a; col[o + 4] = C[1].g * a; col[o + 5] = C[1].b * a;
+                col[o + 6] = Math.min(1.6, C[2].r * a * 1.3); col[o + 7] = Math.min(1.6, C[2].g * a * 1.3); col[o + 8] = Math.min(1.6, C[2].b * a * 1.3);
             }
             tr.m.geometry.attributes.position.needsUpdate = true; tr.m.geometry.attributes.color.needsUpdate = true;
         }
@@ -271,6 +286,10 @@ const AnimFX = {
         // init() вызывается из window.onload, когда функции game.js уже объявлены
         {
             wrap('craftRecipe', () => { Actors3D.gesture('craft'); Sfx3D.play('craft'); const p = this.heroPos(); this.emit({ x: p.x + Math.sin(Actors3D.player ? Actors3D.player.rot : 0) * 0.5, y: p.y + 0.6, z: p.z + Math.cos(Actors3D.player ? Actors3D.player.rot : 0) * 0.5, n: 40, color: [0xffb040, 0xfff0a0, 0xff6a1a], speed: 3, up: 3, life: 0.6, size: 0.06, grav: 10 }); this.flash(p.x, p.z, 0xffa040, 3, 0.25); });
+            const sig = (col, size, y = 0.85, d = 0.65) => { if (player.heroType !== 'archer') return; const p = this.heroPos(), a = player.facingAngle; this.sigil(p.x + Math.cos(a) * d, p.y + y, p.z + Math.sin(a) * d, Math.PI / 2 - a, col, size); Sfx3D.play('buff', 0.6); };
+            wrap('castHeroSkill', key => { if (player.heroType !== 'archer') return; const C = { q: 0x7dd3fc, w: 0xfde68a, e: 0xc8f0ff, r: 0xff3a3a }[key] || 0xffffff; if (key === 'r') { const p = this.heroPos(); this.sigil(p.x, p.y + 0.06, p.z, 0, C, 3.2, 1.6); this.sigils[this.sigils.length - 1].m.rotation.x = -Math.PI / 2; } else sig(C, key === 'w' ? 1.5 : 1.1); });
+            wrap('throwUbwSword', () => sig(0xff4a4a, 1.0));
+            wrap('toggleArcherStance', () => sig(player.archerStance === 'blades' ? 0xff3a3a : 0xe0f2fe, 1.2, 0.8, 0.2));
             wrap('doGachaPulls', () => { Actors3D.gesture('pray'); Sfx3D.play('gacha'); const p = this.heroPos(); this.pillar = { x: p.x, z: p.z, t: 0 }; this.emit({ x: p.x, y: p.y + 0.2, z: p.z, n: 120, color: [0xfde68a, 0xffffff, 0xc084fc], speed: 2, up: 4, life: 1.4, size: 0.09, grav: -0.5, drag: 1, r: 0.6 }); this.flash(p.x, p.z, 0xfde68a, 4, 0.8, 3); });
         }
     },
@@ -350,6 +369,13 @@ const AnimFX = {
             if (k >= 1) { this.scene.remove(pl.mesh); pl.mesh.geometry.dispose(); pl.mesh.material.dispose(); this.pillar = null; }
         }
         this.updateTrails();
+        if (this.sigils) for (let i = this.sigils.length - 1; i >= 0; i--) {
+            const sg = this.sigils[i]; sg.t += dt; const k = sg.t / sg.life;
+            if (k >= 1) { this.scene.remove(sg.m); sg.m.material.dispose(); this.sigils.splice(i, 1); continue; }
+            const open = k < 0.25 ? this.ease3(k / 0.25) : 1;
+            sg.m.scale.setScalar(sg.size * 0.6 * open); sg.m.userData.rune.uTime.value = Engine3D.t; sg.m.userData.rune.uOp.value = k > 0.6 ? (1 - k) / 0.4 : 1;
+        }
     },
+    ease3(k) { return 1 - Math.pow(1 - k, 3); },
     flashLights() { return this.flashes.map(f => ({ x: f.x, z: f.z, h: f.h, c: f.c, i: f.i * (f.life / f.max) })); }
 };

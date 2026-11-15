@@ -54,6 +54,7 @@ const Actors3D = {
             const set = new Set(meshes);
             for (const m of meshes) { [...m.children].forEach(c => { if (!set.has(c)) bone.attach(c); }); m.parent.remove(m); }
         }
+        root.traverse(o => { if (o.isMesh && o.userData.mdx && o.material.emissive) { const mt = o.material; mt.userData.e0 = mt.emissive.clone(); mt.userData.i0 = mt.emissiveIntensity; G3.rimify(mt); mats.push(mt); } });
         return { mats, geos };
     },
     make(model, ringColor) {
@@ -166,6 +167,18 @@ const Actors3D = {
         } else if (style === 'rend') { // ульта: руки раскинуты, тело выгнуто, дрожь
             const sh = Math.sin(Engine3D.t * 41) * 0.08;
             T.a0x = T.a1x = -2.4 + sh; T.a0z = 1.0 + sh; T.a1z = -1.0 - sh; T.bx = -0.4 + sh * 0.5; T.by = sh;
+        } else if (style === 'kneel') { // на колене, голова опущена, клинок опирается о землю
+            T.l0 = -1.45; T.l1 = 0.55; T.bx = 0.5; T.a1x = -0.55; T.a1z = 0.15; T.a0x = 0.25; T.a0z = 0.1;
+        } else if (style === 'rise') { // встаёт, выпрямляясь
+            T.l0 = -0.5; T.l1 = 0.2; T.bx = 0.18; T.a1x = -0.4; T.a0x = -0.1;
+        } else if (style === 'plunge') { // вонзает клинок в землю перед собой двумя руками
+            T.a0x = T.a1x = -1.05; T.a0z = -0.35; T.a1z = 0.35; T.bx = 0.28; T.l0 = -0.25; T.l1 = 0.15;
+        } else if (style === 'roar') { // без оружия: руки-когти разведены, рык
+            T.a0x = T.a1x = -1.0; T.a0z = 0.9; T.a1z = -0.9; T.bx = -0.25;
+        } else if (style === 'bowUp') { T.a0x = -2.3; T.a0z = 0.2; T.a1x = -1.6; T.a1z = 0.5; T.bx = -0.1; }
+        else if (style === 'orbsUp') { T.a0x = T.a1x = -2.4; T.a0z = 0.8; T.a1z = -0.8; T.bx = -0.2; }
+        else if (style === 'stance') { // боевая стойка вполоборота
+            T.a1x = -0.75; T.a1z = -0.25; T.a0x = -0.4; T.a0z = 0.3; T.bx = 0.1; T.by = 0.3; T.l0 = -0.2; T.l1 = 0.25;
         } else if (style === 'pray') { const k = Math.sin(Math.min(1, p) * Math.PI); T.a0x = T.a1x = -2.7 * k; T.a0z = 0.6 * k; T.a1z = -0.6 * k; T.bx = -0.2 * k; }
         return T;
     },
@@ -191,7 +204,20 @@ const Actors3D = {
         if (I.kick) AnimFX.kick(I.kick);
         if (I.sfx) Sfx3D.play(I.sfx, 0.9);
     },
-    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; return ht === 'saber' ? (player.saberAlter ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
+    // Три светящихся рваных борозды от когтей на теле врага (затухают за 2.5 с)
+    clawScar(a, dx, dz) {
+        if (!this.scarGeo) { this.scarGeo = new THREE.PlaneGeometry(0.035, 0.42); }
+        const g = new THREE.Group(), tilt = (Math.random() - 0.5) * 1.2;
+        for (let k = 0; k < 3; k++) {
+            const m = new THREE.Mesh(this.scarGeo, new THREE.MeshBasicMaterial({ color: k === 1 ? 0xff3a2a : 0xd01018, transparent: true, depthWrite: false, depthTest: true, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false }));
+            m.position.set((k - 1) * 0.07, (k - 1) * 0.02, 0); m.rotation.z = tilt; g.add(m);
+        }
+        const r = (a.rig.kind === 'biped' ? 0.2 : 0.3);
+        g.position.set(-dx * r, 0.68, -dz * r); g.lookAt(-dx * 5, 0.68, -dz * 5);
+        a.base.add(g); (a.scars = a.scars || []).push({ g, t: 0 });
+        if (a.scars.length > 4) { const old = a.scars.shift(); a.base.remove(old.g); old.g.children.forEach(m => m.material.dispose()); }
+    },
+    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; return ht === 'saber' ? (saberRed() ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
     animate(a, dt, x, z, opts) {
         const t = Engine3D.t;
         if (a.lx === null) { a.lx = x; a.lz = z; }
@@ -221,7 +247,7 @@ const Actors3D = {
         const S = (k, v, kk) => this.spring(a, k, v, dt, kk);
         if (rig.kind === 'biped') {
             const breathe = Math.sin(t * 1.8 + a.phase * 0.1) * 0.012 * (1 - W);
-            rig.legs[0].rotation.x = S('l0', sw); rig.legs[1].rotation.x = S('l1', -sw);
+            rig.legs[0].rotation.x = S('l0', P && P.l0 !== undefined ? P.l0 : sw, P && P.l0 !== undefined ? 6 : 22); rig.legs[1].rotation.x = S('l1', P && P.l1 !== undefined ? P.l1 : -sw, P && P.l1 !== undefined ? 6 : 22);
             rig.body.position.y = Math.abs(Math.cos(a.phase)) * 0.035 * W + breathe;
             const ia = P ? 1 : 0;
             rig.arms[0].rotation.x = S('a0x', P ? P.a0x : -sw * 0.75 - 0.05, P ? 26 : 14);
@@ -233,6 +259,21 @@ const Actors3D = {
             if (rig.head) rig.head.rotation.x = S('hx', -hit * 0.25 + (ia ? 0.05 : 0), 12);
             if (rig.cape) rig.cape.rotation.x = S('cape', 0.18 + Math.min(0.8, a.spd * 0.14) + Math.sin(t * 4 + a.phase) * 0.06, 6);
             if (rig.wings) rig.wings.forEach((w, i) => w.rotation.y = (i ? -1 : 1) * (0.3 + Math.sin(t * 5 + a.phase) * 0.28));
+        } else if (rig.kind === 'mdx') {
+            // Родные анимации модели WC3: удары и навыки ускоряются под длительность удара в игре
+            const X = rig.mdx, alt = !!opts.alt, A = a.atkStyle, SEQ = MDX3D.ANIMS[X.modelName] || MDX3D.ANIMS.mordred;
+            let name = SEQ.idle || 'Stand', rate = 1, restart = false, loop;
+            if (a.dying > 0) { name = SEQ.death || 'Death'; loop = false; }
+            else if (A && SEQ[A]) { name = SEQ[A]; const s = X.D.sequences[MDX3D.find(X, name, alt)]; rate = s ? (s.end - s.start) / Math.max(150, a.atkDur * 1000) : 1; restart = a.atkT <= dt * 1.5; loop = false; }
+            else if (A) { name = SEQ.slash || SEQ.thrust; const s = X.D.sequences[MDX3D.find(X, name, alt)]; rate = s ? (s.end - s.start) / Math.max(150, a.atkDur * 1000) : 1; restart = a.atkT <= dt * 1.5; loop = false; }
+            else if (opts.hold && SEQ[opts.hold]) { name = SEQ[opts.hold]; loop = true; }
+            else if (a.spd > 0.4) { name = SEQ.walk || 'Walk'; rate = Math.max(0.6, Math.min(2.2, a.spd / 1.9)); loop = true; }
+            else loop = true;
+            if (!MDX3D.play(X, name, { alt, rate, restart, loop })) MDX3D.play(X, SEQ.idle || 'Stand', { alt, loop: true });
+            // Увеличенный клинок (3-й навык Сейбер — «Колоссальный Клинок»)
+            X.boneScale = X.blade && opts.bigBlade ? { id: X.blade.node, s: 1 + opts.bigBlade } : null;
+            X.forceVis = opts.vis || null;
+            MDX3D.update(X, dt);
         } else if (rig.kind === 'quad') {
             rig.legs.forEach((l, i) => l.rotation.x = S('l' + i, (i === 0 || i === 3 ? sw : -sw) * 1.2));
             rig.body.position.y = Math.abs(Math.sin(a.phase)) * 0.05 * W;
@@ -269,6 +310,7 @@ const Actors3D = {
     },
     // Смерть: подкошенное падение с отскоком, души улетают вверх, тело уходит в землю
     dyingPose(a, dt, en) {
+        if (a.rig.kind === 'mdx') { if (a.dying < 0.001) { a.dying = 0.001; } a.dying = Math.min(1.4, a.dying + dt); this.animate(a, dt, a.base.position.x, a.base.position.z, {}); a.blob.visible = a.dying < 0.9; return; }
         if (a.dying < 0.001 && en) {
             const x = a.base.position.x, z = a.base.position.z, y = a.base.position.y;
             const undead = /skeleton|bone|wraith|ghoul|bat|vampire|dracula|gargoyle/.test(en.type), demon = /imp|hell|pit|boss|infernal|ash/.test(en.type);
@@ -305,12 +347,15 @@ const Actors3D = {
         const key = ht + (player.saberAlter ? 'A' : '') + (player.archerStance === 'blades' ? 'B' : '') + (gold ? 'G' : '') + (ch ? ch.id : '') + (ht === 'knight' ? (player.knightSword ? player.knightSword.type : '-claw') : '');
         if (key !== this.playerKey) {
             if (this.player) this.drop(this.player);
-            this.player = this.make(Models3D.hero(ht, { alter: player.saberAlter, stance: player.archerStance, gold, pal: ch && ch.pal, sword: player.knightSword }), null);
+            const mname = ht === 'saber' && player.saberAlter && ch && (ch.id === 'saber' || ch.id === 'saber_alter') ? 'saber_alter' : (ch && ch.model);
+            const mx = mname && typeof MDX3D !== 'undefined' ? MDX3D.create(mname, { height: 1.25 }) : null;
+            this.player = this.make(mx ? { root: mx.root, rig: { kind: 'mdx', mdx: mx, body: mx.root } } : Models3D.hero(ht, { alter: player.saberAlter, stance: player.archerStance, gold, pal: ch && ch.pal, sword: player.knightSword }), null);
             this.player.root.scale.setScalar(1.08);
             const aura = Models3D.glow(0xffd070, 1.8); aura.position.y = 0.7; aura.visible = false; this.player.base.add(aura); this.player.aura = aura;
             this.playerKey = key;
         }
         G3.cape.t.value = Engine3D.t;
+        if (this.player && player.heroType === 'knight') { const pulse = 1.4 + Math.sin(Engine3D.t * 3.2) * 0.9 + Math.sin(Engine3D.t * 11) * 0.2; for (const m of this.player.mats) if (m.emissiveMap && !this.player.tint) m.emissiveIntensity = pulse; }
         const P = this.player;
         if (this.pendingTrans) { P.trans = P.transD = this.pendingTrans; this.pendingTrans = 0; }
         // Начало атаки героя → стиль и длительность удара по классу и стойке
@@ -336,9 +381,11 @@ const Actors3D = {
         P.flash = Math.max(0, (P.flash || 0) - dt * 4);
         const charging = ht === 'saber' && (player.excaliburChargeTime || 0) > 0;
         if (player.knightAnim && player.knightAnim !== P.kAnim) { P.kAnim = player.knightAnim; this.attack(P, player.knightAnim.kind, player.knightAnim.t); }
-        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: charging ? 'raise' : (player.knightRend ? 'rend' : null) });
+        const cine = typeof Cinema !== 'undefined' ? Cinema.heroPose() : null;
+        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: cine ? cine.hold : (charging ? 'raise' : (player.knightRend ? 'rend' : null)), alt: player.charId === 'mordred' && (player.avalonBuffTimer || 0) > 0, bigBlade: ht === 'saber' && (player.avalonBuffTimer || 0) > 0 ? 0.9 : (charging ? 0.35 : 0),
+            vis: P.rig.kind === 'mdx' && P.rig.mdx.modelName === 'archer' ? (player.archerStance === 'blades' ? { 1: true, 2: false } : { 1: false, 2: true }) : null });
         // Ульта рыцаря: левитация и судороги, пока он разрывает себя
-        P.root.position.y = player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : 0;
+        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : 0);
         // Переход формы/стойки: импульс масштаба, оружие «проявляется»
         let wScale = 1;
         if (P.trans > 0) {
@@ -349,21 +396,26 @@ const Actors3D = {
         if (P.rig.offhand) P.rig.offhand.scale.setScalar(wScale);
         if (P.rig.weapon) P.rig.weapon.scale.setScalar(wScale * (ht === 'saber' && charging ? 1.25 + Math.sin(Engine3D.t * 10) * 0.04 : 1));
         P.aura.visible = (player.avalonBuffTimer || 0) > 0 || charging;
-        if (P.aura.visible) { P.aura.material.color.setHex(player.saberAlter ? 0xff3040 : 0xffd070); P.aura.material.opacity = 0.5 + Math.sin(Engine3D.t * 4) * 0.2; P.aura.scale.setScalar(charging ? 2.6 : 1.8); }
+        if (P.aura.visible) { P.aura.material.color.setHex(saberRed() ? 0xff3040 : 0xffd070); P.aura.material.opacity = 0.5 + Math.sin(Engine3D.t * 4) * 0.2; P.aura.scale.setScalar(charging ? 2.6 : 1.8); }
         // Шлейфы оружия: серебристо-голубой у Сейбер (багровый у Альтер, золотой у Экскалибура), багровые у Арчера
         const heavy = P.atkStyle === 'heavy';
-        const wp = this.weaponPts(P.rig.weapon);
+        const wp = P.rig.kind === 'mdx' ? MDX3D.bladePts(P.rig.mdx) : this.weaponPts(P.rig.weapon);
         if (wp) {
-            const col = ht === 'knight' ? 0xc0101a : ht === 'saber' ? (heavy ? (player.saberAlter ? 0xff2030 : 0xffe070) : (player.saberAlter ? 0xff2a3a : 0x9fd0ff)) : 0xff2a40;
-            AnimFX.trail(P, wp[0], wp[1], col, heavy ? { life: 0.4, len: 34, fullSpeed: 12, core: 0.9 } : { life: 0.2, core: 0.6 });
+            // Фирменные градиенты: Сейбер — от чистого белого к жёлтому и золоту Экскалибура (Альтер — чёрно-багровый),
+            // Рыцарь — густая кровь, Арчер — чёрный клинок Канто (тьма и багрянец)
+            const G = ht === 'saber' ? (player.saberAlter ? [0x1a0020, 0x8a1ab0, 0xff3a6a] : (player.charId === 'mordred' ? [0x5a0006, 0xff2a1a, 0xffe0b0] : [0xb8860b, 0xffd23a, 0xffffff]))
+                    : ht === 'knight' ? [0x1a0002, 0x8a0008, 0xff2a2a] : [0x100004, 0x7a0a14, 0xff4050];
+            AnimFX.trail(P, wp[0], wp[1], 0, heavy ? { grad: G, life: 0.42, len: 36, fullSpeed: 12, sparks: 0.9, inner: 0.15 } : { grad: G, life: 0.22, sparks: ht === 'saber' ? 0.6 : 0.25, inner: 0.25 });
         }
         if (P.rig.claws && P.atkStyle && P.atkStyle.startsWith('claw')) P.rig.claws.forEach((c, i) => {
             c.updateWorldMatrix(true, false);
-            const b = new THREE.Vector3(0, 0, 0).applyMatrix4(c.matrixWorld), tp = new THREE.Vector3(0, -0.15, 0.06).applyMatrix4(c.matrixWorld);
-            AnimFX.trail(c, b, tp, 0xff1a2a, { life: 0.22, core: 0.4, minSpeed: 2 });
+            for (let k = 0; k < 3; k++) {   // три параллельных кровавых росчерка — от каждого когтя
+                const x = (k - 1) * 0.022, b = new THREE.Vector3(x, -0.06, 0.02).applyMatrix4(c.matrixWorld), tp = new THREE.Vector3(x, -0.15, 0.06).applyMatrix4(c.matrixWorld);
+                AnimFX.trail(c.uuid + k, b, tp, 0, { grad: [0x2a0002, 0xa0000c, 0xff3a3a], life: 0.3, minSpeed: 1.5, inner: 0, len: 22 });
+            }
         });
         const op = this.weaponPts(P.rig.offhand);
-        if (op) AnimFX.trail(P.rig.offhand, op[0], op[1], 0xff6070, { life: 0.2, core: 0.5 });
+        if (op) AnimFX.trail(P.rig.offhand, op[0], op[1], 0, { grad: [0x3a5070, 0xc8d8f0, 0xffffff], life: 0.22, sparks: 0.3 }); // белый клинок Бакуя — серебристо-голубой след
         if (P.rig.orbs) {
             const ORB = { q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c };
             P.rig.orbs.forEach((o, i) => {
@@ -386,7 +438,8 @@ const Actors3D = {
             if (!a) {
                 if (dead) continue;
                 const ring = en.isBoss ? 0xff2a2a : (en.tpl && en.tpl.miniBoss ? 0xff7a1a : (en.rare ? 0xc060ff : (en.elite ? 0xffd040 : null)));
-                const m = Models3D.enemy(en.type, en);
+                const mxe = en.type === 'saber_shadow' && typeof MDX3D !== 'undefined' ? MDX3D.create('saber_alter', { height: 1.25 }) : null;
+                const m = mxe ? { root: mxe.root, rig: { kind: 'mdx', mdx: mxe, body: mxe.root } } : Models3D.enemy(en.type, en);
                 a = this.make(m, ring);
                 const sc = Math.max(0.7, Math.min(2.2, (en.radius || 16) / 16)) * (en.isBoss ? 1 : 1);
                 a.base.scale.setScalar(sc);
@@ -406,7 +459,7 @@ const Actors3D = {
                     const c = this.heroColor(), hy = a.base.position.y + 0.6 * a.base.scale.x, dx = ex - px, dz = ez - pz, dl = Math.hypot(dx, dz) || 1;
                     AnimFX.emit({ x: ex, y: hy, z: ez, n: 14, color: [c, 0xffffff, 0xffe8a0], speed: 3.2, life: 0.35, size: 0.06, grav: 6, drag: 2, dir: [dx / dl, 0.4, dz / dl], spread: 1.6 });
                     AnimFX.shock(ex, hy, ez, c, 0.1, 0.5, 0.18, 0.7);
-                    if (player.heroType === 'knight') AnimFX.blood(ex, hy, ez, 22, dx / dl, dz / dl);
+                    if (player.heroType === 'knight') { AnimFX.blood(ex, hy, ez, 22, dx / dl, dz / dl); if (!player.knightSword) this.clawScar(a, dx / dl, dz / dl); }
                 }
             }
             a.lastHp = en.hp;
@@ -422,6 +475,7 @@ const Actors3D = {
             const face = (a.spd < 0.3 && chasing) ? Math.atan2(px - ex, pz - ez) : undefined;
             this.animate(a, dt, ex, ez, { face, frozen: (en.freezeTimer || 0) > 0 });
             if (a.ring) { a.ring.rotation.y += dt; a.ring.material.opacity = 0.55 + Math.sin(Engine3D.t * 4) * 0.25; }
+            if (a.scars) for (let i = a.scars.length - 1; i >= 0; i--) { const sc = a.scars[i]; sc.t += dt; const k = 1 - sc.t / 2.5; if (k <= 0) { a.base.remove(sc.g); sc.g.children.forEach(m => m.material.dispose()); a.scars.splice(i, 1); continue; } sc.g.children.forEach(m => m.material.opacity = Math.min(1, k * 1.5)); sc.g.scale.y = Math.min(1, sc.t * 8); }
             a.base.visible = !en.hidden;
         }
         for (const [en, a] of this.map) if (!seen.has(en)) { this.drop(a); this.map.delete(en); }

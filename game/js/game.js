@@ -4238,7 +4238,7 @@ function continueSavedGameFromMenu() {
 }
 function startGameFromMenu() {
     SoundFX.play('invoke');
-    withCurtain(() => { startNewGameFromMenu(); gameStarted = true; setGameState('playing'); });
+    withCurtain(() => { startNewGameFromMenu(); gameStarted = true; setGameState('playing'); Cinema.start(); });
 }
 
 // ---------- слайдер героев ----------
@@ -4528,6 +4528,9 @@ function buildMenuSilhouettes(W, H) {
 }
 
 // ---------- сплэш-арты героев (анимированные) ----------
+// Картинки сплэш-артов (грузятся один раз)
+const splashCache = {};
+function splashArt(src) { let im = splashCache[src]; if (!im) { im = splashCache[src] = new Image(); im.src = src; } return im; }
 function drawHeroSplash(cv, h, dt) {
     const g = cv.getContext('2d'), W = cv.width, H = cv.height;
     const st = menuFx.heroFx[h.id || h.key] || (menuFx.heroFx[h.id || h.key] = { t: 0, p: [] });
@@ -4537,16 +4540,32 @@ function drawHeroSplash(cv, h, dt) {
     const bg = g.createRadialGradient(cx, cy, 20, cx, cy, W * 0.75);
     bg.addColorStop(0, `rgba(${glow},0.38)`); bg.addColorStop(0.45, 'rgba(16,12,20,0.95)'); bg.addColorStop(1, '#050407');
     g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    // Сплэш-арт персонажа (если есть): медленный «наезд» камеры, затемнение слева под текст
+    let art = null;
+    if (h.art) { art = splashArt(h.art); if (!art.complete || !art.naturalWidth) art = null; }
+    if (art) {
+        const k = 1.06 + Math.sin(t * 0.15) * 0.03, iw = art.naturalWidth, ih = art.naturalHeight, sc0 = Math.max(W / iw, H / ih) * k;
+        const dw = iw * sc0, dh = ih * sc0, fx = h.artFocus || 0.5;
+        g.save(); if (h.artFilter) g.filter = h.artFilter;
+        g.drawImage(art, (W - dw) * fx + Math.sin(t * 0.1) * 12, (H - dh) * 0.4, dw, dh); g.restore();
+        const sh = g.createLinearGradient(0, 0, W * 0.75, 0); sh.addColorStop(0, 'rgba(4,4,6,0.92)'); sh.addColorStop(0.55, 'rgba(4,4,6,0.45)'); sh.addColorStop(1, 'rgba(4,4,6,0)');
+        g.fillStyle = sh; g.fillRect(0, 0, W, H);
+        const tint = g.createRadialGradient(cx, cy, 40, cx, cy, W * 0.8); tint.addColorStop(0, `rgba(${glow},0.12)`); tint.addColorStop(1, 'rgba(0,0,0,0.35)'); g.fillStyle = tint; g.fillRect(0, 0, W, H);
+    }
+    if (!art) {
     g.save(); g.translate(cx, cy - 60); g.rotate(t * 0.05);
     for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); g.fillStyle = `rgba(${glow},0.05)`; g.beginPath(); g.moveTo(0, 0); g.lineTo(-40, -W); g.lineTo(40, -W); g.closePath(); g.fill(); }
     g.restore();
+    }
     // Магический круг под героем
+    if (!art) {
     g.save(); g.translate(cx, cy + 210); g.scale(1, 0.32); g.rotate(t * 0.4);
     g.strokeStyle = `rgba(${glow},0.55)`; g.lineWidth = 3;
     g.beginPath(); g.arc(0, 0, 210, 0, Math.PI * 2); g.stroke();
     g.beginPath(); g.arc(0, 0, 170, 0, Math.PI * 2); g.stroke();
     for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.moveTo(Math.cos(a) * 170, Math.sin(a) * 170); g.lineTo(Math.cos(a + 2.4) * 170, Math.sin(a + 2.4) * 170); g.stroke(); }
     g.restore();
+    }
     // Частицы по герою
     const P = st.p;
     const spawn = o => P.push(Object.assign({ life: 1, max: 1 }, o));
@@ -4569,7 +4588,8 @@ function drawHeroSplash(cv, h, dt) {
     }
     // Герой крупным планом
     const spr = h.key === 'knight' ? (saberAlterSpriteCanvas || (saberAlterSpriteCanvas = buildSaberAlterSprite())) : h.key === 'saber' ? saberSpriteCanvas : (h.key === 'archer' ? archerSpriteCanvas : invokerSpriteCanvas);
-    // Чёткий пиксель-арт (целочисленный масштаб) + мягкое свечение-контур
+    // Чёткий пиксель-арт (целочисленный масштаб) + мягкое свечение-контур (на сплэш-арте спрайт не нужен)
+    if (art) return;
     const bob = Math.round(Math.sin(t * 1.6) * 6);
     if (spr) {
         const sc = Math.max(3, Math.floor(H * 0.6 / spr.height)), S = spr.width * sc, SH = spr.height * sc;
@@ -6271,6 +6291,8 @@ const HERO_DEFS = {
                hello: '🩸 Павший Рыцарь поднялся из пепла. Клинок он заберёт у первого же мечника.' }
 };
 const heroDef = () => HERO_DEFS[player.heroType] || HERO_DEFS.invoker;
+// «Красная» Сейбер: тёмная форма Альтер или Мордред (тот же набор навыков, багровые эффекты)
+const saberRed = () => player.heroType === 'saber' && (player.saberAlter || player.charId === 'mordred');
 const diffCfg = () => DIFFICULTY_CONFIG[gameSettings.difficulty] || DIFFICULTY_CONFIG.normal;
 // Броня как в Warcraft 3: каждый пункт даёт убывающее снижение физического урона (10 брони = -37.5%)
 const armorMult = a => 1 / (1 + 0.06 * Math.max(0, a));
@@ -6329,7 +6351,7 @@ function recalcPlayerStats() {
         player.armor = Math.round(3 + L * 0.4 + eq.armor);
         player.moveSpeed = Math.round(204 + e * 4);
         player.cdrPct = Math.min(40, Math.round(e * 1.5 + eq.cdr));
-        player.attackInterval = Math.max(0.45, 0.90 - L * 0.02 - w * 0.02);
+        player.attackInterval = 0.82;   // без баффов скорости атаки: темп стрельбы всегда один
         player.attackRange = Math.round(420 + r * 20 + eq.range);
         player.critChance = Math.min(50, Math.round(12 + L * 0.8 + r * 3 + eq.crit));
         player.critMult = +(2.0 + r * 0.1).toFixed(1);
@@ -6445,6 +6467,16 @@ function nextComboStep() {
     player.comboTimer = 1.3;
     return player.comboStep;
 }
+// Сейбер Альтер: веер теневых клинков (пробивают насквозь)
+function alterShadowBlades(ang, n, dmg) {
+    for (let i = 0; i < n; i++) {
+        const a = ang + (i - (n - 1) / 2) * 0.22, sp = 560, range = 280;
+        projectiles.push({ kind: 'saber_wave', x: player.x + Math.cos(a) * 30, y: player.y + Math.sin(a) * 30, sx: player.x, sy: player.y, ang: a,
+            vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, radius: 24, fromPlayer: true, isSpell: false, color: '#a855f7', dmg, pierce: true,
+            life: range / sp, maxLife: range / sp, hitIds: new Set(), shadow: true });
+    }
+    SoundFX.play('tornado');
+}
 // Удары Сейбер: выпад, перекрёстный разрез, удар с разворота (по кругу), сокрушительный финишер
 const SABER_COMBO = [
     null,
@@ -6462,9 +6494,9 @@ function saberBasicAttack() {
     const ang = player.facingAngle;
     const reach = (aval ? SABER_GIANT.reach : C.reach) * (aval && C.finisher ? 1.15 : 1);
     const halfArc = aval ? Math.max(SABER_GIANT.halfArc, C.arc) : C.arc;
-    const col = player.saberAlter ? '#ef4444' : (aval ? '#fde047' : C.color);
+    const col = saberRed() ? (aval ? '#f87171' : '#ef4444') : (aval ? '#fde047' : C.color);
     if (aval) triggerScreenShake(2);
-    if (C.finisher) { triggerScreenShake(5); addGroundDecal(player.x + Math.cos(ang) * 60, player.y + Math.sin(ang) * 60, 46, 'scorch'); }
+    if (C.finisher) { triggerScreenShake(5); addGroundDecal(player.x + Math.cos(ang) * 60, player.y + Math.sin(ang) * 60, 46, 'scorch'); if (player.saberAlter) alterShadowBlades(ang, 3, Math.round(player.handDmg * 0.7)); }
     activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang, radius: reach, color: col, life: 0.18, maxLife: 0.18 });
     if (C.spin) activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang: ang + Math.PI, radius: reach, color: col, life: 0.22, maxLife: 0.22 });
     const knock = C.finisher ? 42 : 18;
@@ -6685,7 +6717,7 @@ function castSaberSkillImpl(key) {
             const d = 14 + (rendLen / 9) * i, j = (i === 0 || i === 9) ? 0 : (Math.random() - 0.5) * 14;
             pts.push([player.x + Math.cos(ang) * d - Math.sin(ang) * j, player.y + Math.sin(ang) * d + Math.cos(ang) * j]);
         }
-        playerFx.push({ type: 'ground_rift', pts, w: 9, glow: player.saberAlter ? '#ef4444' : '#38bdf8', life: 5, maxLife: 5 });
+        playerFx.push({ type: 'ground_rift', pts, w: 9, glow: saberRed() ? '#ef4444' : '#38bdf8', life: 5, maxLife: 5 });
         for (let i = 1; i < pts.length; i += 2) addGroundDecal(pts[i][0], pts[i][1], 16, 'scorch');
         enemies.forEach(en => {
             if (en.deadTimer > 0) return;
@@ -6705,6 +6737,7 @@ function castSaberSkillImpl(key) {
             vx: Math.cos(ang) * wsp, vy: Math.sin(ang) * wsp, radius: 34, fromPlayer: true, isSpell: false,
             color: '#7dd3fc', dmg: waveDmg, pierce: true, life: wrange / wsp, maxLife: wrange / wsp, hitIds: new Set()
         });
+        if (player.saberAlter) alterShadowBlades(ang, 5, Math.round(waveDmg * 0.45));
         spawnFloatingText(player.x, player.y - 32, '🌋 РАЗЛОМ!', '#7dd3fc');
     } else if (key === 'w') {
         // W — Рывок Праны
@@ -6806,7 +6839,7 @@ function releaseExcalibur(c) {
         en.stunTimer = Math.max(en.stunTimer, 1.5);
         damageEnemy(en, Math.round(c.dmg * falloff), true, ca, sa, '#fef08a', { crit: true });
     });
-    playerFx.push({ type: 'excalibur_beam', x: player.x, y: player.y, ang: c.ang, len: L, width: W, life: 1.2, maxLife: 1.2, alter: !!player.saberAlter });
+    playerFx.push({ type: 'excalibur_beam', x: player.x, y: player.y, ang: c.ang, len: L, width: W, life: 1.2, maxLife: 1.2, alter: saberRed() });
     // Последствия: разломы вдоль луча и светящиеся осколки, которые жгут врагов
     const shardDmg = Math.round(c.dmg * 0.04);
     for (let i = 0; i < 3; i++) {
@@ -7616,6 +7649,8 @@ function damageEnemy(en, dmg, isSpell, knockX = 0, knockY = 0, customColor = nul
     // Броня режет физический урон, сопротивление магии — урон заклинаний
     const final = Math.max(1, Math.round(dmg * (isSpell ? (1 - en.mres) : armorMult(en.armor))));
     en.hp -= final;
+    // Сейбер Альтер: вампиризм — 12% урона ударами и 6% урона навыками возвращается здоровьем
+    if (player.heroType === 'saber' && player.saberAlter && player.hp > 0 && player.hp < player.maxHp) player.hp = Math.min(player.maxHp, player.hp + final * (isSpell ? 0.06 : 0.12));
     en.hitFlash = 0.15;
     if (wpv && wpv.lifesteal) player.hp = Math.min(player.maxHp, player.hp + final * wpv.lifesteal / 100);
     if (wpv && wpv.manaOnHit) player.mp = Math.min(player.maxMp, player.mp + wpv.manaOnHit);
@@ -7636,6 +7671,7 @@ function damageEnemy(en, dmg, isSpell, knockX = 0, knockY = 0, customColor = nul
 function killEnemy(en) {
     en.hp = 0;
     Knight.onKill(en);
+    Cinema.onKill(en);
     en.deadTimer = en.tpl.respawn || (en.isBoss ? 90 : 22);
     if (en.camp) en.deadTimer = 1e9; // бойцы лагеря возвращаются только все вместе (resetCamp)
     en.state = 'chase';
@@ -8298,7 +8334,7 @@ function preUpdate25(dt) {
         if (zt.t >= zt.dur) zoneTransition = null;
     }
     updateSaberUlt(dt);
-    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend);
+    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend || Cinema.active);
 
     if (player.heroType === 'invoker' && player.attackTarget) {
         // Инвокер не умеет атаковать с руки: ПКМ по врагу лишь разворачивает мага к цели
@@ -8629,6 +8665,7 @@ function selectMenuHero(heroKey, charId) {
 function startNewGameFromMenu() {
     player.heroType = gameSettings.selectedHero;
     player.charId = (charById(gameSettings.selectedChar) || {}).key === player.heroType ? gameSettings.selectedChar : player.heroType;
+    const startChar = charById(player.charId);
     const def = heroDef();
     Object.assign(player, {
         level: 1, xp: 0, xpNext: 100, gold: 100, skillPoints: 3,
@@ -8649,7 +8686,8 @@ function startNewGameFromMenu() {
     });
     forgeSpirits = []; activeZones = []; groundDecals = [];
     zoneTransition = null; zoneBanner = null; lastZoneName = null;
-    showToast(def.hello, 'gold');
+    if (startChar && startChar.alter) { player.saberAlter = true; saberAlterSpriteCanvas = buildSaberAlterSprite(); }
+    { const c = charById(player.charId); showToast(c && c.id !== c.key ? `${c.name} • ${c.epithet} вступает в игру!` : def.hello, 'gold'); }
 
     populateWorldEntities();
     recalcPlayerStats();

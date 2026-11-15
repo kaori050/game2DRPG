@@ -140,6 +140,7 @@ const Engine3D = {
         const pitch = 0.98 + (this.zoom - 19) * 0.006, d = this.zoom * (1 - (typeof AnimFX !== 'undefined' ? AnimFX.kickAmt : 0) * 0.05);
         this.camera.position.set(tgt.x + (Math.random() - 0.5) * shake, tgt.y + Math.sin(pitch) * d, tgt.z + Math.cos(pitch) * d + (Math.random() - 0.5) * shake);
         this.camera.lookAt(tgt.x, tgt.y, tgt.z);
+        if (typeof Cinema !== 'undefined') { Cinema.update(dt); Cinema.camera(this.camera, tgt); }
 
         // Свет по времени суток и зоне
         const zone = playerZone(), dark = this.darkness();
