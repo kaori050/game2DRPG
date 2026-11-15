@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Хроники Эльдории: Инвокер, Сейбер и Арчер — Warcraft 3 / Dark Fantasy 2.5D RPG</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             user-select: none;
@@ -521,12 +521,80 @@
         .craft-only { font-size: 12px; color: #d6d3d1; display: flex; gap: 5px; align-items: center; }
         .craft-ing { cursor: help; }
         .craft-n { padding: 6px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+
+        /* ===================== ТЕРМИНАЛЬНО-ГОТИЧЕСКИЙ СТИЛЬ ===================== */
+        #fxCanvas, #labelCanvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        #fxCanvas { z-index: 1; background: #030407; }
+        #labelCanvas { z-index: 2; }
+        .menu-root canvas.ascii-overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+        body { font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; }
+        body, button, input, select { font-variant-ligatures: none; }
+        .rpg-panel, .gacha-wrap, .dock-vitals, .shadow-dialog, .admin-panel, .menu-btn, .hero-card, .diff-card {
+            border-style: solid !important; border-width: 10px !important; border-radius: 0 !important;
+            border-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='30'%20height='30'%3E%3Cg%20font-family='Menlo%2CConsolas%2Cmonospace'%20font-size='11'%20font-weight='700'%20fill='%23b49a62'%20text-anchor='middle'%3E%3Ctext%20x='5'%20y='9'%3E%2B%3C/text%3E%3Ctext%20x='15'%20y='9'%3E=%3C/text%3E%3Ctext%20x='25'%20y='9'%3E%2B%3C/text%3E%3Ctext%20x='5'%20y='19'%3E%7C%3C/text%3E%3Ctext%20x='25'%20y='19'%3E%7C%3C/text%3E%3Ctext%20x='5'%20y='29'%3E%2B%3C/text%3E%3Ctext%20x='15'%20y='29'%3E=%3C/text%3E%3Ctext%20x='25'%20y='29'%3E%2B%3C/text%3E%3C/g%3E%3C/svg%3E") 10 round !important; }
+        body.admin-mode .rpg-panel, body.admin-mode .menu-btn, body.admin-mode .admin-panel, body.admin-mode .dock-vitals { border-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='30'%20height='30'%3E%3Cg%20font-family='Menlo%2CConsolas%2Cmonospace'%20font-size='11'%20font-weight='700'%20fill='%23ef4444'%20text-anchor='middle'%3E%3Ctext%20x='5'%20y='9'%3E%2B%3C/text%3E%3Ctext%20x='15'%20y='9'%3E=%3C/text%3E%3Ctext%20x='25'%20y='9'%3E%2B%3C/text%3E%3Ctext%20x='5'%20y='19'%3E%7C%3C/text%3E%3Ctext%20x='25'%20y='19'%3E%7C%3C/text%3E%3Ctext%20x='5'%20y='29'%3E%2B%3C/text%3E%3Ctext%20x='15'%20y='29'%3E=%3C/text%3E%3Ctext%20x='25'%20y='29'%3E%2B%3C/text%3E%3C/g%3E%3C/svg%3E") 10 round !important; }
+        .rpg-panel { background: linear-gradient(180deg, rgba(8,9,12,.94), rgba(3,4,6,.96)) !important; box-shadow: 0 0 24px rgba(0,0,0,.6), inset 0 0 30px rgba(180,154,98,.05) !important; }
+        .rpg-btn, .rpg-btn-gold, .archer-btn-skill, .saber-btn-skill, .gacha-pull, .gacha-tabs button, .craft-tabs button, .menu-back, .shadow-actions button, .admin-row button, .gacha-hud-btn {
+            border-radius: 2px !important; font-family: 'JetBrains Mono', ui-monospace, monospace !important; letter-spacing: .02em; }
+        .rpg-btn { background: #08090c !important; border: 1px solid rgba(180,154,98,.55) !important; box-shadow: inset 0 0 10px rgba(180,154,98,.08) !important; }
+        .rpg-btn:hover { box-shadow: 0 0 10px rgba(253,230,138,.35), inset 0 0 12px rgba(180,154,98,.18) !important; }
+        h1, h2, h3, .font-rpg, .menu-title, .hero-name, .diff-name, .gacha-head h2 { text-shadow: 0 0 8px rgba(253,230,138,.35), 0 0 2px rgba(0,0,0,.9); }
+        .text-amber-300, .text-amber-400, .text-lime-400, .text-rose-400, .text-cyan-300, .text-emerald-400 { text-shadow: 0 0 6px currentColor; }
+        /* Полосы как блоки символов █ █ █ */
+        .vital-fill, .vital-ghost, #bossHpBar, .vital-xp #barXp, .hero-bar i, .gacha-pity i { -webkit-mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px); mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px); }
+        .vital-track, .vital-xp { border-radius: 0 !important; background: #020203 !important; }
+        .vital-text { font-family: 'JetBrains Mono', monospace; letter-spacing: .04em; }
+        .dock-vitals { background: #040506 !important; }
+        .hotkey-badge { border-radius: 0 !important; font-family: 'JetBrains Mono', monospace !important; }
+        /* Мерцающий ЭЛТ-терминал: строки развёртки и лёгкое зерно */
+        body::after { content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; animation: crtFlicker 4s steps(2) infinite; }
+        @keyframes crtFlicker { 50% { opacity: .85; } }
+        body.ascii-off::after { display: none; }
+        @media (prefers-reduced-motion: reduce) { body::after { animation: none; } }
+
+        /* ===================== ИКОНКИ ИЗ СИМВОЛОВ ===================== */
+        pre.ia { display: inline-block; margin: 0; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-weight: 800; font-size: .3em; line-height: 1.02; letter-spacing: 0;
+            white-space: pre; text-align: left; vertical-align: middle; background: linear-gradient(180deg, var(--ia1), var(--ia2)); -webkit-background-clip: text; background-clip: text; color: transparent;
+            filter: drop-shadow(0 0 .12em var(--ia2)) drop-shadow(0 0 .35em var(--ia2)); }
+        pre.ia.ia-big { font-size: .34em; }
+        #bottomDock pre.ia { font-size: 10px; line-height: 1; }
+        #bottomDock button pre.ia { margin: 1px 0; }
+        .gacha-hud-btn pre.ia, .rpg-btn pre.ia { font-size: 7px; }
+        #modalChar pre.ia, #modalCraft pre.ia { font-size: 9px; }
+        .gacha-card .gi pre.ia { font-size: 15px; }
+        /* ===================== УРОВНИ СЛОЖНОСТИ ===================== */
+        .diff-card { display: flex; flex-direction: column; gap: 4px; min-height: 330px !important; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+        .diff-tag { font-size: 10px; letter-spacing: .25em; color: rgb(var(--d-glow)); opacity: .85; }
+        .diff-art { margin: 4px 0 2px; font-family: inherit; font-weight: 800; font-size: 13px; line-height: 1.05; white-space: pre; color: rgb(var(--d-glow)); text-shadow: 0 0 6px rgba(var(--d-glow), .8), 0 0 18px rgba(var(--d-glow), .45); }
+        .diff-table { margin: 8px 0 0; font-family: inherit; font-size: 11px; overflow: hidden; line-height: 1.5; white-space: pre; color: #d6d3d1; background: rgba(0,0,0,.35); padding: 6px 8px; border-left: 2px solid rgba(var(--d-glow), .7); }
+        .diff-card.d-easy { border-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='30'%20height='30'%3E%3Cg%20font-family='Menlo%2CConsolas%2Cmonospace'%20font-size='11'%20font-weight='700'%20fill='%236ee7b7'%20text-anchor='middle'%3E%3Ctext%20x='5'%20y='9'%3E.%3C/text%3E%3Ctext%20x='15'%20y='9'%3E~%3C/text%3E%3Ctext%20x='25'%20y='9'%3E.%3C/text%3E%3Ctext%20x='5'%20y='19'%3E:%3C/text%3E%3Ctext%20x='25'%20y='19'%3E:%3C/text%3E%3Ctext%20x='5'%20y='29'%3E'%3C/text%3E%3Ctext%20x='15'%20y='29'%3E~%3C/text%3E%3Ctext%20x='25'%20y='29'%3E'%3C/text%3E%3C/g%3E%3C/svg%3E") 10 round !important; background: linear-gradient(180deg, rgba(16,60,40,.35), rgba(5,8,7,.9)) !important; }
+        .diff-card.d-hard { border-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='30'%20height='30'%3E%3Cg%20font-family='Menlo%2CConsolas%2Cmonospace'%20font-size='11'%20font-weight='700'%20fill='%23dc2626'%20text-anchor='middle'%3E%3Ctext%20x='5'%20y='9'%3E%23%3C/text%3E%3Ctext%20x='15'%20y='9'%3E%25%3C/text%3E%3Ctext%20x='25'%20y='9'%3E%23%3C/text%3E%3Ctext%20x='5'%20y='19'%3E%25%3C/text%3E%3Ctext%20x='25'%20y='19'%3E%25%3C/text%3E%3Ctext%20x='5'%20y='29'%3E%23%3C/text%3E%3Ctext%20x='15'%20y='29'%3E%25%3C/text%3E%3Ctext%20x='25'%20y='29'%3E%23%3C/text%3E%3C/g%3E%3C/svg%3E") 10 round !important; background:
+            url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='24'%3E%3Ctext%20x='2'%20y='16'%20font-family='monospace'%20font-size='12'%20fill='rgba%28220%2C38%2C38%2C0.13%29'%3E%25%23%25%3C/text%3E%3C/svg%3E"), linear-gradient(180deg, rgba(90,10,14,.45), rgba(10,3,4,.92)) !important; }
+        .diff-card.d-insane { border-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='30'%20height='30'%3E%3Cg%20font-family='Menlo%2CConsolas%2Cmonospace'%20font-size='12'%20font-weight='700'%20fill='%23ef4444'%20text-anchor='middle'%3E%3Ctext%20x='5'%20y='9'%3E/%3C/text%3E%3Ctext%20x='15'%20y='9'%3E%5E%3C/text%3E%3Ctext%20x='25'%20y='9'%3E%5C%3C/text%3E%3Ctext%20x='5'%20y='19'%3E%3E%3C/text%3E%3Ctext%20x='25'%20y='19'%3E%3C%3C/text%3E%3Ctext%20x='5'%20y='29'%3E%5C%3C/text%3E%3Ctext%20x='15'%20y='29'%3Ev%3C/text%3E%3Ctext%20x='25'%20y='29'%3E/%3C/text%3E%3C/g%3E%3C/svg%3E") 10 round !important; background:
+            url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='46'%20height='30'%3E%3Ctext%20x='3'%20y='20'%20font-family='monospace'%20font-size='13'%20fill='rgba%28239%2C68%2C68%2C0.12%29'%3E/%5C8/%5C%3C/text%3E%3C/svg%3E"), radial-gradient(ellipse at 50% 0%, rgba(220,38,38,.45), rgba(8,0,2,.95) 70%) !important; animation: diffIn .6s cubic-bezier(.2,.8,.2,1) forwards, abyssPulse 2.4s ease-in-out infinite !important; }
+        .diff-card.d-insane .diff-art { animation: abyssFlicker 3s steps(3) infinite; }
+        @keyframes abyssPulse { 50% { box-shadow: 0 0 40px rgba(239,68,68,.55), inset 0 0 30px rgba(239,68,68,.25); } }
+        @keyframes abyssFlicker { 0%, 100% { opacity: 1; } 47% { opacity: .55; } 50% { opacity: 1; } }
+        /* ===================== 4K: масштаб интерфейса ===================== */
+        .ui-zoom, #bottomDock, #toastContainer, #bossHud, #interactPrompt, #adminPanel, .menu-screen, [id^="modal"] > div { zoom: var(--ui-scale, 1); }
+        #fxCanvas { image-rendering: auto; }
+
+        /* ===================== МИКРО-СИМВОЛЫ В ИНТЕРФЕЙСЕ ===================== */
+        canvas.ascii-overlay:not(.hero-splash) { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+        .vital-fill, .vital-ghost, #bossHpBar, .vital-xp #barXp, .hero-bar i, .gacha-pity i {
+            -webkit-mask: var(--micro-mask) repeat 0 0 / var(--micro-size) !important; mask: var(--micro-mask) repeat 0 0 / var(--micro-size) !important; }
+        pre.ia, .diff-art, .menu-title, .hero-name, .gacha-head h2, .chest-title {
+            -webkit-mask: var(--micro-mask) repeat 0 0 / var(--micro-size); mask: var(--micro-mask) repeat 0 0 / var(--micro-size); }
+        .rpg-panel, .dock-vitals, .gacha-wrap, .admin-panel { background-image: var(--micro-tex), linear-gradient(180deg, rgba(8,9,12,.94), rgba(3,4,6,.96)) !important; background-size: var(--micro-size), auto !important; }
     </style>
 </head>
 <body class="relative select-none">
 
     <!-- Основной Canvas Игры -->
     <canvas id="gameCanvas"></canvas>
+    <canvas id="fxCanvas"></canvas>
+    <canvas id="labelCanvas"></canvas>
 
     <!-- ==================== ГЛАВНОЕ МЕНЮ: МЕНЮ → ВЫБОР ГЕРОЯ → СЛОЖНОСТЬ → ИГРА ==================== -->
     <div id="mainMenuOverlay" class="menu-root" data-state="menu">
@@ -642,6 +710,20 @@
 
                 <div class="bg-stone-950/90 p-3 rounded-xl border border-stone-800 flex justify-between items-center">
                     <div>
+                        <div class="font-bold text-stone-200 text-sm">Терминальная ASCII-графика</div>
+                        <div class="text-stone-400 text-[11px]">Мир из цветных символов 0, 1, #, @, %. Размер символа</div>
+                    </div>
+                    <select id="selAsciiMode" onchange="setAsciiMode(this.value)" class="bg-stone-900 text-amber-300 font-bold px-3 py-1.5 rounded-lg border border-stone-700">
+                        <option value="ultra">Ультра: микро-символы 3×5 px</option>
+                        <option value="fine">Высокая: 6×10 px</option>
+                        <option value="medium">Средняя: 9×15 px</option>
+                        <option value="coarse">Крупная: 12×20 px</option>
+                        <option value="off">Выключено</option>
+                    </select>
+                </div>
+
+                <div class="bg-stone-950/90 p-3 rounded-xl border border-stone-800 flex justify-between items-center">
+                    <div>
                         <div class="font-bold text-stone-200 text-sm">Псевдо-3D объем мира (Warcraft 3)</div>
                         <div class="text-stone-400 text-[11px]">Объемные 2.5D стены Камелота, башни, скалы и деревья</div>
                     </div>
@@ -684,7 +766,7 @@
     </div>
 
     <!-- Верхний левый HUD: Герой (Древняя каменная плита со мхом) -->
-    <div class="fixed top-3 left-3 z-20 flex flex-col gap-2.5 pointer-events-none w-80 sm:w-88">
+    <div class="ui-zoom fixed top-3 left-3 z-20 flex flex-col gap-2.5 pointer-events-none w-80 sm:w-88">
         <div class="rpg-panel p-3.5 rounded-xl pointer-events-auto">
             <!-- SVG Декор мха и корней по углам -->
             <svg class="moss-vine-overlay w-full h-full" viewBox="0 0 320 140" preserveAspectRatio="none">
@@ -735,7 +817,7 @@
     </div>
 
     <!-- Верхний правый HUD: Мини-карта в каменной оправе и Кнопки окон -->
-    <div class="fixed top-3 right-3 z-20 flex flex-col items-end gap-2 pointer-events-none">
+    <div class="ui-zoom fixed top-3 right-3 z-20 flex flex-col items-end gap-2 pointer-events-none">
         <div class="rpg-panel p-2.5 rounded-xl pointer-events-auto flex flex-col items-center">
             <div class="relative rounded-lg overflow-hidden border-2 border-stone-700 bg-stone-950 shadow-2xl">
                 <canvas id="minimapCanvas" width="142" height="142" class="block cursor-pointer" title="Карта мира (M)" onclick="toggleModal('worldmap')"></canvas>
@@ -1003,7 +1085,7 @@
                 <button id="btnSaberLvlR" onclick="levelUpOrb('r')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
                 <button onclick="castSaberSkill('r')" class="relative w-14 h-14 sm:w-16 sm:h-16 rpg-btn-gold rounded-xl flex flex-col items-center justify-center group border-2 border-yellow-300" title="R — ЛУЧ ЭКСКАЛИБУРА: каст (3.6с → 2.25с), затем направленный луч энергии вперёд. Остаются светящиеся осколки. S — отмена.">
                     <span class="hotkey-badge">R</span>
-                    <span class="text-2xl sm:text-3xl group-hover:scale-125 transition-transform drop-shadow">🗡️</span>
+                    <span class="text-2xl sm:text-3xl group-hover:scale-125 transition-transform drop-shadow">🔆</span>
                     <span class="text-[9px] font-rpg font-extrabold text-amber-100 mt-0.5">100 MP</span>
                     <div id="cdSaberR" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
                 </button>
@@ -2531,11 +2613,18 @@
             for (let i = 0; i < 18; i++) { g.rotate(Math.PI / 9); g.fillStyle = 'rgba(253,230,138,0.07)'; g.beginPath(); g.moveTo(0, 0); g.lineTo(-30, -W); g.lineTo(30, -W); g.closePath(); g.fill(); }
             g.restore();
             for (let i = 0; i < 90; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.8})`; g.fillRect(Math.random() * W, Math.random() * H, 1.6, 1.6); }
-            g.font = '170px serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-            g.shadowColor = '#facc15'; g.shadowBlur = 50; g.fillText(feat.icon, W * 0.68, H * 0.42);
+            // ASCII-арт оружия баннера
+            const art = ASCII_WEAPON_ART[player.heroType] || ASCII_WEAPON_ART.saber, fs = 22;
+            g.font = `800 ${fs}px "JetBrains Mono", ui-monospace, monospace`; g.textAlign = 'left'; g.textBaseline = 'top';
+            const aw = art[0].length * fs * 0.6, ax = W * 0.68 - aw / 2, ay = H * 0.42 - art.length * fs * 0.6;
+            art.forEach((line, i) => {
+                g.shadowColor = '#facc15'; g.shadowBlur = 18; g.fillStyle = i % 2 ? '#fde68a' : '#facc15';
+                g.fillText(line, ax, ay + i * fs * 1.15);
+            });
             g.shadowBlur = 0;
             const fog = g.createLinearGradient(0, H * 0.55, 0, H); fog.addColorStop(0, 'rgba(7,4,15,0)'); fog.addColorStop(1, 'rgba(7,4,15,0.95)');
             g.fillStyle = fog; g.fillRect(0, 0, W, H);
+            asciiFor(cv, { glow: 1.0, expo: 1.5, fog: 0.08, shaft: 0.6 });
         }
 
         // ============================================================================
@@ -3698,6 +3787,7 @@
         }
 
         let currentInteractTarget = null;
+        const hudTick = { t: 0, map: 0 };
 
         function updateGame(dt) {
             // Пока открыто главное меню, мир стоит на паузе (идёт только погода)
@@ -4175,7 +4265,9 @@
 
             postUpdate25(dt); // ловушки, порталы, зоны ударов боссов, смена локаций
 
-            updateHudUI();
+            // DOM интерфейса обновляем 15 раз в секунду, а не каждый кадр
+            hudTick.t += dt;
+            if (hudTick.t >= 1 / 15) { updateHudUI(); updateDockHud(hudTick.t); hudTick.t = 0; }
         }
 
         // ============================================================================
@@ -4186,12 +4278,17 @@
         const minimapCanvas = document.getElementById('minimapCanvas');
         const miniCtx = minimapCanvas.getContext('2d');
 
+        // Внутреннее разрешение мира = экран / приближение; итоговая картинка рисуется в родном разрешении экрана
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            const z = WORLD_ZOOM_CUR || 1;
+            canvas.width = Math.round(window.innerWidth / z);
+            canvas.height = Math.round(window.innerHeight / z);
+            document.documentElement.style.setProperty('--ui-scale', String(uiScaleF()));
         }
-        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('resize', () => { if (typeof setAsciiMode === 'function' && labelCanvas) setAsciiMode(asciiMode); else resizeCanvas(); });
         resizeCanvas();
+
+        const scrX = e => e.clientX * canvas.width / window.innerWidth, scrY = e => e.clientY * canvas.height / window.innerHeight;
 
         // Рисование реалистичной фрактальной молнии между двумя точками
         function drawLightningBolt(ctx, x1, y1, x2, y2, color, branchWidth = 2.2) {
@@ -5339,7 +5436,7 @@
             ctx.restore(); // Конец трансформации камеры (-camX, -camY)
 
             // 9.8 МНОГОСЛОЙНЫЕ ПАРАЛЛАКС-ЭФФЕКТЫ ПОГОДЫ: 3D-ливень, туманная дымка, пепел и молнии
-            if (curW.rainCount > 0) {
+            if (curW.rainCount > 0 && !asciiActive()) {
                 const dynamicWind = curW.windX + Math.sin(windGustPhase) * 38;
                 const slopeX = dynamicWind * 0.024;
                 const slopeY = curW.speedY * 0.024;
@@ -5391,6 +5488,8 @@
             // Арчер: мрачная кинематографичная гамма (глубже тени, багровый отлив по краям)
             const archerMood = player.heroType === 'archer';
             if (archerMood) darkness = Math.min(0.75, darkness + 0.12);
+            sceneDarkness = darkness;
+            const asciiOn = asciiActive();
 
             const screenPx = player.x - camX;
             const screenPy = player.y - camY;
@@ -5398,9 +5497,8 @@
             grad.addColorStop(0, 'rgba(6, 7, 12, 0)');
             grad.addColorStop(0.65, `rgba(4, 5, 9, ${darkness * 0.65})`);
             grad.addColorStop(1, `rgba(2, 2, 5, ${Math.min(0.92, darkness + 0.25)})`);
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            if (archerMood) {
+            if (!asciiOn) { ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+            if (archerMood && !asciiOn) {
                 const rg = ctx.createRadialGradient(screenPx, screenPy, 160, screenPx, screenPy, Math.max(canvas.width, canvas.height) * 0.7);
                 rg.addColorStop(0, 'rgba(60, 0, 0, 0)');
                 rg.addColorStop(1, `rgba(70, 6, 10, ${0.22 + (player.ubwSky > 0 ? 0.25 : 0)})`);
@@ -5432,7 +5530,8 @@
             // Экранные эффекты: код-арт, тон локации, полоса каста, баннеры локаций, переход через портал
             drawScreenFX25(ctx, now, camX, camY);
 
-            renderMinimap();
+            // Мини-карта — 10 раз в секунду
+            if (now - hudTick.map > 100) { hudTick.map = now; renderMinimap(); asciiFor(minimapCanvas, { glow: 0.5, expo: 1.7, fog: 0, shaft: 0 }); }
         }
 
         // renderMinimap() — см. раздел 24
@@ -5568,7 +5667,7 @@
         // Плавный 3D-наклон карточки и параллакс сплэш-арта за курсором
         function heroTilt(card, e) {
             if (!card.classList.contains('is-active')) return;
-            const splash = card.querySelector('.hero-splash'), info = card.querySelector('.hero-info');
+            const splash = card.querySelector('canvas.hero-splash:not(.ascii-overlay)'), info = card.querySelector('.hero-info');
             if (!e) { card.style.transform = 'translateZ(0)'; splash.style.transform = ''; info.style.transform = ''; return; }
             const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
             card.style.transform = `rotateY(${x * 9}deg) rotateX(${-y * 7}deg)`;
@@ -5579,13 +5678,20 @@
         // ---------- выбор сложности ----------
         function renderDifficultyCards() {
             const grid = document.getElementById('diffGrid');
+            const esc = t => t.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[ch]);
             grid.innerHTML = DIFF_MENU.map((d, i) => {
-                const cfg = DIFFICULTY_CONFIG[d.key];
-                return `<button class="diff-card ${gameSettings.difficulty === d.key ? 'on' : ''}" style="--d-glow:${d.glow}; animation-delay:${i * 0.08}s" onclick="pickDifficulty('${d.key}')" ondblclick="startGameFromMenu()">
-                    <div class="diff-icon">${d.icon}</div>
+                const cfg = DIFFICULTY_CONFIG[d.key], th = DIFF_THEME[d.key];
+                const table = [
+                    `HP    ${asciiBar(cfg.hpMult, 2, 8)} x${cfg.hpMult}`,
+                    `УРОН  ${asciiBar(cfg.dmgMult, 2, 8)} x${cfg.dmgMult}`,
+                    `ДОБЫЧА${asciiBar(cfg.rewardMult, 2, 8)} x${cfg.rewardMult}`
+                ].join('\n');
+                return `<button class="diff-card ${th.cls} ${gameSettings.difficulty === d.key ? 'on' : ''}" style="--d-glow:${d.glow}; animation-delay:${i * 0.08}s" onclick="pickDifficulty('${d.key}')" ondblclick="startGameFromMenu()">
+                    <div class="diff-tag">// ${th.tag}</div>
+                    <pre class="diff-art">${esc(DIFF_ART[d.key].join('\n'))}</pre>
                     <div class="diff-name">${d.name}</div>
-                    <div class="diff-desc">${d.desc}</div>
-                    <div class="diff-mult"><span>Здоровье врагов и боссов</span><b>×${cfg.hpMult}</b><span>Урон врагов и боссов</span><b>×${cfg.dmgMult}</b><span>Золото и опыт</span><b>×${cfg.rewardMult}</b></div>
+                    <div class="diff-desc">${th.note}</div>
+                    <pre class="diff-table">${esc(table)}</pre>
                 </button>`;
             }).join('');
             updateDiffSummary();
@@ -5630,9 +5736,16 @@
                 if (gameState === 'playing') { menuFx.raf = 0; return; }
                 const dt = Math.min(0.05, (now - menuFx.last) / 1000); menuFx.last = now;
                 drawMenuBackground(dt);
+                if (!menuFx.ascii) menuFx.ascii = attachAscii(document.getElementById('menuBgCanvas'));
+                menuFx.ascii.render({ glow: 0.95, rain: 0.7, wind: -150, fog: 0.3, shaft: 1.0, expo: 1.5 });
                 if (gameState === 'char_select') {
                     const card = document.querySelector('.hero-card.is-active');
-                    if (card) drawHeroSplash(card.querySelector('.hero-splash'), HERO_MENU[heroIdx], dt);
+                    if (card) {
+                        const sp = card.querySelector('canvas.hero-splash:not(.ascii-overlay)');
+                        drawHeroSplash(sp, HERO_MENU[heroIdx], dt);
+                        if (!sp._ascii) sp._ascii = attachAscii(sp);
+                        sp._ascii.render({ glow: 0.9, shaft: 0.5, fog: 0.1, expo: 1.4 });
+                    }
                 }
                 menuFx.raf = requestAnimationFrame(loop);
             };
@@ -5963,14 +6076,16 @@
             document.getElementById('hudHeroName').textContent = heroDisplayName();
 
             document.getElementById('barHp').style.width = `${(player.hp / player.maxHp) * 100}%`;
-            document.getElementById('txtHp').textContent = `${Math.ceil(player.hp)} / ${player.maxHp} HP (+${player.hpRegen}/с)`;
+            document.getElementById('txtHp').textContent = `HP ${Math.ceil(player.hp)}/${player.maxHp}`;
+            document.getElementById('vitalHp').title = `Здоровье: ${Math.ceil(player.hp)} / ${player.maxHp}, восстановление +${player.hpRegen}/с`;
 
             document.getElementById('barMp').style.width = `${(player.mp / player.maxMp) * 100}%`;
             const stMax = maxStamina(), st = player.stamina ?? stMax;
             document.getElementById('barSta').style.width = `${(st / stMax) * 100}%`;
             document.getElementById('barSta').style.filter = player.exhausted ? 'grayscale(1) brightness(0.7)' : 'none';
-            document.getElementById('txtSta').textContent = `${Math.ceil(st)} / ${stMax} ВЫНОСЛИВОСТЬ${player.shrineBuff ? ` • ${SHRINE_BUFFS[player.shrineBuff.kind].icon} ${Math.ceil(player.shrineBuff.t)}с` : ''}`;
-            document.getElementById('txtMp').textContent = `${Math.ceil(player.mp)} / ${player.maxMp} MP (+${player.mpRegen}/с)`;
+            document.getElementById('txtSta').textContent = `ST ${Math.ceil(st)}/${stMax}`;
+            document.getElementById('txtMp').textContent = `MP ${Math.ceil(player.mp)}/${player.maxMp}`;
+            document.getElementById('vitalMp').title = `Мана: ${Math.ceil(player.mp)} / ${player.maxMp}, восстановление +${player.mpRegen}/с`;
 
             document.getElementById('barXp').style.width = `${(player.xp / player.xpNext) * 100}%`;
 
@@ -6727,10 +6842,10 @@
         canvas.addEventListener('mousemove', e => {
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            mouseWorldX = player.x + (e.clientX - cx);
-            mouseWorldY = player.y + (e.clientY - cy);
+            mouseWorldX = player.x + (scrX(e) - cx);
+            mouseWorldY = player.y + (scrY(e) - cy);
             if (player.moveTargetX === null && !player.attackTarget && !player.controlLock) {
-                player.facingAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+                player.facingAngle = Math.atan2(scrY(e) - cy, scrX(e) - cx);
             }
         });
 
@@ -6774,8 +6889,8 @@
             if (isAnyModalOpen()) return;
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            mouseWorldX = player.x + (e.clientX - cx);
-            mouseWorldY = player.y + (e.clientY - cy);
+            mouseWorldX = player.x + (scrX(e) - cx);
+            mouseWorldY = player.y + (scrY(e) - cy);
 
             if (player.controlLock) {
                 // Во время каста Экскалибура ПКМ отменяет каст; во время перехода через портал клики игнорируются
@@ -6784,7 +6899,7 @@
             }
             if (player.heroType === 'invoker' && e.button === 0 && !player.attackMoveMode) {
                 // У Инвокера нет автоатак: ЛКМ применяет заклинание из слота D в точку курсора
-                player.facingAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+                player.facingAngle = Math.atan2(scrY(e) - cy, scrX(e) - cx);
                 performMageBasicAttack();
                 return;
             }
@@ -6847,7 +6962,7 @@
                     player.attackTarget = clickedEnemy;
                     clickIndicators.push({ x: clickedEnemy.x, y: clickedEnemy.y, kind: 'attack', life: 0.38, maxLife: 0.38 });
                 } else {
-                    player.facingAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+                    player.facingAngle = Math.atan2(scrY(e) - cy, scrX(e) - cx);
                     performMageBasicAttack();
                 }
             }
@@ -8627,7 +8742,6 @@
         function updateCamps(dt) {
             adminTick();
             updateShadowDuel(dt);
-            updateDockHud(dt);
             updateRares(dt);
             updateExploration(dt);
             for (const c of camps) {
@@ -10190,6 +10304,7 @@
             pCtx.fillRect(0, 0, 64, 64);
             const spr = heroSpriteCanvas();
             if (spr) pCtx.drawImage(spr, 0, 2, 64, 64);
+            asciiFor(pCanvas, { glow: 0.9, expo: 1.45, fog: 0, shaft: 0.2 });
         }
 
         function renderMenuHeroPreviews() {
@@ -11336,11 +11451,12 @@
         function drawScreenFX25(c, now, camX, camY) {
             const W = canvas.width, H = canvas.height;
             const zone = playerZone();
-            if (zone === 'hell') { c.fillStyle = 'rgba(150,30,0,0.10)'; c.fillRect(0, 0, W, H); }
-            else if (zone === 'castle') { c.fillStyle = 'rgba(50,20,90,0.10)'; c.fillRect(0, 0, W, H); }
+            const ascii = asciiActive();
+            if (!ascii && zone === 'hell') { c.fillStyle = 'rgba(150,30,0,0.10)'; c.fillRect(0, 0, W, H); }
+            else if (!ascii && zone === 'castle') { c.fillStyle = 'rgba(50,20,90,0.10)'; c.fillRect(0, 0, W, H); }
 
             // Код-арт: полупрозрачная сетка символов, привязанная к миру (движется вместе с камерой)
-            if (gameSettings.codeArt && R25.glyphPattern && hiQ()) {
+            if (!ascii && gameSettings.codeArt && R25.glyphPattern && hiQ()) {
                 c.save();
                 c.globalAlpha = 0.075; c.globalCompositeOperation = 'lighter';
                 c.translate(-(((camX % 128) + 128) % 128), -(((camY % 128) + 128) % 128));
@@ -11523,6 +11639,557 @@
         }
 
         // ============================================================================
+        // ТЕРМИНАЛЬНЫЙ ДВИЖОК: ЦВЕТНАЯ ASCII-ГРАФИКА, БЕЗ ЭМОДЗИ
+        // ============================================================================
+        // 1) Кадр рисуется как раньше на gameCanvas, затем WebGL-шейдер переводит его в сетку цветных символов:
+        //    яркость клетки выбирает символ из «рампы» плотности (пусто → . : - = + * 1 0 # % @), цвет — из сцены,
+        //    свечение — мягкий ореол ярких клеток. Свет и тень передаются плотностью символов.
+        // 2) Весь текст сцены (имена, урон, баннеры) уходит на отдельный чёткий слой labelCanvas.
+        // 3) Эмодзи в интерфейсе и на холстах заменяются символьными значками.
+        const ASCII_ICONS = {
+            '⚔': '><', '🏹': '}->', '🗡': '-+-', '🔥': '^^', '💎': '<>', '🪙': '$', '🛡': '[#]', '⚡': '/\\/', '🌋': '^A^', '✨': '*', '⚗': '&', '❄': '*', '🔮': '(o)',
+            '📜': '[~]', '☄': 'o~', '💍': 'o', '🦇': '^v^', '⚙': '#', '📖': '[=]', '🔒': '[x]', '✡': 'X', '🧪': '!', '🗿': '||', '🩸': '%', '🖤': '<3', '☀': '(*)',
+            '🐺': 'w', '💀': '8', '🌧': '///', '🏰': '[^]', '🪄': '/*', '🦴': '=', '🌙': '(', '💠': '<>', '👑': '^^^', '🧛': 'V', '🏛': '[|]', '⛩': '[T]', '💰': '$$',
+            '👘': '[Y]', '⏱': '@', '🧙': 'M', '📕': '[=]', '🧥': '[Y]', '🌟': '*', '👻': '~o~', '🌊': '~~', '⛓': '-o-', '👹': 'W', '🏆': 'Y', '🕯': 'i', '🎒': '[b]',
+            '🔊': '<)', '💾': '[s]', '🎁': '[+]', '🔇': '<x', '🌿': 'v', '🟢': 'o', '🍷': '!', '🔱': 'W', '↩': '<-', '🌠': '*~', '📘': '[=]', '🧊': '[]', '🌪': '@',
+            '🌩': '/\\', '🌀': '@', '💥': '*!', '🌲': 'A', '💧': '.', '🐙': 'gh', '❓': '?', '❤': '<3', '🗺': '[m]', '🗑': '[u]', '🪨': 'o', '🦷': 'v', '🫀': '<3',
+            '🕸': '#', '🐏': '@', '🔶': '<>', '♨': '~', '🦯': '|', '🌕': 'O', '🥷': '?', '🧣': '~', '👁': '(o)', '💨': '~', '🌱': 'v', '🌺': '*', '🦪': 'o', '🖋': '/',
+            '🧉': '!', '🥤': '!', '🫖': '!', '📿': 'o', '🌅': '(*)', '📗': '[=]', '📙': '[=]', '📓': '[=]', '🛤': '==', '🪽': '>>', '🟣': 'o', '🔆': '*', '🧔': '@',
+            '🧝': '@', '🤺': '@', '🕵': '@', '⛈': '///', '🌫': '~~', '🎉': '*', '❗': '!', '🧭': '+', '⚒': 'T', '🛑': '[x]', '⛰': '/\\', '🌑': 'o', '🪦': 'n',
+            '✖': 'x', '👺': 'g', '🧟': 'Z', '👿': 'v', '🎯': '(+)', '😈': 'v', '🏃': '>>', '😮': '..', '🔓': '[ ]', '⚠': '!', '❔': '?', '☠': '8', '⛧': '*', '🖐': '*', '↔': '<->', '➡': '->', '⬅': '<-', '⬆': '^', '⬇': 'v', '✔': '+', '☾': '(', '➹': '>>', '©': '(c)'
+        };
+        const EMOJI_RE = /\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*️?/gu;
+        const sanitizeCache = new Map();
+        function asciiText(str) {
+            if (typeof str !== 'string' || !/\p{Extended_Pictographic}/u.test(str)) return str;
+            let r = sanitizeCache.get(str);
+            if (r === undefined) {
+                r = str.replace(EMOJI_RE, m => ASCII_ICONS[String.fromCodePoint(m.codePointAt(0))] || '*').replace(/️/g, '');
+                if (sanitizeCache.size > 4000) sanitizeCache.clear();
+                sanitizeCache.set(str, r);
+            }
+            return r;
+        }
+        // Все холсты: эмодзи → символы
+        (function patchCanvasText() {
+            const P = CanvasRenderingContext2D.prototype, fT = P.fillText, sT = P.strokeText;
+            P.fillText = function (t, ...a) { return fT.call(this, asciiText(String(t)), ...a); };
+            P.strokeText = function (t, ...a) { return sT.call(this, asciiText(String(t)), ...a); };
+        })();
+        // Интерфейс: начальная чистка и наблюдение за изменениями DOM
+        function fixTextNode(n) {
+            if (!/\p{Extended_Pictographic}/u.test(n.nodeValue)) return;
+            if (typeof artifyTextNode === 'function' && artifyTextNode(n)) return;
+            const t = asciiText(n.nodeValue); if (t !== n.nodeValue) n.nodeValue = t;
+        }
+        function sanitizeNode(root) {
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), list = [];
+            let n; while ((n = walker.nextNode())) list.push(n);
+            list.forEach(fixTextNode);
+            if (root.querySelectorAll) root.querySelectorAll('[title],[placeholder]').forEach(el => {
+                ['title', 'placeholder'].forEach(a => { const v = el.getAttribute(a); if (v) { const t = asciiText(v); if (t !== v) el.setAttribute(a, t); } });
+            });
+        }
+        function startDomSanitizer() {
+            sanitizeNode(document.body);
+            new MutationObserver(muts => {
+                for (const m of muts) {
+                    if (m.type === 'characterData') { if (m.target.parentNode) fixTextNode(m.target); }
+                    else if (m.type === 'attributes') { const v = m.target.getAttribute(m.attributeName); if (v) { const t = asciiText(v); if (t !== v) m.target.setAttribute(m.attributeName, t); } }
+                    else m.addedNodes.forEach(nd => { if (nd.nodeType === 3) { if (nd.parentNode) fixTextNode(nd); } else if (nd.nodeType === 1) sanitizeNode(nd); });
+                }
+            }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['title', 'placeholder'] });
+        }
+
+        // ---------- ASCII-ДВИЖОК v3: ОБЪЁМ ПЛОТНОСТЬЮ СИМВОЛОВ ----------
+        // Принцип: цвет не затемняется. Каждая клетка — «чернила» поверх освещённой поверхности того же оттенка,
+        // а тень задаёт ТОЛЬКО плотность знака: свет — разреженные . ' , ; тень — плотные # @ ░ ▒ ▓ █.
+        // Рампа сортируется по реально измеренной «чернильности» каждого символа.
+        // Суб-символьная детализация: на резких переходах клетка делится полублоком ▀ (верх/низ — свои цвета),
+        // на контурах ставятся линии - | / \ по направлению градиента. Светящееся (магия, огонь, глаза) рисуется
+        // наоборот — светлым знаком на тёмном, с ореолом. Дождь (3 слоя параллакса) и брызги — целиком в шейдере.
+        // Микро-шрифт 3×5 пикселей: каждый знак нарисован попиксельно, поэтому даже в клетке 3×5 физических пикселей
+        // символ точный. Издалека сетка сливается в сплошной затенённый пиксель-арт; вплотную видны 0, 1, #, @, ░ ▒ ▓ █.
+        const MICRO_FONT = {
+            ' ': ['...', '...', '...', '...', '...'], '.': ['...', '...', '...', '...', '.x.'], "'": ['.x.', '.x.', '...', '...', '...'],
+            ':': ['...', '.x.', '...', '.x.', '...'], '-': ['...', '...', 'xxx', '...', '...'], '+': ['...', '.x.', 'xxx', '.x.', '...'],
+            'x': ['...', 'x.x', '.x.', 'x.x', '...'], '░': ['x..', '..x', '.x.', 'x..', '..x'], '=': ['...', 'xxx', '...', 'xxx', '...'],
+            'i': ['.x.', '...', 'xx.', '.x.', 'xxx'], '1': ['.x.', 'xx.', '.x.', '.x.', 'xxx'], 'o': ['...', 'xxx', 'x.x', 'xxx', '...'],
+            '*': ['x.x', '.x.', 'xxx', '.x.', 'x.x'], '▒': ['x.x', '.x.', 'x.x', '.x.', 'x.x'], '$': ['.xx', 'xx.', '.x.', '.xx', 'xx.'],
+            '&': ['.x.', 'x.x', '.xx', 'x.x', 'xxx'], '#': ['x.x', 'xxx', 'x.x', 'xxx', 'x.x'], '@': ['xxx', 'x.x', 'xxx', 'x..', 'xxx'],
+            '0': ['xxx', 'x.x', 'x.x', 'x.x', 'xxx'], '8': ['xxx', 'x.x', 'xxx', 'x.x', 'xxx'], '▓': ['xxx', 'x.x', 'xxx', 'xx.', 'xxx'],
+            'M': ['x.x', 'xxx', 'xxx', 'x.x', 'xxx'], '█': ['xxx', 'xxx', 'xxx', 'xxx', 'xxx'],
+            '▀': ['xxx', 'xxx', '...', '...', '...'], '|': ['.x.', '.x.', '.x.', '.x.', '.x.'], '/': ['..x', '..x', '.x.', 'x..', 'x..'],
+            '\\': ['x..', 'x..', '.x.', '..x', '..x'], ',': ['...', '...', '...', '.x.', 'x..']
+        };
+        const ASCII_CANDIDATES = " .':-+x░=i1o*▒$&#@08▓M█";
+        const ASCII_SPECIAL = ['▀', '-', '|', '/', '\\', ','];
+        // s — масштаб пикселя микро-шрифта в ФИЗИЧЕСКИХ пикселях: клетка = 3s × 5s
+        const ASCII_PRESETS = { ultra: { s: 1, zoom: 1.25 }, fine: { s: 2, zoom: 1.15 }, medium: { s: 3, zoom: 1.0 }, coarse: { s: 4, zoom: 1.0 }, off: null };
+        let asciiMode = 'ultra';
+        try { asciiMode = localStorage.getItem('eldoria_ascii') || 'ultra'; } catch (e) {}
+        if (!(asciiMode in ASCII_PRESETS)) asciiMode = 'ultra';
+        var WORLD_ZOOM_CUR = 1;
+        function uiScaleF() { return Math.max(1, Math.min(2.6, Math.min(window.innerWidth / 1600, window.innerHeight / 900))); }
+        const uiScale = uiScaleF;
+        const devRatio = () => Math.min(3, window.devicePixelRatio || 1);
+        const GL_COMMON = `
+            float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+            float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+                return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }
+            float fbm(vec2 p){ return vnoise(p) * 0.55 + vnoise(p * 2.1 + 3.7) * 0.3 + vnoise(p * 4.3 + 7.1) * 0.15; }
+            float luma(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }`;
+        // Проход 1 — по клеткам. uMode: 0 → A (цвет знака, индекс), 1 → B (цвет фона, свечение), 2 → C (ореол, для мягкой интерполяции)
+        const FS_CELL = `precision mediump float;
+            uniform sampler2D uScene; uniform vec2 uGrid, uLight; uniform vec3 uInk;
+            uniform float uTime, uFog, uShaft, uExpo, uMode, uR, uHalf, uLine0, uFull;
+            ${GL_COMMON}
+            vec3 S(vec2 uv){ return texture2D(uScene, clamp(uv, 0.0, 1.0)).rgb; }
+            vec3 hueOf(vec3 c){ float m = max(c.r, max(c.g, c.b)); return m < 0.06 ? vec3(0.62, 0.62, 0.68) : c / m; }
+            float enc(float i){ return (i + 0.5) / 64.0; }
+            void main(){
+                vec2 cell = floor(gl_FragCoord.xy);
+                vec2 top = vec2(cell.x, uGrid.y - 1.0 - cell.y);
+                vec2 cs = 1.0 / uGrid, uv = (top + 0.5) * cs;
+                vec3 cT = (S(uv + vec2(-0.25, -0.25) * cs) + S(uv + vec2(0.25, -0.25) * cs)) * 0.5;
+                vec3 cB = (S(uv + vec2(-0.25, 0.25) * cs) + S(uv + vec2(0.25, 0.25) * cs)) * 0.5;
+                vec3 c = (cT + cB) * 0.5;
+                float lum = luma(c), lT = luma(cT), lB = luma(cB);
+                float lL = luma(S(uv - vec2(cs.x, 0.0))), lR = luma(S(uv + vec2(cs.x, 0.0)));
+                float lU = luma(S(uv - vec2(0.0, cs.y))), lD = luma(S(uv + vec2(0.0, cs.y)));
+                vec3 wide = (S(uv + vec2(3.0, 0.0) * cs) + S(uv - vec2(3.0, 0.0) * cs) + S(uv + vec2(0.0, 2.2) * cs) + S(uv - vec2(0.0, 2.2) * cs)) * 0.25;
+                // Мягкая тень (AO): насколько клетка темнее окружения — уходит в плотность, не в цвет
+                float ao = clamp(1.0 - max(0.0, luma(wide) - lum) * 1.6, 0.35, 1.0);
+                // Объёмные лучи от источника света
+                float sh = 0.0;
+                for (int i = 1; i <= 6; i++) sh += max(luma(S(uv + uLight * cs * float(i) * 2.4)) - 0.5, 0.0) * (1.0 - float(i) / 7.0);
+                sh *= uShaft / 3.0;
+                float fog = smoothstep(0.4, 0.95, fbm(top * 0.045 + vec2(uTime * 0.05, uTime * 0.02))) * uFog;
+                float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b));
+                float sat = (mx - mn) / max(mx, 0.001);
+                float emis = clamp(smoothstep(0.93, 1.0, lum) * 0.8 + smoothstep(0.6, 0.9, sat) * smoothstep(0.72, 0.95, lum), 0.0, 1.0);
+                // Освещённость клетки (экспозиция сцены, тень, лучи, туман) → только плотность символа
+                float L = clamp(pow(lum * uExpo, 0.78) * ao + sh * 0.35 + fog * 0.18, 0.0, 1.0);
+                vec3 hue = hueOf(c);
+                vec3 surf = hue * 0.7 + vec3(0.04);             // освещённая поверхность: чистый оттенок
+                vec3 ink = hue * 0.07 + uInk;                    // «чернила»: глубокая тень того же оттенка
+                vec3 fg, bg; float idx;
+                float gx = lR - lL, gy = lD - lU, gm = length(vec2(gx, gy));
+                if (uMode > 1.5) {
+                    // Ореол: светящиеся клетки + лучи
+                    vec3 near = (S(uv + vec2(1.5, 0.0) * cs) + S(uv - vec2(1.5, 0.0) * cs) + S(uv + vec2(0.0, 1.3) * cs) + S(uv - vec2(0.0, 1.3) * cs)) * 0.25;
+                    float ne = smoothstep(0.7, 0.98, luma(near));
+                    gl_FragColor = vec4(clamp(hueOf(near) * (ne * 0.35 + emis * 0.3) + vec3(1.0, 0.92, 0.75) * sh * 0.18 + vec3(0.55, 0.62, 0.78) * fog * 0.10, 0.0, 1.0), 1.0);
+                    return;
+                }
+                if (emis > 0.5) {
+                    // Свет: яркий знак на тёмном, плотность = яркость
+                    fg = clamp(hue * (0.62 + 0.3 * lum), 0.0, 1.0); bg = ink;
+                    idx = floor(clamp(L, 0.0, 0.999) * uR);
+                } else if (abs(lT - lB) > uHalf && abs(lT - lB) > gm * 0.6) {
+                    // Суб-символ: полублок ▀ — верхняя и нижняя половины своим цветом (вдвое выше разрешение)
+                    float LT = clamp(pow(lT * uExpo, 0.78), 0.0, 1.0), LB = clamp(pow(lB * uExpo, 0.78), 0.0, 1.0);
+                    fg = mix(ink, hueOf(cT) * 0.62 + 0.04, LT); bg = mix(ink, hueOf(cB) * 0.62 + 0.04, LB);
+                    idx = uR;
+                } else if (gm > uLine0) {
+                    // Контур: линия по направлению границы, чернилами по поверхности
+                    float a = atan(gy, gx);
+                    float ad = abs(cos(a)), av = abs(sin(a));
+                    idx = ad > 0.88 ? uR + 2.0 : (av > 0.88 ? uR + 1.0 : (gx * gy > 0.0 ? uR + 3.0 : uR + 4.0));
+                    fg = ink; bg = mix(ink, surf, clamp(L + 0.25, 0.0, 1.0));
+                } else {
+                    // Тон: чернила поверх поверхности, плотность знака = глубина тени
+                    float h = hash(cell + floor(uTime * 1.5) * vec2(0.37, 0.71));
+                    float shade = clamp(pow(1.0 - L, 0.72) + (h - 0.5) * 0.05, 0.0, 0.999);
+                    idx = floor(shade * uR);
+                    fg = ink; bg = surf;
+                    if (shade > 0.985) { idx = uFull; }
+                }
+                if (uMode < 0.5) gl_FragColor = vec4(fg, enc(idx));
+                else gl_FragColor = vec4(bg, emis);
+            }`;
+        const FS_OUT = `precision mediump float;
+            uniform sampler2D uA, uB, uC, uAtlas, uGlowAtlas; uniform vec2 uRes, uCell, uGrid;
+            uniform float uNT, uTime, uRain, uWind, uGlow, uRainI, uSplashI, uRainScale;
+            ${GL_COMMON}
+            float glyph(float idx, vec2 local){ return texture2D(uAtlas, vec2((idx + local.x) / uNT, local.y)).r; }
+            void main(){
+                vec2 frag = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
+                vec2 cell = floor(frag / uCell), local = fract(frag / uCell);
+                vec2 tuv = vec2((cell.x + 0.5) / uGrid.x, (uGrid.y - 1.0 - cell.y + 0.5) / uGrid.y);
+                vec4 A = texture2D(uA, tuv), B = texture2D(uB, tuv);
+                vec3 C = texture2D(uC, vec2(frag.x / (uCell.x * uGrid.x), 1.0 - frag.y / (uCell.y * uGrid.y))).rgb;
+                float idx = floor(A.a * 64.0);
+                vec2 auv = vec2((idx + local.x) / uNT, local.y);
+                float m = texture2D(uAtlas, auv).r, gl2 = texture2D(uGlowAtlas, auv).r;
+                vec3 col = mix(B.rgb, A.rgb, m) + A.rgb * gl2 * B.a * 0.6 + C * uGlow;
+                // Дождь: три слоя параллакса (дальний мелкий/медленный → ближний крупный/быстрый), наклон по ветру
+                if (uRain > 0.0) {
+                    for (int i = 0; i < 3; i++) {
+                        float fi = float(i);
+                        float sc = uRainScale * (1.0 + fi * 0.9), sp = 1.1 + fi * 1.3, dens = 0.5 - fi * 0.13, len = 0.16 + fi * 0.08;
+                        vec2 p = frag; p.x += p.y * uWind * (0.18 + fi * 0.06);
+                        vec2 lc = uCell * sc, rc = floor(p / lc), rl = fract(p / lc);
+                        float hx = hash(vec2(rc.x, 3.1 + fi));
+                        float t = rc.y * (0.07 - fi * 0.015) - uTime * sp - hx * 17.0;
+                        if (hash(vec2(rc.x, floor(t) + fi * 11.0)) < uRain * dens && fract(t) > 1.0 - len) {
+                            float k = (fract(t) - (1.0 - len)) / len;
+                            float g = glyph(uWind < -0.02 ? uNT - 3.0 : (uWind > 0.02 ? uNT - 2.0 : uNT - 4.0), rl);
+                            col += vec3(0.55, 0.72, 0.95) * g * uRainI * (0.25 + fi * 0.22) * (0.35 + k * 0.65);
+                        }
+                    }
+                    // Брызги на земле
+                    vec2 sc2 = uCell * 1.6 * uRainScale, sp2 = floor(frag / sc2);
+                    float slot = floor(uTime * 7.0 + hash(sp2) * 7.0);
+                    if (hash(sp2 + slot * 0.137) < uRain * 0.012) col += vec3(0.7, 0.85, 1.0) * glyph(uNT - 1.0, fract(frag / sc2)) * uSplashI;
+                }
+                gl_FragColor = vec4(col, 1.0);
+            }`;
+        class AsciiRenderer {
+            constructor(target) {
+                this.cv = target;
+                const gl = this.gl = target.getContext('webgl', { premultipliedAlpha: false, alpha: false, antialias: false, powerPreference: 'high-performance' });
+                if (!gl) { this.ok = false; return; }
+                const vs = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }';
+                const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+                const prog = fs => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.bindAttribLocation(p, 0, 'p'); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; };
+                this.pCell = prog(FS_CELL); this.pOut = prog(FS_OUT);
+                const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+                gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+                const tex = filt => { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filt); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filt); return t; };
+                this.tScene = tex(gl.LINEAR); this.tAtlas = tex(gl.NEAREST); this.tGlow = tex(gl.LINEAR);
+                this.tA = tex(gl.NEAREST); this.tB = tex(gl.NEAREST); this.tC = tex(gl.LINEAR);
+                this.fbo = [gl.createFramebuffer(), gl.createFramebuffer(), gl.createFramebuffer()];
+                const U = (p, names) => Object.fromEntries(names.map(n => [n, gl.getUniformLocation(p, n)]));
+                this.uc = U(this.pCell, ['uScene', 'uGrid', 'uLight', 'uInk', 'uTime', 'uFog', 'uShaft', 'uExpo', 'uMode', 'uR', 'uHalf', 'uLine0', 'uFull']);
+                this.uo = U(this.pOut, ['uA', 'uB', 'uC', 'uAtlas', 'uGlowAtlas', 'uRes', 'uCell', 'uGrid', 'uNT', 'uTime', 'uRain', 'uWind', 'uGlow', 'uRainI', 'uSplashI', 'uRainScale']);
+                this.cell = null; this.grid = null; this.ok = true;
+                target.addEventListener('webglcontextlost', e => { e.preventDefault(); this.ok = false; });
+            }
+            // Атлас: символы рампы, отсортированные по измеренной плотности, + спецзнаки; блоки и линии рисуются вручную (точное покрытие)
+            setCell(cw, ch) {
+                if (this.cell && this.cell[0] === cw && this.cell[1] === ch) return;
+                this.cell = [cw, ch];
+                const sx = cw / 3, sy = ch / 5;
+                const drawGlyph = (g, chr, x0) => {
+                    const bm = MICRO_FONT[chr]; if (!bm) return;
+                    g.fillStyle = '#fff';
+                    for (let y = 0; y < 5; y++) for (let x = 0; x < 3; x++) if (bm[y][x] === 'x') g.fillRect(x0 + Math.round(x * sx), Math.round(y * sy), Math.round((x + 1) * sx) - Math.round(x * sx), Math.round((y + 1) * sy) - Math.round(y * sy));
+                };
+                // Рампа — по числу закрашенных пикселей знака (монотонная «чернильность»)
+                const cov = chr => MICRO_FONT[chr].join('').split('x').length - 1;
+                const ramp = [...ASCII_CANDIDATES].sort((a, b) => cov(a) - cov(b));
+                this.ramp = ramp.join('');
+                const chars = this.ramp + ASCII_SPECIAL.join('') + '|/\\,';
+                this.R = this.ramp.length; this.NT = chars.length; this.full = this.ramp.indexOf('█');
+                const mk = blur => {
+                    const a = document.createElement('canvas'); a.width = cw * chars.length; a.height = ch;
+                    const g = a.getContext('2d');
+                    g.fillStyle = '#000'; g.fillRect(0, 0, a.width, a.height);
+                    if (blur) g.filter = `blur(${Math.max(1, ch * 0.22)}px)`;
+                    for (let k = 0; k < (blur ? 2 : 1); k++) [...chars].forEach((chr, i) => drawGlyph(g, chr, i * cw));
+                    return a;
+                };
+                const gl = this.gl;
+                gl.bindTexture(gl.TEXTURE_2D, this.tAtlas); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mk(false));
+                gl.bindTexture(gl.TEXTURE_2D, this.tGlow); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mk(true));
+            }
+            ensureGrid(cols, rows) {
+                if (this.grid && this.grid[0] === cols && this.grid[1] === rows) return;
+                this.grid = [cols, rows];
+                const gl = this.gl;
+                [this.tA, this.tB, this.tC].forEach((t, i) => {
+                    gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, cols, rows, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+                    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo[i]); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+                });
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            }
+            render(src, cw, ch, opts = {}, outW, outH) {
+                if (!this.ok || !src.width || !src.height) return;
+                const gl = this.gl, W = outW || src.width, H = outH || src.height;
+                if (this.cv.width !== W || this.cv.height !== H) { this.cv.width = W; this.cv.height = H; }
+                this.setCell(cw, ch);
+                const cols = Math.ceil(W / cw), rows = Math.ceil(H / ch);
+                this.ensureGrid(cols, rows);
+                const t = (performance.now() / 1000) % 600;
+                gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.tScene);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+                gl.useProgram(this.pCell);
+                const u = this.uc, L = opts.light || [-0.45, -0.89], ink = opts.ink || [0.012, 0.012, 0.022];
+                gl.uniform1i(u.uScene, 0);
+                gl.uniform2f(u.uGrid, cols, rows); gl.uniform2f(u.uLight, L[0], L[1]); gl.uniform3f(u.uInk, ink[0], ink[1], ink[2]);
+                gl.uniform1f(u.uTime, t); gl.uniform1f(u.uFog, opts.fog ?? 0.25); gl.uniform1f(u.uShaft, opts.shaft ?? 0.9);
+                gl.uniform1f(u.uExpo, opts.expo ?? 1.35); gl.uniform1f(u.uR, this.R); gl.uniform1f(u.uFull, this.full);
+                gl.uniform1f(u.uHalf, opts.half ?? 0.16); gl.uniform1f(u.uLine0, opts.line ?? 0.22);
+                gl.viewport(0, 0, cols, rows);
+                for (let i = 0; i < 3; i++) { gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo[i]); gl.uniform1f(u.uMode, i); gl.drawArrays(gl.TRIANGLES, 0, 6); }
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                gl.viewport(0, 0, W, H);
+                gl.useProgram(this.pOut);
+                const o = this.uo;
+                [[this.tA, 'uA'], [this.tB, 'uB'], [this.tC, 'uC'], [this.tAtlas, 'uAtlas'], [this.tGlow, 'uGlowAtlas']].forEach(([tx, name], i) => { gl.activeTexture(gl.TEXTURE1 + i); gl.bindTexture(gl.TEXTURE_2D, tx); gl.uniform1i(o[name], 1 + i); });
+                gl.uniform2f(o.uRes, W, H); gl.uniform2f(o.uCell, cw, ch); gl.uniform2f(o.uGrid, cols, rows);
+                gl.uniform1f(o.uNT, this.NT); gl.uniform1f(o.uTime, t);
+                gl.uniform1f(o.uRain, opts.rain ?? 0); gl.uniform1f(o.uWind, Math.max(-1, Math.min(1, (opts.wind ?? 0) / 200)));
+                gl.uniform1f(o.uRainScale, Math.max(1, 9 / ch)); gl.uniform1f(o.uGlow, opts.glow ?? 0.85); gl.uniform1f(o.uRainI, opts.rainI ?? 1.0); gl.uniform1f(o.uSplashI, opts.splash ?? 0.6);
+                gl.drawArrays(gl.TRIANGLES, 0, 6);
+            }
+        }
+        // Клетка в пикселях вывода: плотная микро-сетка, растёт с размером экрана медленнее, чем интерфейс
+        // Клетка в физических пикселях: 3s × 5s (на «Ультра» — 3×5 пикселей экрана независимо от плотности дисплея)
+        const asciiCell = () => { const p = ASCII_PRESETS[asciiMode]; return p ? [3 * p.s, 5 * p.s] : null; };
+        // Один ASCII-слой на каждый дополнительный холст (мини-карта, портрет, баннер)
+        function asciiFor(cv, opts) {
+            if (!cv || typeof AsciiRenderer === 'undefined') return;
+            if (!cv._ascii) cv._ascii = attachAscii(cv);
+            cv._ascii.render(opts);
+        }
+        const asciiActive = () => !!(ASCII_PRESETS[asciiMode] && fxRenderer && fxRenderer.ok);
+        function attachAscii(srcCanvas, extraClass) {
+            const ov = document.createElement('canvas');
+            ov.className = (srcCanvas.className || '') + ' ascii-overlay ' + (extraClass || '');
+            ov.style.pointerEvents = 'none';
+            srcCanvas.insertAdjacentElement('afterend', ov);
+            let r = null; try { r = new AsciiRenderer(ov); } catch (e) { console.warn(e); r = { ok: false }; }
+            return { ov, r, render(opts) {
+                const cell = asciiCell(devRatio());
+                ov.style.display = cell && r.ok ? '' : 'none';
+                if (!cell || !r.ok) return;
+                if (ov.style.transform !== srcCanvas.style.transform) ov.style.transform = srcCanvas.style.transform;
+                const W = Math.round(srcCanvas.clientWidth * devRatio()), H = Math.round(srcCanvas.clientHeight * devRatio());
+                r.render(srcCanvas, cell[0], cell[1], opts, W || srcCanvas.width, H || srcCanvas.height);
+            } };
+        }
+
+        // ---------- Иконки, нарисованные символами (вместо эмодзи) ----------
+        // Каждая — маленькая матрица символов с градиентом и свечением. Ключ → [строки, цвет1, цвет2]
+        const ICON_ART = {
+            sword:    [['  A  ', '  #  ', '=#+#=', '  o  '], '#f8fafc', '#93c5fd'],
+            blades:   [['\\   /', ' \\ / ', '  X  ', ' / \\ '], '#f1f5f9', '#ef4444'],
+            bow:      [[' )\\  ', ' |->>', ' )/  '], '#fde68a', '#b45309'],
+            arrow:    [['     ', '>>-->', '     '], '#e7e5e4', '#a8a29e'],
+            shield:   [['/---\\', '| + |', '\\___/'], '#cbd5e1', '#64748b'],
+            staff:    [['  @  ', '  |  ', '  |  ', '  |  '], '#c4b5fd', '#7c3aed'],
+            book:     [[' ___ ', '|=|=|', '|_|_|'], '#fca5a5', '#7f1d1d'],
+            scroll:   [['.---.', '|~~~|', "'---'"], '#fde68a', '#a16207'],
+            potion:   [['  n  ', ' / \\ ', '(___)'], '#fda4af', '#be123c'],
+            flask:    [['  |  ', ' / \\ ', '/~~~\\'], '#a7f3d0', '#0f766e'],
+            gem:      [['  _  ', ' /_\\ ', ' \\ / ', '  v  '], '#bae6fd', '#0284c7'],
+            coin:     [[' .-. ', '( $ )', " '-' "], '#fde047', '#a16207'],
+            ring:     [[' .o. ', '(   )', " '-' "], '#fde68a', '#d97706'],
+            armor:    [['/\\_/\\', '|[#]|', '|___|'], '#d6d3d1', '#57534e'],
+            cloak:    [[' ___ ', '/   \\', '|/ \\|'], '#fca5a5', '#991b1b'],
+            fire:     [['  )  ', ' ( ) ', '(^^^)'], '#fde047', '#ea580c'],
+            ice:      [['\\ | /', '- * -', '/ | \\'], '#e0f2fe', '#38bdf8'],
+            lightning:[['  /| ', ' /_  ', '  /  '], '#fef08a', '#a855f7'],
+            wave:     [['     ', '~^~^~', '~~~~~'], '#7dd3fc', '#1d4ed8'],
+            tornado:  [['~~~~~', ' ~~~ ', '  ~  '], '#e2e8f0', '#94a3b8'],
+            skull:    [[' ___ ', '(o o)', ' |^| '], '#e7e5e4', '#a8a29e'],
+            bat:      [['/\\_/\\', '\\(v)/', '  "  '], '#c4b5fd', '#4c1d95'],
+            wolf:     [['/\\_/\\', '(o.o)', ' > < '], '#d6d3d1', '#78716c'],
+            moon:     [[' .-. ', '(  ( ', " '-' "], '#e0e7ff', '#818cf8'],
+            sun:      [['\\ | /', '-(O)-', '/ | \\'], '#fde047', '#f59e0b'],
+            star:     [['  .  ', '-=*=-', "  '  "], '#fef9c3', '#facc15'],
+            rune:     [['.---.', '| X |', "'---'"], '#c4b5fd', '#6d28d9'],
+            orb:      [[' .-. ', '( @ )', " '-' "], '#e9d5ff', '#9333ea'],
+            lock:     [[' .-. ', ' | | ', '[ # ]'], '#d6d3d1', '#78716c'],
+            gear:     [[' _#_ ', '#(o)#', ' "#" '], '#d6d3d1', '#57534e'],
+            chest:    [[' ___ ', '[_$_]', '|___|'], '#fbbf24', '#78350f'],
+            map:      [['._._.', '|\\_/|', '|_|_|'], '#fde68a', '#92400e'],
+            castle:   [['n_n_n', '|[ ]|', '|___|'], '#e7e5e4', '#78716c'],
+            temple:   [['_/^\\_', '| | |', '|_|_|'], '#e7e5e4', '#a8a29e'],
+            tower:    [[' /^\\ ', ' |#| ', ' |_| '], '#d6d3d1', '#57534e'],
+            crown:    [['\\/\\/\\', '|ooo|', '|___|'], '#fde047', '#ca8a04'],
+            herb:     [[' \\|/ ', '  |  ', ' _|_ '], '#86efac', '#15803d'],
+            bone:     [['o   o', ' \\=/ ', 'o   o'], '#f5f5f4', '#a8a29e'],
+            volley:   [['| | |', 'v v v', '/ / /'], '#e0f2fe', '#60a5fa'],
+            beam:     [['=====', '>>>>>', '====='], '#fff7ed', '#f59e0b'],
+            rift:     [['  /  ', ' /\\/ ', '/    '], '#7dd3fc', '#0ea5e9'],
+            dash:     [['     ', '>>>> ', '     '], '#e0f2fe', '#38bdf8'],
+            heart:    [[' _ _ ', '( v )', ' \\ / '], '#fda4af', '#e11d48'],
+            eye:      [[' ___ ', '(_o_)', '     '], '#fde68a', '#b45309'],
+            clock:    [[' .-. ', '(-|-)', " '-' "], '#e7e5e4', '#a8a29e'],
+            save:     [['[===]', '| o |', '[___]'], '#86efac', '#15803d'],
+            sound:    [[' |\\  ', '=| ) ', ' |/  '], '#e7e5e4', '#a8a29e'],
+            question: [[' ?? ', '   ?', '  . '], '#fde68a', '#a16207'],
+            compass:  [['  N  ', 'W-+-E', '  S  '], '#86efac', '#065f46'],
+            chain:    [['-o-o-', 'o-o-o', '-o-o-'], '#a8a29e', '#57534e'],
+            mana:     [[' /\\ ', '<  >', ' \\/ '], '#93c5fd', '#2563eb']
+        };
+        const EMOJI_ART = {
+            '⚔': 'blades', '🏹': 'bow', '🗡': 'sword', '🔥': 'fire', '💎': 'gem', '🪙': 'coin', '🛡': 'shield', '⚡': 'lightning', '🌋': 'rift', '✨': 'star', '⚗': 'flask',
+            '❄': 'ice', '🔮': 'orb', '📜': 'scroll', '☄': 'fire', '💍': 'ring', '🦇': 'bat', '⚙': 'gear', '📖': 'book', '🔒': 'lock', '✡': 'rune', '🧪': 'potion', '🗿': 'tower',
+            '🩸': 'potion', '🖤': 'heart', '☀': 'sun', '🐺': 'wolf', '💀': 'skull', '🌧': 'volley', '🏰': 'castle', '🪄': 'staff', '🦴': 'bone', '🌙': 'moon', '💠': 'gem',
+            '👑': 'crown', '🧛': 'bat', '🏛': 'temple', '⛩': 'temple', '💰': 'chest', '👘': 'cloak', '⏱': 'clock', '🧙': 'staff', '📕': 'book', '🧥': 'cloak', '🌟': 'star',
+            '👻': 'skull', '🌊': 'wave', '⛓': 'chain', '👹': 'skull', '🏆': 'crown', '🕯': 'fire', '🎒': 'chest', '🔊': 'sound', '💾': 'save', '🎁': 'chest', '🌿': 'herb',
+            '🟢': 'orb', '🍷': 'potion', '🔱': 'staff', '↩': 'dash', '🌠': 'star', '📘': 'book', '🧊': 'ice', '🌪': 'tornado', '🌩': 'lightning', '🌀': 'tornado', '💥': 'fire',
+            '🌲': 'herb', '🗺': 'map', '🪨': 'gem', '🦷': 'bone', '🫀': 'heart', '🕸': 'rune', '🐏': 'bone', '🔶': 'gem', '♨': 'fire', '🦯': 'staff', '🌕': 'moon', '🥷': 'cloak',
+            '🧣': 'cloak', '👁': 'eye', '💨': 'tornado', '🌱': 'herb', '🌺': 'herb', '🦪': 'gem', '🖋': 'staff', '🧉': 'potion', '🥤': 'potion', '🫖': 'potion', '📿': 'ring',
+            '🌅': 'sun', '📗': 'book', '📙': 'book', '📓': 'book', '🛤': 'dash', '🪽': 'dash', '🟣': 'orb', '🔆': 'beam', '🧭': 'compass', '⚒': 'gear', '⛰': 'tower',
+            '🌑': 'moon', '🪦': 'tower', '🎯': 'eye', '☠': 'skull', '❤': 'heart', '❓': 'question', '🐙': 'orb', '🧔': 'staff', '🧝': 'bow', '🤺': 'sword', '🕵': 'eye'
+        };
+        function iconArtHTML(key, big) {
+            const a = ICON_ART[key]; if (!a) return null;
+            return `<pre class="ia${big ? ' ia-big' : ''}" style="--ia1:${a[1]};--ia2:${a[2]}" aria-hidden="true">${a[0].join('\n').replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[ch])}</pre>`;
+        }
+        // Одиночный эмодзи-значок (весь текст узла — один символ) → нарисованная символами иконка
+        function artifyTextNode(n) {
+            const p = n.parentNode; if (!p || p.nodeName === 'OPTION' || p.nodeName === 'TITLE' || p.closest && p.closest('pre.ia, select, textarea')) return false;
+            const v = n.nodeValue.trim(); if (!v) return false;
+            const m = v.match(EMOJI_RE); if (!m || m.length !== 1 || m[0] !== v) return false;
+            const key = EMOJI_ART[String.fromCodePoint(v.codePointAt(0))]; if (!key) return false;
+            const big = p.classList && (p.classList.contains('gi') || p.classList.contains('diff-icon') || p.classList.contains('text-3xl') || p.classList.contains('text-2xl'));
+            const tmp = document.createElement('span'); tmp.innerHTML = iconArtHTML(key, big);
+            p.replaceChild(tmp.firstChild, n);
+            return true;
+        }
+
+        // ---------- ASCII-оформление уровней сложности ----------
+        const DIFF_ART = {
+            easy:   ['    N    ', '  .-+-.  ', 'W-( * )-E', "  '-+-'  ", '    S    '],
+            normal: ['\\\\     //', ' \\\\   // ', '  \\\\ //  ', '   >X<   ', '  // \\\\  ', ' //   \\\\ '],
+            hard:   ['   ) (   ', '  ( ) )  ', ' ) (^) ( ', '(  )^(  )', ' \\_^^^_/ ', '  \\###/  '],
+            insane: [' /\\   /\\ ', '/  \\_/  \\', '| (@) (@)|', ' \\  ^^  / ', '  |vVVv|  ', '  \\____/  ']
+        };
+        const DIFF_THEME = {
+            easy:   { cls: 'd-easy', tag: 'МЯГКИЙ ПУТЬ', note: 'Сбалансированные враги, щадящие боссы. Для исследования и истории.' },
+            normal: { cls: 'd-normal', tag: 'КАНОН', note: 'Задуманный баланс: элита лагерей и Граф Дракула требуют тактики.' },
+            hard:   { cls: 'd-hard', tag: 'БАГРЯНЫЙ ОБЕТ', note: 'Враги и боссы заметно сильнее, но щедрее на золото и опыт.' },
+            insane: { cls: 'd-insane', tag: 'ЗАЗУБРЕННАЯ БЕЗДНА', note: 'Дракула и Владыка Ада вдвое опаснее. Ни одной лишней ошибки.' }
+        };
+        const asciiBar = (v, max, w = 12) => { const n = Math.max(0, Math.min(w, Math.round(v / max * w))); return '[' + '#'.repeat(n) + '-'.repeat(w - n) + ']'; };
+
+        // ---------- слой чётких подписей и символьный дождь ----------
+        let labelCanvas = null, labelCtx = null, fxCanvas = null, fxRenderer = null;
+        const glyphRain = [];
+        function initTerminalEngine() {
+            fxCanvas = document.getElementById('fxCanvas');
+            labelCanvas = document.getElementById('labelCanvas');
+            labelCtx = labelCanvas.getContext('2d');
+            try { fxRenderer = new AsciiRenderer(fxCanvas); } catch (e) { fxRenderer = null; console.warn('ASCII-шейдер недоступен', e); }
+            // Весь текст главной сцены рисуется на чётком слое с тем же преобразованием и стилем
+            const keys = ['font', 'fillStyle', 'strokeStyle', 'lineWidth', 'textAlign', 'textBaseline', 'globalAlpha', 'shadowColor', 'shadowBlur', 'shadowOffsetX', 'shadowOffsetY', 'globalCompositeOperation', 'lineJoin'];
+            const route = method => function (t, x, y, mw) {
+                const L = labelCtx, k = labelCanvas.width / canvas.width, m = this.getTransform();
+                L.setTransform(m.a * k, m.b * k, m.c * k, m.d * k, m.e * k, m.f * k);
+                for (const k of keys) L[k] = this[k];
+                if (mw === undefined) L[method](t, x, y); else L[method](t, x, y, mw);
+            };
+            ctx.fillText = route('fillText');
+            ctx.strokeText = route('strokeText');
+            const sel = document.getElementById('selAsciiMode');
+            if (sel) sel.value = asciiMode;
+            buildMicroPatterns();
+            startDomSanitizer();
+        }
+        // Интерфейс из тех же микро-символов: маска (плотные знаки) для полос, иконок и заголовков и фактура для панелей
+        function buildMicroPatterns() {
+            const dpr = devRatio(), cols = 24, rows = 12, W = cols * 3, H = rows * 5;
+            const paint = (pool, color) => {
+                const c = document.createElement('canvas'); c.width = W; c.height = H;
+                const g = c.getContext('2d'); g.fillStyle = color;
+                let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+                for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
+                    const bm = MICRO_FONT[pool[Math.floor(rnd() * pool.length)]];
+                    for (let y = 0; y < 5; y++) for (let x = 0; x < 3; x++) if (bm[y][x] === 'x') g.fillRect(q * 3 + x, r * 5 + y, 1, 1);
+                }
+                return `url(${c.toDataURL()})`;
+            };
+            const root = document.documentElement.style;
+            root.setProperty('--micro-mask', paint(['█', '█', '▓', '8', 'M', '0', '#', '@', '&', '▓', '█'], '#fff'));
+            root.setProperty('--micro-tex', paint([' ', ' ', '.', ':', '1', '0', '-', '░', ' ', "'"], 'rgba(214,190,140,0.07)'));
+            root.setProperty('--micro-size', `${W / dpr}px ${H / dpr}px`);
+        }
+        function setAsciiMode(m) {
+            asciiMode = m in ASCII_PRESETS ? m : 'ultra';
+            try { localStorage.setItem('eldoria_ascii', asciiMode); } catch (e) {}
+            document.body.classList.toggle('ascii-off', asciiMode === 'off');
+            // Приближение мира: больше символов на каждого героя и монстра; на больших экранах — пропорционально
+            const p = ASCII_PRESETS[asciiMode];
+            WORLD_ZOOM_CUR = (p ? p.zoom : 1) * uiScaleF();
+            resizeCanvas();
+            const sel = document.getElementById('selAsciiMode'); if (sel) sel.value = asciiMode;
+        }
+        function beginFrameLayers() {
+            const W = Math.round(window.innerWidth * devRatio()), H = Math.round(window.innerHeight * devRatio());
+            if (labelCanvas.width !== W || labelCanvas.height !== H) { labelCanvas.width = W; labelCanvas.height = H; }
+            labelCtx.setTransform(1, 0, 0, 1, 0, 0);
+            labelCtx.clearRect(0, 0, labelCanvas.width, labelCanvas.height);
+        }
+        var sceneDarkness = 0.34;
+        function endFrameLayers(dt) {
+            const cell = asciiCell(devRatio());
+            const on = !!(cell && fxRenderer && fxRenderer.ok);
+            if (fxCanvas.style.display !== (on ? '' : 'none')) fxCanvas.style.display = on ? '' : 'none';
+            if (!on) return;
+            const w = zoneWeather(), z = playerZone();
+            fxRenderer.render(canvas, cell[0], cell[1], {
+                rain: Math.min(1, (w.rainCount || 0) / 260), wind: w.windX || 0,
+                fog: Math.min(0.8, (w.fogMult || 1) * 0.2 + (isDarkZone() ? 0.1 : 0)),
+                expo: 1.9 - sceneDarkness * 1.85,
+                shaft: z === 'hell' ? 1.4 : (z === 'castle' || z === 'shadow_realm' ? 1.15 : 0.9),
+                light: z === 'hell' ? [0.15, 0.98] : [-0.45, -0.89],
+                ink: z === 'hell' ? [0.05, 0.01, 0.004] : (z === 'castle' || z === 'shadow_realm' ? [0.025, 0.006, 0.03] : [0.012, 0.012, 0.022]),
+                glow: z === 'hell' ? 1.0 : 0.85
+            }, labelCanvas.width, labelCanvas.height);
+        }
+        // Кинематографичный дождь: два ближних слоя с параллаксом (разная скорость, размер, яркость) + брызги.
+        // Самый дальний слой рисует шейдер прямо в сетке символов, за объектами.
+        const RAIN_LAYERS = [
+            { speed: 560, size: 0.95, alpha: 0.38, color: '#8fb3d9', glow: 0, density: 0.55, chars: ['/', '|', '.'], len: [3, 5] },
+            { speed: 1050, size: 1.45, alpha: 0.75, color: '#e0f2fe', glow: 1, density: 0.2, chars: ['/', '|', '1'], len: [2, 4] }
+        ];
+        const rainSplash = [];
+        function drawGlyphRain(dt, cell) {
+            const w = zoneWeather(), L = labelCtx, W = labelCanvas.width, H = labelCanvas.height, k = devRatio();
+            const inten = Math.min(1, (w.rainCount || 0) / 280);
+            L.setTransform(1, 0, 0, 1, 0, 0); L.globalCompositeOperation = 'source-over'; L.textAlign = 'center'; L.textBaseline = 'top';
+            const wind = (w.windX || 0) * 0.45 * k;
+            RAIN_LAYERS.forEach((ly, li) => {
+                ly.drops = ly.drops || [];
+                const want = Math.round(inten * (W / cell[0]) * ly.density);
+                while (ly.drops.length < want) ly.drops.push({ x: Math.random() * W, y: Math.random() * H, v: ly.speed * (0.8 + Math.random() * 0.4) * k, len: ly.len[0] + Math.floor(Math.random() * (ly.len[1] - ly.len[0] + 1)), stop: H * (0.35 + Math.random() * 0.65), ch: ly.chars[Math.floor(Math.random() * ly.chars.length)] });
+                if (ly.drops.length > want) ly.drops.length = want;
+                if (!want) return;
+                const fs = Math.round(cell[1] * ly.size);
+                L.font = `700 ${fs}px "JetBrains Mono", ui-monospace, monospace`;
+                L.shadowColor = ly.color; L.shadowBlur = ly.glow ? 6 * k : 0;
+                const slantCh = wind < -1 ? '/' : (wind > 1 ? '\\' : '|');
+                for (const d of ly.drops) {
+                    d.y += d.v * dt; d.x += wind * (0.6 + li * 0.5) * dt;
+                    if (d.y > d.stop) {
+                        if (li === 1 && rainSplash.length < 160) rainSplash.push({ x: d.x, y: d.y + fs * d.len, t: 0.22 });
+                        d.y = -d.len * fs; d.x = Math.random() * W; d.stop = H * (0.35 + Math.random() * 0.65);
+                    }
+                    if (d.x < -30) d.x = W + 20; else if (d.x > W + 30) d.x = -20;
+                    for (let i = 0; i < d.len; i++) {
+                        L.globalAlpha = ly.alpha * (i + 1) / d.len;
+                        L.fillStyle = i === d.len - 1 ? '#ffffff' : ly.color;
+                        L.fillText(d.ch === '.' ? '.' : (d.ch === '1' ? '1' : slantCh), d.x - wind * 0.012 * i, d.y + i * fs * 0.92);
+                    }
+                }
+            });
+            // Брызги на земле
+            L.shadowBlur = 0; L.font = `700 ${Math.round(cell[1] * 0.9)}px "JetBrains Mono", ui-monospace, monospace`;
+            for (let i = rainSplash.length - 1; i >= 0; i--) {
+                const s = rainSplash[i]; s.t -= dt;
+                if (s.t <= 0) { rainSplash.splice(i, 1); continue; }
+                L.globalAlpha = s.t / 0.22 * 0.7; L.fillStyle = '#bae6fd';
+                L.fillText(s.t > 0.12 ? 'o' : ',', s.x, s.y);
+                L.fillText('.', s.x - cell[0], s.y + 2); L.fillText('.', s.x + cell[0], s.y + 2);
+            }
+            L.globalAlpha = 1;
+        }
+
+        // ASCII-арт оружия для баннера молитвы
+        const ASCII_WEAPON_ART = {
+            saber: ['      /\\      ', '      ||      ', '      ||      ', '      ||      ', '      ||      ', '      ||      ', '   ___||___   ', '  [===()===]  ', '      ##      ', '      ##      ', '      ()      '],
+            archer: ['   ,-.        ', '  /   \\       ', ' |     \\      ', ' |      )     ', ' |-----+---->>', ' |      )     ', ' |     /      ', '  \\   /       ', "   `-'        "],
+            invoker: ['   _________  ', '  /        /| ', ' /  (o)   / | ', '/________/  | ', '| ##  ## |  | ', '| #(**)# |  / ', '| ##  ## | /  ', '|________|/   ']
+        };
+
+        // ============================================================================
         // 15. ИНИЦИАЛИЗАЦИЯ И ЗАПУСК ИГРОВОГО ЦИКЛА
         // ============================================================================
         window.onload = function () {
@@ -11539,6 +12206,8 @@
             updateInvokerBarUI();
             updateHeroPortraitHUD();
 
+            initTerminalEngine();
+            setAsciiMode(asciiMode);
             try { if (localStorage.getItem('eldoria_admin') === '1') toggleAdminMode(); } catch (e) {}
             setGameState('menu');
 
@@ -11559,7 +12228,7 @@
                 }
 
                 updateGame(dt);
-                if (gameState === 'playing') renderGame(); // под непрозрачным меню мир не рисуем
+                if (gameState === 'playing') { beginFrameLayers(); renderGame(); endFrameLayers(dt); } // под непрозрачным меню мир не рисуем
                 requestAnimationFrame(gameLoop);
             }
             requestAnimationFrame(gameLoop);
