@@ -52,34 +52,41 @@ const Tex3D = {
 
     build() {
         const T = this.T = {}, S = 256, f = (x, y, P, o, s) => this.fbm(x, y, P, o, s);
-        // Ткань: переплетение нитей, швы
-        let H = this.heights(S, (x, y) => {
-            const wx = Math.sin(x / S * Math.PI * 2 * 48), wy = Math.sin(y / S * Math.PI * 2 * 48);
-            const weave = ((Math.floor(x / S * 48) + Math.floor(y / S * 48)) % 2 ? wx : wy) * 0.5 + 0.5;
-            const seam = (Math.abs((y % 128) - 64) < 1.5 ? -0.6 : 0) + (Math.abs((x % 128) - 2) < 1.2 ? -0.4 : 0);
-            return weave * 0.45 + f(x / 32, y / 32, 8, 3, 3) * 0.55 + seam;
+        // Все «персонажные» карты — 512×512: волокна, поры, царапины. Затенение в углублениях (AO) запекается в цвет.
+        const S2 = 512, f2 = (x, y, P, o, sd) => this.fbm(x, y, P, o, sd);
+        const ao = (H, i, k = 1) => 1 - Math.max(0, 0.5 - H[i]) * 0.9 * k;
+        // Ткань: нити основы и утка, волокна-ворсинки, швы со стежками
+        let H = this.heights(S2, (x, y) => {
+            const n = 96, u = x / S2 * n, v = y / S2 * n, cu = Math.floor(u), cv = Math.floor(v);
+            const over = (cu + cv) % 2 === 0;
+            const thread = over ? Math.sin((u - cu) * Math.PI) : Math.sin((v - cv) * Math.PI);
+            const jitter = this.hash(cu, cv, 7) * 0.25;
+            const fiber = this.fbm(x / 1.2, y / 9, 426.6, 2, 3) * 0.25;
+            const seamY = Math.abs((y % 256) - 128) < 2 ? -0.7 : 0, stitch = Math.abs((y % 256) - 132) < 1.5 && (x % 10) < 5 ? 0.35 : 0;
+            return thread * 0.55 + jitter + fiber + seamY + stitch;
         });
-        T.clothN = this.normal(H, S, 2.2);
-        T.cloth = this.paint(S, (x, y) => { const v = 0.82 + H[y * S + x] * 0.18 - f(x / 64, y / 64, 4, 3, 9) * 0.12; return [v, v, v]; });
-        // Кожа (выделанная): зерно и потёртости
-        H = this.heights(S, (x, y) => f(x / 6, y / 6, 42.666, 3, 21) * 0.6 + f(x / 40, y / 40, 6.4, 3, 22) * 0.4);
-        T.leatherN = this.normal(H, S, 3.5);
-        T.leather = this.paint(S, (x, y) => { const v = 0.72 + H[y * S + x] * 0.3; return [v, v * 0.97, v * 0.94]; });
-        // Металл: шлифовка, царапины, потёртости по краям
-        const scratch = new Float32Array(S * S);
-        for (let i = 0; i < 160; i++) {
-            let x = Math.random() * S, y = Math.random() * S; const a = Math.random() * Math.PI, len = 10 + Math.random() * 60;
-            for (let k = 0; k < len; k++) { x += Math.cos(a); y += Math.sin(a); const xi = ((Math.floor(x) % S) + S) % S, yi = ((Math.floor(y) % S) + S) % S; scratch[yi * S + xi] = 1; }
+        T.clothN = this.normal(H, S2, 2.6);
+        T.cloth = this.paint(S2, (x, y) => { const i = y * S2 + x, v = (0.8 + H[i] * 0.16 - f2(x / 90, y / 90, 5.68, 3, 9) * 0.14) * ao(H, i); return [v, v, v]; });
+        // Кожа (выделанная): зерно, складки, светлые потёртости на рукоятях и сгибах, строчка
+        H = this.heights(S2, (x, y) => f2(x / 5, y / 5, 102.4, 3, 21) * 0.45 + f2(x / 60, y / 14, 8.53, 3, 22) * 0.4 + (Math.abs((x % 128) - 6) < 1.2 && (y % 12) < 7 ? 0.3 : 0));
+        T.leatherN = this.normal(H, S2, 3.8);
+        T.leather = this.paint(S2, (x, y) => { const i = y * S2 + x, wear = Math.max(0, f2(x / 70, y / 70, 7.3, 3, 23) - 0.55) * 1.6; const v = (0.68 + H[i] * 0.28 + wear * 0.45) * ao(H, i); return [v, v * 0.96, v * 0.92]; });
+        // Металл: шлифовка, сеть тонких царапин, вмятины, износ — плюс карты шероховатости и металличности
+        const scratch = new Float32Array(S2 * S2);
+        for (let i = 0; i < 520; i++) {
+            let x = Math.random() * S2, y = Math.random() * S2; const a = Math.random() * Math.PI, len = 8 + Math.random() * 90, deep = 0.4 + Math.random() * 0.6;
+            for (let k = 0; k < len; k++) { x += Math.cos(a); y += Math.sin(a); const xi = ((Math.floor(x) % S2) + S2) % S2, yi = ((Math.floor(y) % S2) + S2) % S2; scratch[yi * S2 + xi] = Math.max(scratch[yi * S2 + xi], deep); }
         }
-        H = this.heights(S, (x, y) => f(x / 2, y / 40, 128, 2, 31) * 0.3 + f(x / 50, y / 50, 5.12, 3, 32) * 0.4 - scratch[y * S + x] * 0.5);
-        T.metalN = this.normal(H, S, 1.6);
-        T.metalR = this.paint(S, (x, y) => { const v = 0.55 + f(x / 30, y / 30, 8.53, 4, 33) * 0.45 + scratch[y * S + x] * 0.35; return [v, v, v]; }, false);
-        T.metal = this.paint(S, (x, y) => { const v = 0.85 + f(x / 24, y / 24, 10.66, 3, 34) * 0.15 - scratch[y * S + x] * 0.05; return [v, v, v]; });
-        // Камень: кладка из блоков, швы, сколы
-        const brick = (x, y) => { const row = Math.floor(y / 32), off = row % 2 ? 32 : 0, bx = Math.floor((x + off) / 64), lx = (x + off) % 64, ly = y % 32; return { id: bx * 7 + row * 13, edge: Math.min(lx, 64 - lx, ly, 32 - ly) }; };
-        H = this.heights(S, (x, y) => { const b = brick(x, y); const mortar = Math.min(1, b.edge / 3); return mortar * (0.6 + f(x / 10, y / 10, 25.6, 4, 41 + (b.id % 5)) * 0.4); });
-        T.stoneN = this.normal(H, S, 4);
-        T.stone = this.paint(S, (x, y) => { const b = brick(x, y); const tone = 0.7 + this.hash(b.id, 3, 5) * 0.25; const v = (b.edge < 2 ? 0.45 : tone) * (0.85 + f(x / 16, y / 16, 16, 3, 44) * 0.25); return [v, v * 0.98, v * 0.96]; });
+        H = this.heights(S2, (x, y) => { const i = y * S2 + x; return f2(x / 1.5, y / 60, 341.3, 2, 31) * 0.22 + f2(x / 70, y / 70, 7.31, 3, 32) * 0.4 - scratch[i] * 0.45 - Math.max(0, f2(x / 30, y / 30, 17.06, 2, 35) - 0.7) * 1.2; });
+        T.metalN = this.normal(H, S2, 1.8);
+        T.metalR = this.paint(S2, (x, y) => { const i = y * S2 + x; const v = 0.5 + f2(x / 40, y / 40, 12.8, 4, 33) * 0.4 + scratch[i] * 0.3; return [v, v, v]; }, false);
+        T.metalM = this.paint(S2, (x, y) => { const i = y * S2 + x, dirt = Math.max(0, f2(x / 50, y / 50, 10.24, 3, 36) - 0.6) * 2.2; const v = Math.max(0.35, 1 - dirt - scratch[i] * 0.15); return [v, v, v]; }, false);
+        T.metal = this.paint(S2, (x, y) => { const i = y * S2 + x, dirt = Math.max(0, f2(x / 50, y / 50, 10.24, 3, 36) - 0.6) * 1.6; const v = (0.86 + f2(x / 24, y / 24, 21.33, 3, 34) * 0.14 + scratch[i] * 0.08 - dirt * 0.35) * ao(H, i, 0.6); return [v, v * 0.99, v * 0.97]; });
+        // Камень: кладка, сколы по краям блоков, трещины, мох в швах
+        const brick = (x, y) => { const row = Math.floor(y / 64), off = row % 2 ? 64 : 0, bx = Math.floor((x + off) / 128), lx = (x + off) % 128, ly = y % 64; return { id: bx * 7 + row * 13, edge: Math.min(lx, 128 - lx, ly, 64 - ly) }; };
+        H = this.heights(S2, (x, y) => { const b = brick(x, y); const chip = f2(x / 9, y / 9, 56.9, 3, 45) * 6; const mortar = Math.min(1, Math.max(0, b.edge - chip * 0.6) / 5); const crack = Math.abs(f2(x / 40, y / 40, 12.8, 3, 46 + (b.id % 7)) - 0.5) < 0.012 ? -0.4 : 0; return mortar * (0.55 + f2(x / 14, y / 14, 36.57, 4, 41 + (b.id % 5)) * 0.45) + crack; });
+        T.stoneN = this.normal(H, S2, 4.5);
+        T.stone = this.paint(S2, (x, y) => { const b = brick(x, y), i = y * S2 + x; const tone = 0.68 + this.hash(b.id, 3, 5) * 0.26; const inMortar = H[i] < 0.2; const moss = inMortar && f2(x / 20, y / 20, 25.6, 2, 47) > 0.55; const v = (inMortar ? 0.42 : tone) * (0.85 + f2(x / 20, y / 20, 25.6, 3, 44) * 0.25) * ao(H, i); return moss ? [v * 0.7, v * 0.95, v * 0.55] : [v, v * 0.98, v * 0.95]; });
         // Кора деревьев: вертикальные борозды
         H = this.heights(S, (x, y) => { const r = f(x / 6, y / 40, 42.666, 3, 51); return Math.pow(Math.abs(Math.sin(x / S * Math.PI * 2 * 9 + r * 6)), 0.6) * 0.6 + r * 0.4; });
         T.barkN = this.normal(H, S, 4.5);
@@ -91,9 +98,10 @@ const Tex3D = {
         H = this.heights(S, (x, y) => f(x / 1.5, y / 12, 170.66, 3, 71) * 0.7 + f(x / 20, y / 20, 12.8, 2, 72) * 0.3);
         T.furN = this.normal(H, S, 3);
         T.fur = this.paint(S, (x, y) => { const v = 0.7 + H[y * S + x] * 0.4; return [v, v, v]; });
-        // Кожа персонажей: еле заметные поры
-        H = this.heights(128, (x, y) => this.fbm(x / 4, y / 4, 32, 2, 81));
-        T.skinN = this.normal(H, 128, 0.6);
+        // Кожа персонажей: поры, мелкие складки, лёгкий румянец и неравномерность тона
+        H = this.heights(S2, (x, y) => { const pore = this.hash(Math.floor(x / 3), Math.floor(y / 3), 81) > 0.86 ? -0.5 : 0; return f2(x / 6, y / 6, 85.3, 2, 82) * 0.6 + pore * 0.4; });
+        T.skinN = this.normal(H, S2, 1.1);
+        T.skin = this.paint(S2, (x, y) => { const m = f2(x / 40, y / 40, 12.8, 3, 83), i = y * S2 + x; const v = 0.94 + H[i] * 0.06; return [v * (1 + (m - 0.5) * 0.06), v * (1 - (m - 0.5) * 0.04), v * (1 - (m - 0.5) * 0.05)]; });
         // Земля (512): мелкие камешки, комья, травинки — умножается на цвет тайла
         const G = 512;
         H = this.heights(G, (x, y) => { const p = f(x / 7, y / 7, 73.14, 3, 91), big = f(x / 64, y / 64, 8, 3, 92); return p * 0.55 + big * 0.45 + (p > 0.72 ? 0.25 : 0); });
@@ -107,25 +115,25 @@ const Tex3D = {
         // Вода: рябь
         H = this.heights(S, (x, y) => f(x / 12, y / 12, 21.33, 4, 121));
         T.waterN = this.normal(H, S, 5);
-        [T.cloth, T.clothN].forEach(t => t.repeat.set(2, 2));
+        [T.cloth, T.clothN].forEach(t => t.repeat.set(1.5, 1.5));
         return T;
     },
     // Есть ли лужа в точке мира (для ряби от капель)
     puddleAt(x, z) {
         if (!this.cloudData) return false;
         const S = 256, u = ((x * 0.11 + 0.37) % 1 + 1) % 1, v = ((z * 0.11 + 0.37) % 1 + 1) % 1;
-        return this.cloudData[Math.floor(v * S) * S + Math.floor(u * S)] > 0.6;
+        return this.cloudData[Math.min(S - 1, Math.floor((1 - v) * S)) * S + Math.floor(u * S)] > 0.62;
     }
 };
 
 // ---------- PBR-материалы по типу поверхности ----------
 G3.KIND = {
-    metal:   { metalness: 0.8, roughness: 0.48, n: 'metalN', rm: 'metalR', map: 'metal', ns: 0.6, env: 0.85 },
-    gold:    { metalness: 1.0, roughness: 0.36, n: 'metalN', rm: 'metalR', ns: 0.4, env: 1.1 },
-    dark:    { metalness: 0.7, roughness: 0.5, n: 'metalN', rm: 'metalR', map: 'metal', ns: 0.8, env: 0.9 },
+    metal:   { metalness: 0.85, roughness: 0.46, n: 'metalN', rm: 'metalR', mm: 'metalM', map: 'metal', ns: 0.6, env: 0.85 },
+    gold:    { metalness: 1.0, roughness: 0.36, n: 'metalN', rm: 'metalR', mm: 'metalM', ns: 0.4, env: 1.1 },
+    dark:    { metalness: 0.75, roughness: 0.5, n: 'metalN', rm: 'metalR', mm: 'metalM', map: 'metal', ns: 0.8, env: 0.9 },
     cloth:   { metalness: 0, roughness: 0.92, n: 'clothN', map: 'cloth', ns: 0.9, env: 0.35 },
     leather: { metalness: 0, roughness: 0.62, n: 'leatherN', map: 'leather', ns: 0.7, env: 0.5 },
-    skin:    { metalness: 0, roughness: 0.55, n: 'skinN', ns: 0.4, env: 0.4 },
+    skin:    { metalness: 0, roughness: 0.52, n: 'skinN', map: 'skin', ns: 0.35, env: 0.4 },
     bone:    { metalness: 0, roughness: 0.68, n: 'leatherN', ns: 0.35, env: 0.5 },
     fur:     { metalness: 0, roughness: 0.96, n: 'furN', map: 'fur', ns: 1.0, env: 0.25 },
     wood:    { metalness: 0, roughness: 0.86, n: 'barkN', map: 'bark', ns: 1.0, env: 0.3 },
@@ -144,6 +152,7 @@ G3.mat = function (color, opts) {
     const p = { color: new THREE.Color(color), metalness: K.metalness, roughness: K.roughness, envMapIntensity: K.env };
     if (K.n && T[K.n]) { p.normalMap = T[K.n]; p.normalScale = new THREE.Vector2(K.ns, K.ns); }
     if (K.rm && T[K.rm]) p.roughnessMap = T[K.rm];
+    if (K.mm && T[K.mm]) p.metalnessMap = T[K.mm];
     if (K.map && T[K.map]) p.map = T[K.map];
     const m = new THREE.MeshStandardMaterial(Object.assign(p, o));
     if (!unique) { m.userData.cached = true; G3.matCache.set(key, m); }
@@ -203,4 +212,23 @@ G3.envFor = function (renderer, mode) {
     const rt = pm.fromScene(sc, 0.02);
     pm.dispose(); geo.dispose();
     return (G3.envCache[mode] = rt.texture);
+};
+
+// ---------- Развевающиеся плащи: волна по ткани в вершинном шейдере ----------
+G3.cape = { t: { value: 0 }, wind: { value: 0.4 } };
+G3.capeify = function (m) {
+    if (!m || m.userData.cape) return m;
+    m.userData.cape = true;
+    const prev = m.onBeforeCompile;
+    m.onBeforeCompile = (sh, r) => {
+        if (prev) prev(sh, r);
+        sh.uniforms.capeT = G3.cape.t; sh.uniforms.capeWind = G3.cape.wind;
+        sh.vertexShader = 'uniform float capeT, capeWind;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+            float ck = clamp(-position.y / 0.8, 0.0, 1.0); ck *= ck;
+            transformed.z -= (sin(capeT * 3.1 + position.y * 7.0 + position.x * 6.0) * 0.045 + sin(capeT * 5.3 + position.x * 11.0) * 0.015) * ck * (0.6 + capeWind);
+            transformed.x += sin(capeT * 2.2 + position.y * 5.0) * 0.02 * ck * (0.6 + capeWind);`);
+    };
+    m.customProgramCacheKey = () => (m.userData.rim ? 'rim' : '') + 'cape';
+    m.needsUpdate = true;
+    return m;
 };

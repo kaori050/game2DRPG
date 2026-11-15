@@ -10,7 +10,7 @@ const Controls = {
         ['move_up', 'Вперёд (вверх)', 'move'], ['move_down', 'Назад (вниз)', 'move'], ['move_left', 'Влево', 'move'], ['move_right', 'Вправо', 'move'],
         ['sprint', 'Бег (выносливость)', 'move'], ['command', 'Приказ: идти / цель / подойти', 'move'], ['stop', 'Стоп (отмена каста)', 'move'],
         ['skill1', 'Навык 1 (Q · Квас)', 'skill'], ['skill2', 'Навык 2 (W · Векс)', 'skill'], ['skill3', 'Навык 3 (E · Экзорт)', 'skill'], ['skill4', 'Ультимейт / Инвок (R)', 'skill'],
-        ['skill5', 'Доп. навык 1 (D: стойка / слот 1)', 'skill'], ['skill6', 'Доп. навык 2 (F: бросок / слот 2)', 'skill'],
+        ['skill5', 'Доп. навык 1 (D: стойка / слот 1 / Пир)', 'skill'], ['skill6', 'Доп. навык 2 (F: бросок / слот 2)', 'skill'],
         ['primary', 'Основное действие (атака к курсору / цель)', 'combat'], ['attack', 'Атака к курсору', 'combat'], ['attack_move', 'Атака с ходу (A-клик)', 'combat'],
         ['interact', 'Взаимодействие', 'combat'], ['pot_hp', 'Зелье здоровья', 'combat'], ['pot_mp', 'Зелье маны', 'combat'],
         ['inventory', 'Котомка / снаряжение', 'ui'], ['spellbook', 'Гримуар', 'ui'], ['craft', 'Алтарь (крафт)', 'ui'], ['worldmap', 'Карта мира', 'ui'],
@@ -169,7 +169,7 @@ const Controls = {
             else castHeroSkill(sk);
             return true;
         }
-        if (a === 'skill5') { aimed(); if (ht === 'invoker') castInvokedSpell(0); else if (ht === 'archer') toggleArcherStance(); return true; }
+        if (a === 'skill5') { aimed(); if (ht === 'invoker') castInvokedSpell(0); else if (ht === 'archer') toggleArcherStance(); else if (ht === 'knight') castHeroSkill('d'); return true; }
         if (a === 'skill6') { aimed(); if (ht === 'invoker') castInvokedSpell(1); else if (ht === 'archer') throwUbwSword(); return true; }
         if (a === 'attack') { aimed(); performMageBasicAttack(); return true; }
         if (a === 'attack_move') { player.attackMoveMode = !player.attackMoveMode; return true; }

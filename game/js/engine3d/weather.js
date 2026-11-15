@@ -86,7 +86,7 @@ const Weather3D = {
         // ---------- Влажность земли и облака ----------
         this.wet += ((P.rain > 0.05 ? 1 : 0) - this.wet) * Math.min(1, dt * (P.rain > 0.05 ? 0.25 : 0.05));
         this.cloudOff.x += dt * (0.004 + wind * 0.006); this.cloudOff.y += dt * 0.0025;
-        if (World3D.U) { World3D.U.uWet.value = this.wet; World3D.U.uCloud.value = P.cloud * (1 - night * 0.7); World3D.U.uCloudOff.value.copy(this.cloudOff); }
+        if (World3D.U) { World3D.U.uTime.value = t; World3D.U.uRain.value = Math.min(1, P.rain); World3D.U.uWet.value = this.wet; World3D.U.uCloud.value = P.cloud * (1 - night * 0.7); World3D.U.uCloudOff.value.copy(this.cloudOff); }
         // Облачность приглушает солнце; багровое зарево у замка
         E.sun.intensity *= 1 - Math.min(0.55, P.rain * 0.45);
         if (P.glow > 0) {

@@ -8,23 +8,75 @@ const World3D = {
         this.scene = scene;
         const T = Tex3D.T;
         // Земля: PBR с картой нормалей; в шейдер добавлены тени облаков, мокрая земля и лужи
-        this.U = { uClouds: { value: T.clouds }, uCloud: { value: 0 }, uWet: { value: 0 }, uCloudOff: { value: new THREE.Vector2() } };
+        this.U = { uClouds: { value: T.clouds }, uCloud: { value: 0 }, uWet: { value: 0 }, uCloudOff: { value: new THREE.Vector2() }, uTime: { value: 0 }, uRain: { value: 0 } };
+        // Рябь от капель: кольца расходятся из случайных точек в каждой клетке сетки (возвращает наклон поверхности)
+        const RIPPLE = `
+            vec2 rippleField(vec2 p, float t) {
+                vec2 rd = vec2(0.0);
+                for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+                    vec2 cell = floor(p) + vec2(float(i), float(j));
+                    float h = fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
+                    vec2 c = cell + 0.5 + 0.35 * vec2(sin(h * 6.28), cos(h * 9.1));
+                    float ph = fract(t * (0.8 + h * 0.4) + h);
+                    vec2 d = p - c; float dist = length(d), r = ph * 0.85;
+                    float w = sin((dist - r) * 30.0) * smoothstep(0.14, 0.0, abs(dist - r)) * (1.0 - ph) * (1.0 - ph);
+                    rd += d / max(dist, 1e-3) * w;
+                }
+                return rd;
+            }`;
+        // Земля: PBR с картой нормалей; в шейдере — тени облаков, мокрая земля и лужи
+        // Лужа: гладкое зеркало с френелем (отражает небо/окружение), сквозь воду видно преломлённое дно, по воде бегут круги от капель, края мягко переходят в мокрую землю
         this.groundMat = new THREE.MeshStandardMaterial({ vertexColors: true, map: T.ground, normalMap: T.groundN, normalScale: new THREE.Vector2(0.9, 0.9), roughness: 0.94, metalness: 0, envMapIntensity: 0.35 });
         this.groundMat.onBeforeCompile = sh => {
             Object.assign(sh.uniforms, this.U);
             sh.vertexShader = 'varying vec3 vGW;\n' + sh.vertexShader.replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-            sh.fragmentShader = 'varying vec3 vGW;\nuniform sampler2D uClouds;\nuniform float uCloud, uWet;\nuniform vec2 uCloudOff;\nfloat gPuddle = 0.0;\n' + sh.fragmentShader
+            sh.fragmentShader = 'varying vec3 vGW;\nuniform sampler2D uClouds;\nuniform float uCloud, uWet, uTime, uRain;\nuniform vec2 uCloudOff;\nfloat gPuddle = 0.0;\nvec2 gRip = vec2(0.0);\n' + RIPPLE + '\n' + sh.fragmentShader
                 .replace('#include <map_fragment>', `#include <map_fragment>
                     float cl = texture2D(uClouds, vGW.xz * 0.02 + uCloudOff).r;
                     diffuseColor.rgb *= mix(1.0, 0.42 + 0.58 * smoothstep(0.38, 0.68, cl), uCloud);
-                    gPuddle = smoothstep(0.58, 0.66, texture2D(uClouds, vGW.xz * 0.11 + 0.37).r) * uWet;
-                    diffuseColor.rgb *= 1.0 - uWet * 0.3 - gPuddle * 0.35;`)
-                .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor * (1.0 - uWet * 0.4), 0.05, gPuddle);')
-                .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal = normalize(mix(normal, normalize(vNormal), gPuddle));');
+                    float pm = texture2D(uClouds, vGW.xz * 0.11 + 0.37).r;
+                    gPuddle = smoothstep(0.6, 0.665, pm) * uWet;
+                    float wetRim = (smoothstep(0.53, 0.62, pm) - smoothstep(0.6, 0.665, pm)) * uWet;
+                    gRip = rippleField(vGW.xz * 2.4, uTime) * uRain;
+                    #ifdef USE_MAP
+                        // Преломление: дно под водой чуть смещено рябью, темнее и холоднее
+                        vec3 under = texture2D(map, vUv + gRip * 0.025).rgb * diffuse;
+                        diffuseColor.rgb = mix(diffuseColor.rgb, under * vec3(0.62, 0.68, 0.74), gPuddle);
+                    #endif
+                    diffuseColor.rgb *= 1.0 - uWet * 0.28 - wetRim * 0.22;`)
+                .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor * (1.0 - uWet * 0.4), 0.03, gPuddle);')
+                .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+                    vec3 wN = normalize(vec3(-gRip.x * 0.55, 1.0, -gRip.y * 0.55));
+                    normal = normalize(mix(normal, normalize((viewMatrix * vec4(wN, 0.0)).xyz), gPuddle));`)
+                .replace('#include <output_fragment>', `
+                    #ifdef USE_ENVMAP
+                    if (gPuddle > 0.002) {
+                        vec3 vdir = normalize(vViewPosition);
+                        float fres = 0.1 + 0.9 * pow(1.0 - clamp(dot(normal, vdir), 0.0, 1.0), 4.0);
+                        vec3 refl = getIBLRadiance(vdir, normal, 0.02) * 1.5;
+                        outgoingLight = mix(outgoingLight, outgoingLight * 0.8 + refl * (0.18 + fres * 1.1), gPuddle * 0.9);
+                    }
+                    #endif
+                    #include <output_fragment>`);
         };
-        this.groundMat.customProgramCacheKey = () => 'ground';
-        // Вода: глянцевая, с бегущей рябью и отражением неба; лава — светящаяся
-        this.waterMat = new THREE.MeshStandardMaterial({ color: 0x1a4458, roughness: 0.06, metalness: 0.15, normalMap: T.waterN, normalScale: new THREE.Vector2(0.55, 0.55), transparent: true, opacity: 0.86, envMapIntensity: 1.4 });
+        this.groundMat.customProgramCacheKey = () => 'ground2';
+        // Вода рек и озёр: рябь от ветра + круги от дождя, отражение неба с френелем
+        this.waterMat = new THREE.MeshStandardMaterial({ color: 0x1a4458, roughness: 0.05, metalness: 0.1, normalMap: T.waterN, normalScale: new THREE.Vector2(0.5, 0.5), transparent: true, opacity: 0.88, envMapIntensity: 1.0 });
+        this.waterMat.onBeforeCompile = sh => {
+            sh.uniforms.uTime = this.U.uTime; sh.uniforms.uRain = this.U.uRain;
+            sh.vertexShader = 'varying vec3 vGW;\n' + sh.vertexShader.replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+            sh.fragmentShader = 'varying vec3 vGW;\nuniform float uTime, uRain;\n' + RIPPLE + '\n' + sh.fragmentShader
+                .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+                    vec2 wr = rippleField(vGW.xz * 2.0, uTime) * uRain;
+                    normal = normalize(normal + (viewMatrix * vec4(-wr.x * 0.5, 0.0, -wr.y * 0.5, 0.0)).xyz);`)
+                .replace('#include <output_fragment>', `
+                    #ifdef USE_ENVMAP
+                    { vec3 vdir = normalize(vViewPosition); float fres = 0.08 + 0.92 * pow(1.0 - clamp(dot(normal, vdir), 0.0, 1.0), 5.0);
+                      outgoingLight += getIBLRadiance(vdir, normal, 0.03) * fres * 1.6; diffuseColor.a = mix(diffuseColor.a, 1.0, fres * 0.6); }
+                    #endif
+                    #include <output_fragment>`);
+        };
+        this.waterMat.customProgramCacheKey = () => 'water2';
         T.waterN.repeat.set(3, 3);
         this.lavaTex = T.clouds.clone(); this.lavaTex.needsUpdate = true; this.lavaTex.repeat.set(2, 2);
         this.lavaMat = new THREE.MeshStandardMaterial({ color: 0x1a0400, emissive: 0xff5a10, emissiveIntensity: 1.6, emissiveMap: this.lavaTex, roughness: 0.6, normalMap: T.leafN });

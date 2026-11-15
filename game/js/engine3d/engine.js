@@ -174,6 +174,7 @@ const Engine3D = {
         World3D.update(px, pz, typeof WORLD !== 'undefined' && pz >= WORLD.hellRow, dt);
         Actors3D.update(dt);
         FX3D.update(dt);
+        if (typeof Knight3D !== 'undefined') Knight3D.update(dt);
         Weather3D.update(dt, w, tgt);
         AnimFX.update(dt);
         // Ближайшие источники огня получают настоящие точечные огни

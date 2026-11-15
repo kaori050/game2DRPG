@@ -51,22 +51,29 @@ const AnimFX = {
     init(scene) {
         this.scene = scene;
         // ---------- 3D-частицы событий: скорость, гравитация, сопротивление, притяжение, размер и цвет ----------
-        const N = this.MAXP, g = new THREE.BufferGeometry();
-        this.P = { pos: new Float32Array(N * 3), vel: new Float32Array(N * 3), col: new Float32Array(N * 3), size: new Float32Array(N), alpha: new Float32Array(N),
-            life: new Float32Array(N), max: new Float32Array(N), s0: new Float32Array(N), s1: new Float32Array(N), grav: new Float32Array(N), drag: new Float32Array(N), pull: new Float32Array(N * 4), i: 0 };
-        g.setAttribute('position', new THREE.BufferAttribute(this.P.pos, 3).setUsage(THREE.DynamicDrawUsage));
-        g.setAttribute('aColor', new THREE.BufferAttribute(this.P.col, 3).setUsage(THREE.DynamicDrawUsage));
-        g.setAttribute('aSize', new THREE.BufferAttribute(this.P.size, 1).setUsage(THREE.DynamicDrawUsage));
-        g.setAttribute('aAlpha', new THREE.BufferAttribute(this.P.alpha, 1).setUsage(THREE.DynamicDrawUsage));
-        this.pMat = new THREE.ShaderMaterial({
-            transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-            uniforms: { uScale: { value: 600 } },
-            vertexShader: `attribute vec3 aColor; attribute float aSize; attribute float aAlpha; uniform float uScale; varying vec3 vC; varying float vA;
-                void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = aSize * uScale / max(0.1, -mv.z); vC = aColor; vA = aAlpha; }`,
-            fragmentShader: `varying vec3 vC; varying float vA;
-                void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.0, d); a *= a; gl_FragColor = vec4(vC * (a * vA * 1.8) + vec3(a * a * vA * 0.6), 1.0); }`
-        });
-        this.points = new THREE.Points(g, this.pMat); this.points.frustumCulled = false; this.points.renderOrder = 10; scene.add(this.points);
+        // Два пула: светящиеся искры (аддитивно) и густая кровь/дым (обычное смешивание — тёмные капли видны на любом фоне)
+        const makePool = (N, additive) => {
+            const g = new THREE.BufferGeometry();
+            const P = { N, pos: new Float32Array(N * 3), vel: new Float32Array(N * 3), col: new Float32Array(N * 3), size: new Float32Array(N), alpha: new Float32Array(N),
+                life: new Float32Array(N), max: new Float32Array(N), s0: new Float32Array(N), s1: new Float32Array(N), grav: new Float32Array(N), drag: new Float32Array(N), pull: new Float32Array(N * 4), stick: new Uint8Array(N), i: 0 };
+            g.setAttribute('position', new THREE.BufferAttribute(P.pos, 3).setUsage(THREE.DynamicDrawUsage));
+            g.setAttribute('aColor', new THREE.BufferAttribute(P.col, 3).setUsage(THREE.DynamicDrawUsage));
+            g.setAttribute('aSize', new THREE.BufferAttribute(P.size, 1).setUsage(THREE.DynamicDrawUsage));
+            g.setAttribute('aAlpha', new THREE.BufferAttribute(P.alpha, 1).setUsage(THREE.DynamicDrawUsage));
+            const mat = new THREE.ShaderMaterial({
+                transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+                uniforms: { uScale: { value: 600 } },
+                vertexShader: `attribute vec3 aColor; attribute float aSize; attribute float aAlpha; uniform float uScale; varying vec3 vC; varying float vA;
+                    void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = aSize * uScale / max(0.1, -mv.z); vC = aColor; vA = aAlpha; }`,
+                fragmentShader: additive
+                    ? `varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.0, d); a *= a; gl_FragColor = vec4(vC * (a * vA * 1.8) + vec3(a * a * vA * 0.6), 1.0); }`
+                    : `varying vec3 vC; varying float vA; void main(){ vec2 q = gl_PointCoord - 0.5; float d = length(q); float a = smoothstep(0.5, 0.32, d) * vA; if (a < 0.02) discard; float hl = smoothstep(0.22, 0.0, length(q + vec2(0.12, 0.14))); gl_FragColor = vec4(vC + hl * 0.35, a); }`
+            });
+            const pts = new THREE.Points(g, mat); pts.frustumCulled = false; pts.renderOrder = additive ? 10 : 9; scene.add(pts);
+            P.points = pts; P.mat = mat; return P;
+        };
+        this.P = makePool(this.MAXP, true); this.G = makePool(2500, false);
+        this.pMat = this.P.mat; this.points = this.P.points;
         // ---------- Ударные волны: расходящиеся светящиеся кольца ----------
         const rg = new THREE.RingGeometry(0.8, 1, 64); rg.rotateX(-Math.PI / 2);
         this.shocks = [];
@@ -162,7 +169,7 @@ const AnimFX = {
     // ---------- частицы ----------
     // o: x,y,z, n, color (число или массив), speed, up, spread (разлёт по горизонтали), life, size, sizeEnd, grav, drag, pull: {x,y,z,k}
     emit(o) {
-        const P = this.P, N = this.MAXP, cols = Array.isArray(o.color) ? o.color : [o.color || 0xffffff], c = this.tc || (this.tc = new THREE.Color());
+        const P = o.gore ? this.G : this.P, N = P.N, cols = Array.isArray(o.color) ? o.color : [o.color || 0xffffff], c = this.tc || (this.tc = new THREE.Color());
         for (let k = 0; k < (o.n || 10); k++) {
             const i = P.i; P.i = (P.i + 1) % N;
             const a = Math.random() * Math.PI * 2, sp = (o.speed || 2) * (0.4 + Math.random() * 0.8), h = o.spread === undefined ? 1 : o.spread;
@@ -175,8 +182,15 @@ const AnimFX = {
             P.max[i] = P.life[i] = (o.life || 0.8) * (0.6 + Math.random() * 0.6);
             P.s0[i] = (o.size || 0.12) * (0.6 + Math.random() * 0.7); P.s1[i] = o.sizeEnd === undefined ? 0 : o.sizeEnd;
             P.grav[i] = o.grav === undefined ? 4 : o.grav; P.drag[i] = o.drag === undefined ? 1.5 : o.drag;
+            P.stick[i] = o.stick ? 1 : 0;
             if (o.pull) { P.pull[i * 4] = o.pull.x; P.pull[i * 4 + 1] = o.pull.y; P.pull[i * 4 + 2] = o.pull.z; P.pull[i * 4 + 3] = o.pull.k || 8; } else P.pull[i * 4 + 3] = 0;
         }
+    },
+    // Брызги крови: тёмно-алые капли летят веером по направлению удара, падают и остаются на земле
+    blood(x, y, z, n = 20, dx = 0, dz = 0) {
+        this.emit({ gore: true, stick: true, x, y, z, n: Math.round(n), color: [0x6a0006, 0x4a0004, 0x9a0a12, 0x2a0002], speed: 2.6, up: 1.8, life: 1.6, size: 0.075, sizeEnd: 0.05, grav: 11, drag: 1.2, dir: (dx || dz) ? [dx, 0.5, dz] : null, spread: 1.4 });
+        this.emit({ x, y, z, n: Math.round(n * 0.25), color: [0x5a0005, 0x3a0003], speed: 0.4, life: 1.1, size: 0.35, sizeEnd: 0.6, grav: -0.2, drag: 2 });
+        this.emit({ x, y, z, n: Math.round(n * 0.3), color: [0xff2030, 0xc8101a], speed: 2, up: 1, life: 0.35, size: 0.05, grav: 6 });
     },
     shock(x, y, z, color, r0, r1, life = 0.5, op = 1) {
         const s = this.shocks.find(s => s.life <= 0) || this.shocks[0];
@@ -295,23 +309,30 @@ const AnimFX = {
 
     update(dt) {
         const E = Engine3D, now = E.t;
-        this.pMat.uniforms.uScale.value = E.renderer.domElement.height * 0.5 / Math.tan(E.camera.fov * Math.PI / 360);
+        this.P.mat.uniforms.uScale.value = this.G.mat.uniforms.uScale.value = E.renderer.domElement.height * 0.5 / Math.tan(E.camera.fov * Math.PI / 360);
         if (typeof player !== 'undefined') this.watch();
-        // Частицы
-        const P = this.P, N = this.MAXP;
-        for (let i = 0; i < N; i++) {
-            if (P.life[i] <= 0) { if (P.alpha[i] !== 0) { P.alpha[i] = 0; P.size[i] = 0; } continue; }
-            P.life[i] -= dt; const k = Math.max(0, P.life[i] / P.max[i]), o = i * 3, dr = Math.max(0, 1 - P.drag[i] * dt);
-            P.vel[o] *= dr; P.vel[o + 1] = P.vel[o + 1] * dr - P.grav[i] * dt; P.vel[o + 2] *= dr;
-            if (P.pull[i * 4 + 3]) { const pk = P.pull[i * 4 + 3] * dt; P.vel[o] += (P.pull[i * 4] - P.pos[o]) * pk; P.vel[o + 1] += (P.pull[i * 4 + 1] - P.pos[o + 1]) * pk; P.vel[o + 2] += (P.pull[i * 4 + 2] - P.pos[o + 2]) * pk; }
-            P.pos[o] += P.vel[o] * dt; P.pos[o + 1] += P.vel[o + 1] * dt; P.pos[o + 2] += P.vel[o + 2] * dt;
-            const gy = World3D.hAt(P.pos[o], P.pos[o + 2]);
-            if (P.pos[o + 1] < gy + 0.02 && P.grav[i] > 0) { P.pos[o + 1] = gy + 0.02; P.vel[o + 1] *= -0.35; P.vel[o] *= 0.6; P.vel[o + 2] *= 0.6; }
-            P.alpha[i] = Math.min(1, k * 2.2) * (k > 0.92 ? (1 - k) * 12 : 1);
-            P.size[i] = P.s1[i] + (P.s0[i] - P.s1[i]) * k;
+        // Частицы (оба пула)
+        for (const P of [this.P, this.G]) {
+            const N = P.N;
+            for (let i = 0; i < N; i++) {
+                if (P.life[i] <= 0) { if (P.alpha[i] !== 0) { P.alpha[i] = 0; P.size[i] = 0; } continue; }
+                P.life[i] -= dt; const k = Math.max(0, P.life[i] / P.max[i]), o = i * 3, dr = Math.max(0, 1 - P.drag[i] * dt);
+                P.vel[o] *= dr; P.vel[o + 1] = P.vel[o + 1] * dr - P.grav[i] * dt; P.vel[o + 2] *= dr;
+                if (P.pull[i * 4 + 3]) { const pk = P.pull[i * 4 + 3] * dt; P.vel[o] += (P.pull[i * 4] - P.pos[o]) * pk; P.vel[o + 1] += (P.pull[i * 4 + 1] - P.pos[o + 1]) * pk; P.vel[o + 2] += (P.pull[i * 4 + 2] - P.pos[o + 2]) * pk; }
+                P.pos[o] += P.vel[o] * dt; P.pos[o + 1] += P.vel[o + 1] * dt; P.pos[o + 2] += P.vel[o + 2] * dt;
+                const gy = World3D.hAt(P.pos[o], P.pos[o + 2]);
+                if (P.pos[o + 1] < gy + 0.02 && P.grav[i] > 0) {
+                    P.pos[o + 1] = gy + 0.02;
+                    // Кровь не отскакивает — растекается каплей по земле
+                    if (P.stick[i]) { P.vel[o] = P.vel[o + 1] = P.vel[o + 2] = 0; P.grav[i] = 0; P.s1[i] = P.s0[i] * 1.6; }
+                    else { P.vel[o + 1] *= -0.35; P.vel[o] *= 0.6; P.vel[o + 2] *= 0.6; }
+                }
+                P.alpha[i] = Math.min(1, k * 2.2) * (k > 0.92 ? (1 - k) * 12 : 1);
+                P.size[i] = P.s1[i] + (P.s0[i] - P.s1[i]) * k;
+            }
+            const ga = P.points.geometry.attributes;
+            ga.position.needsUpdate = ga.aColor.needsUpdate = ga.aSize.needsUpdate = ga.aAlpha.needsUpdate = true;
         }
-        const ga = this.points.geometry.attributes;
-        ga.position.needsUpdate = ga.aColor.needsUpdate = ga.aSize.needsUpdate = ga.aAlpha.needsUpdate = true;
         // Волны
         for (const s of this.shocks) {
             if (s.life <= 0) { s.m.visible = false; continue; }

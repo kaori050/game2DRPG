@@ -6,7 +6,7 @@
     <title>Хроники Эльдории — 3D Action RPG (Warcraft 3 / Dark Fantasy)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=15">
+    <link rel="stylesheet" href="css/style.css?v=27">
 </head>
 <body class="relative select-none">
 
@@ -34,8 +34,9 @@
                 <div class="menu-subtitle">Наследие Древних</div>
                 <nav class="menu-buttons">
                     <button id="btnMenuResume" class="menu-btn hidden" onclick="resumeFromMenu()"><span>Вернуться в игру</span></button>
-                    <button class="menu-btn menu-btn-primary" onclick="setGameState('char_select')"><span>Играть</span></button>
+                    <button class="menu-btn menu-btn-primary" onclick="setGameState('class_select')"><span>Играть</span></button>
                     <button id="btnContinueGame" class="menu-btn hidden" onclick="continueSavedGameFromMenu()"><span>Продолжить сохранение</span></button>
+                    <button class="menu-btn" onclick="SaveIO.pickFile()"><span>Импорт сейва</span></button>
                     <button class="menu-btn" onclick="openSettingsModal()"><span>Настройки</span></button>
                     <button class="menu-btn" onclick="setGameState('exit')"><span>Выйти</span></button>
                 </nav>
@@ -44,11 +45,25 @@
         </section>
 
         <!-- ЭКРАН 2: ВЫБОР ГЕРОЯ -->
-        <section id="scrHeroes" class="menu-screen" aria-label="Выбор героя">
+        <!-- ЭКРАН 2: КЛАСС -->
+        <section id="scrClasses" class="menu-screen" aria-label="Выбор класса">
             <header class="menu-screen-head">
                 <button class="menu-back" onclick="setGameState('menu')">← Назад</button>
-                <h2>Выберите героя</h2>
-                <div class="menu-step">Шаг 1 из 2</div>
+                <h2>Выберите класс</h2>
+                <div class="menu-step">Шаг 1 из 3</div>
+            </header>
+            <div id="classGrid" class="class-grid"></div>
+            <footer class="hero-foot">
+                <div class="diff-summary">В каждом классе — три персонажа со своими характеристиками, чертой и стилем боя</div>
+                <button class="menu-btn menu-btn-primary" onclick="confirmClass()"><span>К персонажам</span></button>
+            </footer>
+        </section>
+
+        <section id="scrHeroes" class="menu-screen" aria-label="Выбор персонажа">
+            <header class="menu-screen-head">
+                <button class="menu-back" onclick="setGameState('class_select')">← К классам</button>
+                <h2 id="heroScreenTitle">Выберите персонажа</h2>
+                <div class="menu-step">Шаг 2 из 3</div>
             </header>
             <div class="hero-stage">
                 <button class="hero-arrow hero-arrow-left" onclick="heroSlide(-1)" aria-label="Предыдущий герой">‹</button>
@@ -57,16 +72,16 @@
             </div>
             <footer class="hero-foot">
                 <div id="heroDots" class="hero-dots"></div>
-                <button class="menu-btn menu-btn-primary hero-confirm" onclick="confirmHero()"><span>Выбрать героя</span></button>
+                <button class="menu-btn menu-btn-primary hero-confirm" onclick="confirmHero()"><span>Выбрать персонажа</span></button>
             </footer>
         </section>
 
         <!-- ЭКРАН 3: СЛОЖНОСТЬ -->
         <section id="scrDifficulty" class="menu-screen" aria-label="Выбор сложности">
             <header class="menu-screen-head">
-                <button class="menu-back" onclick="setGameState('char_select')">← К героям</button>
+                <button class="menu-back" onclick="setGameState('char_select')">← К персонажам</button>
                 <h2>Уровень сложности</h2>
-                <div class="menu-step">Шаг 2 из 2</div>
+                <div class="menu-step">Шаг 3 из 3</div>
             </header>
             <div id="diffGrid" class="diff-grid"></div>
             <footer class="hero-foot">
@@ -116,6 +131,21 @@
             <div class="settings-tabs">
                 <button id="tabGfx" class="on" onclick="setSettingsTab('gfx')">Графика</button>
                 <button id="tabControls" onclick="setSettingsTab('controls')">Управление <span id="controlsSchemeBadge" class="ctl-badge"></span></button>
+                <button id="tabSaves" onclick="setSettingsTab('saves')">Сохранения</button>
+            </div>
+            <div id="savesPane" class="hidden text-xs space-y-3">
+                <div class="save-card">
+                    <div><b>Экспорт сейва</b><span>Скачать прогресс файлом .json: позиция, уровень, навыки, инвентарь, золото, алмазы, квесты, открытые места и раскладка управления.</span></div>
+                    <button onclick="SaveIO.exportFile()" class="rpg-btn-gold px-4 py-2 rounded-lg text-xs font-bold">⬇ Экспорт</button>
+                </div>
+                <div class="save-card">
+                    <div><b>Импорт сейва</b><span>Выбрать файл с компьютера и продолжить с того же места — на любом устройстве. Текущий прогресс в этом браузере будет заменён.</span></div>
+                    <button onclick="SaveIO.pickFile()" class="rpg-btn px-4 py-2 rounded-lg text-xs font-bold">⬆ Импорт</button>
+                </div>
+                <div class="save-card">
+                    <div><b>Сохранить сейчас</b><span>Игра и так сохраняется каждые 20 секунд.</span></div>
+                    <button onclick="saveGame(true)" class="rpg-btn px-4 py-2 rounded-lg text-xs font-bold">💾 Сохранить</button>
+                </div>
             </div>
             <div id="controlsPane" class="hidden text-xs"></div>
 
@@ -800,15 +830,18 @@
 
     <!-- Three.js (WebGL) — обычный скрипт с CDN: без сборщиков и без CORS при открытии файла двойным кликом -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
-    <script src="js/engine3d/engine.js?v=15"></script>
-    <script src="js/engine3d/materials.js?v=15"></script>
-    <script src="js/engine3d/world.js?v=15"></script>
-    <script src="js/engine3d/models.js?v=15"></script>
-    <script src="js/engine3d/actors.js?v=15"></script>
-    <script src="js/engine3d/effects.js?v=15"></script>
-    <script src="js/engine3d/weather.js?v=15"></script>
-    <script src="js/engine3d/animfx.js?v=15"></script>
-    <script src="js/controls.js?v=15"></script>
-    <script src="js/game.js?v=15"></script>
+    <script src="js/engine3d/engine.js?v=27"></script>
+    <script src="js/engine3d/materials.js?v=27"></script>
+    <script src="js/engine3d/world.js?v=27"></script>
+    <script src="js/engine3d/models.js?v=27"></script>
+    <script src="js/engine3d/actors.js?v=27"></script>
+    <script src="js/engine3d/effects.js?v=27"></script>
+    <script src="js/engine3d/weather.js?v=27"></script>
+    <script src="js/engine3d/animfx.js?v=27"></script>
+    <script src="js/controls.js?v=27"></script>
+    <script src="js/characters.js?v=27"></script>
+    <script src="js/knight.js?v=27"></script>
+    <script src="js/hud.js?v=27"></script>
+    <script src="js/game.js?v=27"></script>
 </body>
 </html>

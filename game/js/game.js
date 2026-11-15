@@ -1389,7 +1389,7 @@ function updateDockHud(dt) {
     // Доступность навыков по мане
     const h = player.heroType;
     if (h !== 'invoker') {
-        const P = h === 'archer' ? 'Archer' : 'Saber', SK = h === 'archer' ? ARCHER_SKILLS : SABER_SKILLS;
+        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : 'Saber'), SK = heroSkillSet();
         ['q', 'w', 'e', 'r'].forEach(k => { const el = document.getElementById(`cd${P}${k.toUpperCase()}`); if (el && el.parentElement) el.parentElement.classList.toggle('no-mana', player.mp < SK[k].manaCost); });
     } else {
         [['cdSpellD', 0], ['cdSpellF', 1]].forEach(([id, slot]) => {
@@ -2422,6 +2422,7 @@ function updateGame(dt) {
     // Регенерация в безопасных зонах (Святилище или Королевство Камелот)
     const safeZ = playerZone();
     const inSanctuary = safeZ === 'sanctuary' || safeZ === 'camelot';
+    Knight.update(dt);
     player.hp = Math.min(player.maxHp, player.hp + (player.hpRegen + (inSanctuary ? 5 : 0)) * dt);
     player.mp = Math.min(player.maxMp, player.mp + (player.mpRegen + (inSanctuary ? 6 : 0)) * dt);
 
@@ -4186,22 +4187,10 @@ function renderGame() {
 // gameState: 'menu' | 'char_select' | 'difficulty' | 'playing' | 'exit'
 let gameState = 'menu';
 let gameStarted = false;
-const MENU_SCREENS = { menu: 'scrMenu', char_select: 'scrHeroes', difficulty: 'scrDifficulty', exit: 'scrExit' };
+const MENU_SCREENS = { menu: 'scrMenu', class_select: 'scrClasses', char_select: 'scrHeroes', difficulty: 'scrDifficulty', exit: 'scrExit' };
 
-const HERO_MENU = [
-    { key: 'saber', name: 'Сейбер', epithet: 'Король Рыцарей', role: 'Ближний бой • Танк', glow: '250,204,21',
-      lore: 'Владычица Форта Этельгард, вернувшаяся из Авалона. Её клинок раскалывает землю, а Луч Экскалибура выжигает путь сквозь армии тьмы.',
-      stats: [['Атака', 8], ['Защита', 9], ['Мобильность', 6], ['Сложность', 3]],
-      skills: [['Q', 'Разлом и Волна'], ['W', 'Рывок Праны'], ['E', 'Колоссальный Клинок'], ['R', 'Луч Экскалибура']] },
-    { key: 'invoker', name: 'Инвокер', epithet: 'Архимаг Карл', role: 'Маг • Комбинатор', glow: '168,85,247',
-      lore: 'Последний хранитель Руин Голдрона. Сплетает лёд Quas, молнию Wex и огонь Exort в 27 древних заклинаний — нужна лишь верная последовательность.',
-      stats: [['Атака', 9], ['Защита', 3], ['Мобильность', 5], ['Сложность', 9]],
-      skills: [['Q W E', 'Сферы стихий'], ['R', 'Invoke'], ['D F', 'Призванные чары']] },
-    { key: 'archer', name: 'Арчер', epithet: 'Страж Клинков', role: 'Стрелок • Мечник', glow: '239,68,68',
-      lore: 'Воин в алом плаще, разящий из чёрного лука. В ближнем бою призывает клинки Канто и Бакуя, а в час нужды — Бесконечный Арсенал.',
-      stats: [['Атака', 8], ['Защита', 4], ['Мобильность', 8], ['Сложность', 6]],
-      skills: [['Q', 'Ледяная стрела'], ['W', 'Залп'], ['E', 'Отскок'], ['D', 'Лук ↔ Клинки'], ['R', 'Бесконечный Арсенал']] }
-];
+// Персонажи выбранного класса (см. js/characters.js): заполняется на экране «Класс»
+let HERO_MENU = CHARACTERS.filter(h => h.cls === 'warrior');
 const DIFF_MENU = [
     { key: 'easy', name: 'Искатель приключений', icon: '🧭', glow: '52,211,153', desc: 'Для тех, кто пришёл за историей и исследованием. Монстры слабее, лагеря проходятся легко.' },
     { key: 'normal', name: 'Рыцарь', icon: '⚔️', glow: '212,162,76', desc: 'Задуманный баланс. Элита лагерей и Граф Дракула потребуют внимания и тактики.' },
@@ -4223,8 +4212,9 @@ function setGameState(st) {
         let hasSave = false; try { hasSave = !!localStorage.getItem(SAVE_KEY); } catch (e) {}
         document.getElementById('btnContinueGame').classList.toggle('hidden', !hasSave);
     }
+    if (st === 'class_select') { syncClassFromChar(); renderClassCards(); }
     if (st === 'char_select') {
-        const i = HERO_MENU.findIndex(h => h.key === gameSettings.selectedHero);
+        const i = HERO_MENU.findIndex(h => h.id === gameSettings.selectedChar);
         heroIdx = i >= 0 ? i : 0;
         renderHeroSlider();
     }
@@ -4264,6 +4254,7 @@ function renderHeroSlider() {
                     <div class="hero-name">${h.name}</div>
                     <div class="hero-epithet">${h.epithet}</div>
                     <p class="hero-lore">${h.lore}</p>
+                    <p class="hero-trait">✦ ${h.trait}</p>
                     <div class="hero-stats">${h.stats.map(([n, v]) => `<span>${n}</span><div class="hero-bar"><i data-w="${v * 10}"></i></div>`).join('')}</div>
                     <div class="hero-skills">${h.skills.map(([k, n]) => `<span><b>${k}</b>${n}</span>`).join('')}</div>
                 </div>
@@ -4273,7 +4264,8 @@ function renderHeroSlider() {
             card.addEventListener('mousemove', e => heroTilt(card, e));
             card.addEventListener('mouseleave', () => heroTilt(card, null));
         });
-        document.querySelector('.hero-stage').addEventListener('wheel', e => {
+        const stage = document.querySelector('.hero-stage');
+        if (!stage.dataset.wheel) stage.dataset.wheel = '1', stage.addEventListener('wheel', e => {
             e.preventDefault();
             const now = performance.now();
             if (now - (heroSlide.last || 0) < 450) return;
@@ -4297,12 +4289,12 @@ function layoutHeroCards() {
         card.querySelectorAll('.hero-bar i').forEach(b => { b.style.width = off === 0 ? b.dataset.w + '%' : '0'; });
     });
     document.querySelectorAll('#heroDots button').forEach((b, i) => b.classList.toggle('on', i === heroIdx));
-    selectMenuHero(HERO_MENU[heroIdx].key);
+    selectMenuHero(HERO_MENU[heroIdx].key, HERO_MENU[heroIdx].id);
 }
 function heroSlide(d) { heroIdx = (heroIdx + d + HERO_MENU.length) % HERO_MENU.length; layoutHeroCards(); }
 function heroGo(i) { heroIdx = i; layoutHeroCards(); }
 function heroCardClick(i) { if (i !== heroIdx) heroGo(i); }
-function confirmHero() { selectMenuHero(HERO_MENU[heroIdx].key); setGameState('difficulty'); }
+function confirmHero() { selectMenuHero(HERO_MENU[heroIdx].key, HERO_MENU[heroIdx].id); setGameState('difficulty'); }
 // Плавный 3D-наклон карточки и параллакс сплэш-арта за курсором
 function heroTilt(card, e) {
     if (!card.classList.contains('is-active')) return;
@@ -4369,7 +4361,7 @@ function pickDifficulty(key) {
     updateDiffSummary();
 }
 function updateDiffSummary() {
-    const h = HERO_MENU.find(x => x.key === gameSettings.selectedHero) || HERO_MENU[0];
+    const h = charById(gameSettings.selectedChar) || HERO_MENU.find(x => x.key === gameSettings.selectedHero) || HERO_MENU[0];
     const d = DIFF_MENU.find(x => x.key === gameSettings.difficulty) || DIFF_MENU[1];
     document.getElementById('diffSummary').textContent = `${h.name} • ${h.epithet} — сложность «${d.name}»`;
 }
@@ -4377,11 +4369,16 @@ function updateDiffSummary() {
 // Клавиши в меню: ←/→ — листать героев, Enter — подтвердить, Esc — назад
 function handleMenuKey(e) {
     if (!document.getElementById('modalSettings').classList.contains('hidden')) { if (e.code === 'Escape') closeSettingsModal(); return; }
-    if (gameState === 'char_select') {
+    if (gameState === 'class_select') {
+        if (e.code === 'ArrowLeft') pickClass((classIdx + CLASSES.length - 1) % CLASSES.length);
+        else if (e.code === 'ArrowRight') pickClass((classIdx + 1) % CLASSES.length);
+        else if (e.code === 'Enter') confirmClass();
+        else if (e.code === 'Escape') setGameState('menu');
+    } else if (gameState === 'char_select') {
         if (e.code === 'ArrowLeft') heroSlide(-1);
         else if (e.code === 'ArrowRight') heroSlide(1);
         else if (e.code === 'Enter') confirmHero();
-        else if (e.code === 'Escape') setGameState('menu');
+        else if (e.code === 'Escape') setGameState('class_select');
     } else if (gameState === 'difficulty') {
         const i = DIFF_MENU.findIndex(d => d.key === gameSettings.difficulty);
         if (e.code === 'ArrowLeft') pickDifficulty(DIFF_MENU[Math.max(0, i - 1)].key);
@@ -4390,7 +4387,7 @@ function handleMenuKey(e) {
         else if (e.code === 'Escape') setGameState('char_select');
     } else if (gameState === 'menu') {
         if (e.code === 'Escape' && gameStarted) resumeFromMenu();
-        else if (e.code === 'Enter') setGameState('char_select');
+        else if (e.code === 'Enter') setGameState('class_select');
     } else if (gameState === 'exit' && e.code === 'Escape') setGameState('menu');
 }
 
@@ -4533,7 +4530,7 @@ function buildMenuSilhouettes(W, H) {
 // ---------- сплэш-арты героев (анимированные) ----------
 function drawHeroSplash(cv, h, dt) {
     const g = cv.getContext('2d'), W = cv.width, H = cv.height;
-    const st = menuFx.heroFx[h.key] || (menuFx.heroFx[h.key] = { t: 0, p: [] });
+    const st = menuFx.heroFx[h.id || h.key] || (menuFx.heroFx[h.id || h.key] = { t: 0, p: [] });
     st.t += dt;
     const t = st.t, glow = h.glow, cx = W * 0.68, cy = H * 0.52;
     // Фон: цветная мгла, лучи света
@@ -4571,7 +4568,7 @@ function drawHeroSplash(cv, h, dt) {
         }
     }
     // Герой крупным планом
-    const spr = h.key === 'saber' ? saberSpriteCanvas : (h.key === 'archer' ? archerSpriteCanvas : invokerSpriteCanvas);
+    const spr = h.key === 'knight' ? (saberAlterSpriteCanvas || (saberAlterSpriteCanvas = buildSaberAlterSprite())) : h.key === 'saber' ? saberSpriteCanvas : (h.key === 'archer' ? archerSpriteCanvas : invokerSpriteCanvas);
     // Чёткий пиксель-арт (целочисленный масштаб) + мягкое свечение-контур
     const bob = Math.round(Math.sin(t * 1.6) * 6);
     if (spr) {
@@ -4579,8 +4576,10 @@ function drawHeroSplash(cv, h, dt) {
         const sx = Math.round(cx - S / 2), sy = Math.round(cy - SH * 0.58 + bob);
         g.save(); g.imageSmoothingEnabled = false;
         g.shadowColor = `rgba(${glow},0.75)`; g.shadowBlur = 22;
+        if (h.filter) g.filter = h.filter;   // облик персонажа внутри класса
         g.drawImage(spr, sx, sy, S, SH);
         g.shadowBlur = 0; g.drawImage(spr, sx, sy, S, SH);
+        g.filter = 'none';
         g.restore();
     }
     // Оружие и магия
@@ -4689,10 +4688,12 @@ function openSettingsModal() {
 // Вкладки настроек: «Графика» и «Управление»
 function setSettingsTab(t) {
     const ctl = t === 'controls';
-    document.getElementById('gfxPane').classList.toggle('hidden', ctl);
+    document.getElementById('gfxPane').classList.toggle('hidden', t !== 'gfx');
     document.getElementById('controlsPane').classList.toggle('hidden', !ctl);
-    document.getElementById('tabGfx').classList.toggle('on', !ctl);
+    document.getElementById('savesPane').classList.toggle('hidden', t !== 'saves');
+    document.getElementById('tabGfx').classList.toggle('on', t === 'gfx');
     document.getElementById('tabControls').classList.toggle('on', ctl);
+    document.getElementById('tabSaves').classList.toggle('on', t === 'saves');
     document.getElementById('settingsBox').classList.toggle('max-w-2xl', ctl);
     document.getElementById('settingsBox').classList.toggle('max-w-lg', !ctl);
     if (ctl) Controls.renderUI();
@@ -4759,12 +4760,16 @@ function updateHudUI() {
     document.getElementById('txtHp').textContent = `HP ${Math.ceil(player.hp)}/${player.maxHp}`;
     document.getElementById('vitalHp').title = `Здоровье: ${Math.ceil(player.hp)} / ${player.maxHp}, восстановление +${player.hpRegen}/с`;
 
-    document.getElementById('barMp').style.width = `${(player.mp / player.maxMp) * 100}%`;
+    if (player.heroType === 'knight') {
+        // Нет маны: на её месте — прочность кровавого щита
+        const sh = player.bloodShield || 0;
+        document.getElementById('barMp').style.width = `${sh > 0 ? sh / Math.max(1, player.bloodShieldMax) * 100 : 0}%`;
+    } else document.getElementById('barMp').style.width = `${(player.mp / Math.max(1, player.maxMp)) * 100}%`;
     const stMax = maxStamina(), st = player.stamina ?? stMax;
     document.getElementById('barSta').style.width = `${(st / stMax) * 100}%`;
     document.getElementById('barSta').style.filter = player.exhausted ? 'grayscale(1) brightness(0.7)' : 'none';
     document.getElementById('txtSta').textContent = `ST ${Math.ceil(st)}/${stMax}`;
-    document.getElementById('txtMp').textContent = `MP ${Math.ceil(player.mp)}/${player.maxMp}`;
+    document.getElementById('txtMp').textContent = player.heroType === 'knight' ? (player.bloodShield > 0 ? `ЩИТ ${Math.ceil(player.bloodShield)}` : 'НЕТ МАНЫ • ЦЕНА — КРОВЬ') : `MP ${Math.ceil(player.mp)}/${player.maxMp}`;
     document.getElementById('vitalMp').title = `Мана: ${Math.ceil(player.mp)} / ${player.maxMp}, восстановление +${player.mpRegen}/с`;
 
     document.getElementById('barXp').style.width = `${(player.xp / player.xpNext) * 100}%`;
@@ -4772,7 +4777,8 @@ function updateHudUI() {
     document.getElementById('hudOrbBuffs').textContent = heroStatLine();
 
     if (player.heroType !== 'invoker') {
-        const cdP = player.heroType === 'archer' ? 'cdArcher' : 'cdSaber';
+        const cdP = player.heroType === 'archer' ? 'cdArcher' : (player.heroType === 'knight' ? 'cdKnight' : 'cdSaber');
+        if (player.heroType === 'knight') { updateCooldownBadge('cdKnightD', player.saberCooldowns.d || 0); Knight.refreshBar(); }
         updateCooldownBadge(cdP + 'Q', player.saberCooldowns.q || 0);
         updateCooldownBadge(cdP + 'W', player.saberCooldowns.w || 0);
         updateCooldownBadge(cdP + 'E', player.saberCooldowns.e || 0);
@@ -4820,15 +4826,15 @@ function renderSpellbookModal() {
     document.getElementById('spellbookFilterTabs').classList.toggle('hidden', isSaber);
 
     if (isSaber) {
-        document.getElementById('spellbookTitle').textContent = isArcherBook
+        document.getElementById('spellbookTitle').textContent = player.heroType === 'knight' ? '🩸 Кодекс Павшего Рыцаря: Магия Крови' : isArcherBook
             ? '🏹 Кодекс Следопыта: Способности Арчер (кастомки Warcraft 3)'
             : '⚔️ Кодекс Короля Рыцарей: Способности Сейбер (Fate / Warcraft 3)';
-        document.getElementById('spellbookSubtitle').textContent = isArcherBook
+        document.getElementById('spellbookSubtitle').textContent = player.heroType === 'knight' ? 'Маны нет: каждый навык платит процентом ТЕКУЩЕГО здоровья и никогда не убивает. Чем сильнее ранен — тем быстрее регенерация. Меч — трофей с убитого мечника, он ломается; без него рыцарь рвёт врагов когтями.' : isArcherBook
             ? 'Стрелы летят по баллистической дуге. Издалека урон выше (до +30%), ближе 90px — ниже на 25%. Крит зависит от уровня и ультимейта.'
             : 'Все навыки Сейбер — ближний бой. Они усиливаются от очков мастерства и экипировки Камелота.';
 
-        Object.values(isArcherBook ? ARCHER_SKILLS : SABER_SKILLS).forEach(sk => {
-            const lvl = getEffOrbLevel(sk.key);
+        Object.values(heroSkillSet()).forEach(sk => {
+            const lvl = getEffOrbLevel(sk.key) || player.level;
             const card = document.createElement('div');
             card.className = 'bg-slate-900/95 border border-sky-700/80 hover:border-amber-400 rounded-xl p-4 flex flex-col justify-between gap-2 transition';
             card.innerHTML = `
@@ -4842,7 +4848,7 @@ function renderSpellbookModal() {
                             </div>
                         </div>
                         <div class="text-right text-xs">
-                            <div class="text-cyan-300 font-bold">💧 ${sk.manaCost} MP</div>
+                            <div class="text-cyan-300 font-bold">${player.heroType === 'knight' ? (sk.hpPct ? '🩸 ' + sk.hpPct + '% тек. HP' : '🩸 без цены') : '💧 ' + sk.manaCost + ' MP'}</div>
                             <div class="text-amber-300 font-bold">⏱️ Баз. КД: ${sk.baseCd}с</div>
                         </div>
                     </div>
@@ -4960,6 +4966,7 @@ function useQuickPotion(kind) {
             spawnFloatingText(player.x, player.y - 20, `+${ITEMS_DB.hp_pot.healHp} HP`, '#4ade80');
         } else showToast('Нет Флаконов Жизни!', 'error');
     } else {
+        if (player.heroType === 'knight') { showToast('Павшему Рыцарю мана не нужна — его сила в крови', 'error'); return; }
         if (player.mp >= player.maxMp) { showToast('Мана уже полная!', 'info'); return; }
         if (removeItemFromInventory('mp_pot', 1)) {
             player.mp = Math.min(player.maxMp, player.mp + ITEMS_DB.mp_pot.healMp);
@@ -5438,13 +5445,9 @@ function showToast(msg, kind = 'info') {
         gold: 'border-amber-400 text-amber-300',
         error: 'border-rose-500 text-rose-300'
     };
-    el.className = `rpg-panel px-4 py-1.5 rounded-full text-xs font-bold border ${colors[kind] || colors.info} shadow-lg transition-opacity duration-300`;
+    el.className = `rpg-panel toast-msg toast-${kind} px-4 py-1.5 rounded-full text-xs font-bold border ${colors[kind] || colors.info} shadow-lg`;
     el.textContent = msg;
-    container.appendChild(el);
-    setTimeout(() => {
-        el.style.opacity = '0';
-        setTimeout(() => el.remove(), 300);
-    }, 2600);
+    ToastQueue.push(el);   // не больше 3 сообщений: самое старое плавно растворяется
 }
 
 const SAVE_KEY = 'eldoria_chronicles_save_v3';
@@ -6263,7 +6266,9 @@ const HERO_DEFS = {
     saber:   { title: 'Сейбер • Король Артур', short: 'Сейбер', home: { x: 57.5, y: 15.5 }, equip: { weapon: 'knight_sword', armor: 'camelot_mail', ring: null },
                hello: '🏰 Сейбер прибыла в Королевство Камелот!' },
     archer:  { title: 'Арчер • Страж Клинков', short: 'Арчер', home: { x: 14, y: 18.5 }, equip: { weapon: 'hunter_bow', armor: 'ranger_leather', ring: null },
-               hello: '🏹 Арчер явился в Руины Святилища. Trace on.' }
+               hello: '🏹 Арчер явился в Руины Святилища. Trace on.' },
+    knight:  { title: 'Павший Рыцарь • Магия Крови', short: 'Рыцарь', home: { x: 57.5, y: 17 }, equip: { weapon: null, armor: null, ring: null },
+               hello: '🩸 Павший Рыцарь поднялся из пепла. Клинок он заберёт у первого же мечника.' }
 };
 const heroDef = () => HERO_DEFS[player.heroType] || HERO_DEFS.invoker;
 const diffCfg = () => DIFFICULTY_CONFIG[gameSettings.difficulty] || DIFFICULTY_CONFIG.normal;
@@ -6273,11 +6278,14 @@ const armorMult = a => 1 / (1 + 0.06 * Math.max(0, a));
 function heroDisplayName() {
     if (player.heroType === 'invoker' && player.orbLevels.r >= 4) return '👑 Карл • Золотой Инвокер';
     if (player.heroType === 'saber' && player.saberAlter) return '🖤 Сейбер Альтер • Тёмный Король';
+    const c = playerChar();
+    if (c && c.id !== c.key) return `${c.name} • ${c.epithet}`;
     return heroDef().title;
 }
 function heroStatLine() {
     if (player.heroType === 'invoker') return `Мощь: +${player.spellAmp}% | Скор: ${player.moveSpeed} | Сниж.КД: ${player.cdrPct}%`;
     if (player.heroType === 'archer') return `Атака: ${player.handDmg} | Крит: ${player.critChance}% | Дальность: ${player.attackRange}`;
+    if (player.heroType === 'knight') return `Атака: ${player.handDmg} | Реген: ${player.hpRegen}/с | ${player.knightSword ? 'Меч ' + player.knightSword.dur + '/' + player.knightSword.max : 'Когти'}`;
     return `Атака: ${player.handDmg} | Броня: ${player.armor} | Скор: ${player.moveSpeed}`;
 }
 
@@ -6332,6 +6340,8 @@ function recalcPlayerStats() {
             player.handDmg = Math.round(player.handDmg * ARCHER_STANCE.bladeDmgMult);
             player.armor += 3;
         }
+    } else if (player.heroType === 'knight') {
+        Knight.stats(L, q, w, e, r, eq);
     } else {
         // Инвокер: чистый кастер. Автоатак и физического урона нет — весь урон только от заклинаний.
         const activeQ = player.activeOrbs.filter(o => o === 'q').length;
@@ -6353,6 +6363,8 @@ function recalcPlayerStats() {
         player.critChance = 0;
         player.critMult = 1;
     }
+    // Черта персонажа внутри класса
+    applyCharacterMods();
     // Пассивка оружия молитвы
     const wpv = weaponPassive();
     if (wpv) {
@@ -6393,7 +6405,7 @@ function levelUpOrb(orbKey) {
     updateHeroPortraitHUD();
 
     if (player.heroType !== 'invoker') {
-        const sk = (player.heroType === 'archer' ? ARCHER_SKILLS : SABER_SKILLS)[orbKey];
+        const sk = heroSkillSet()[orbKey];
         showToast(`Прокачан навык: ${sk.name} (${orbKey.toUpperCase()}) — Уровень ${player.orbLevels[orbKey]}!`, 'gold');
     } else {
         const names = { q: 'Quas (Лёд)', w: 'Wex (Шторм)', e: 'Exort (Огонь)', r: 'Invoke (Призыв)' };
@@ -6424,26 +6436,45 @@ function performMageBasicAttack() {
         return;
     }
     if (player.basicAttackCd > 0) return;
-    if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
+    if (player.heroType === 'knight') Knight.attack(); else if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
 }
 
+// Цепочка автоатак: 1 → 2 → 3 → 4 → снова 1 (сбрасывается, если пауза между ударами дольше 1.3 с)
+function nextComboStep() {
+    player.comboStep = (player.comboTimer > 0 ? ((player.comboStep || 0) % 4) : 0) + 1;
+    player.comboTimer = 1.3;
+    return player.comboStep;
+}
+// Удары Сейбер: выпад, перекрёстный разрез, удар с разворота (по кругу), сокрушительный финишер
+const SABER_COMBO = [
+    null,
+    { reach: 96, arc: 0.55, mult: 1.0, cd: 0.85, anim: 0.2, color: '#bae6fd' },
+    { reach: 82, arc: 1.3, mult: 1.1, cd: 0.95, anim: 0.24, color: '#38bdf8' },
+    { reach: 90, arc: Math.PI, mult: 1.3, cd: 1.1, anim: 0.3, color: '#7dd3fc', spin: true },
+    { reach: 108, arc: 0.95, mult: 1.8, cd: 1.5, anim: 0.36, color: '#e0f2fe', finisher: true }
+];
 function saberBasicAttack() {
     const aval = player.avalonBuffTimer > 0;
-    player.basicAttackCd = player.attackInterval;
-    player.slashAnimTime = 0.24;
+    const step = nextComboStep(), C = SABER_COMBO[step];
+    player.basicAttackCd = player.attackInterval * C.cd;
+    player.slashAnimTime = C.anim;
     SoundFX.play('bolt');
     const ang = player.facingAngle;
-    const reach = aval ? SABER_GIANT.reach : 80;
-    const halfArc = aval ? SABER_GIANT.halfArc : 1.15;
+    const reach = (aval ? SABER_GIANT.reach : C.reach) * (aval && C.finisher ? 1.15 : 1);
+    const halfArc = aval ? Math.max(SABER_GIANT.halfArc, C.arc) : C.arc;
+    const col = player.saberAlter ? '#ef4444' : (aval ? '#fde047' : C.color);
     if (aval) triggerScreenShake(2);
-    activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang, radius: reach, color: aval ? '#fde047' : '#38bdf8', life: 0.18, maxLife: 0.18 });
+    if (C.finisher) { triggerScreenShake(5); addGroundDecal(player.x + Math.cos(ang) * 60, player.y + Math.sin(ang) * 60, 46, 'scorch'); }
+    activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang, radius: reach, color: col, life: 0.18, maxLife: 0.18 });
+    if (C.spin) activeZones.push({ type: 'saber_slash_fx', x: player.x, y: player.y, ang: ang + Math.PI, radius: reach, color: col, life: 0.22, maxLife: 0.22 });
+    const knock = C.finisher ? 42 : 18;
     enemies.forEach(en => {
         if (en.deadTimer > 0) return;
         const d = Math.hypot(en.x - player.x, en.y - player.y);
         if (d > reach + en.radius) return;
         if (d > 30 && Math.abs(angDiff(Math.atan2(en.y - player.y, en.x - player.x), ang)) > halfArc) return;
         const crit = Math.random() * 100 < player.critChance;
-        damageEnemy(en, Math.round(player.handDmg * (crit ? player.critMult : 1)), false, Math.cos(ang) * 18, Math.sin(ang) * 18, aval ? '#fde047' : '#e2e8f0', { crit });
+        damageEnemy(en, Math.round(player.handDmg * C.mult * (crit ? player.critMult : 1)), false, Math.cos(ang) * knock, Math.sin(ang) * knock, aval ? '#fde047' : '#e2e8f0', { crit });
     });
 }
 
@@ -6480,8 +6511,20 @@ function archerBasicAttack() {
     player.facingAngle = ang;
     // Зона поражения: стрела приземляется в точке прицеливания (в пределах дальности лука)
     const range = Math.min(player.attackRange * 1.05, Math.max(110, Math.hypot(ax - player.x, ay - player.y) + 6));
-    const shot = rollArcherShot(1, 0);
-    fireArrow({ ang, range, dmg: shot.dmg, crit: shot.crit });
+    const step = nextComboStep();
+    if (step === 3) {
+        // Двойной выстрел веером
+        player.castAnimTime = 0.22;
+        [-0.07, 0.07].forEach(da => { const sh = rollArcherShot(0.75, 0); fireArrow({ ang: ang + da, range, dmg: sh.dmg, crit: sh.crit }); });
+    } else if (step === 4) {
+        // Мощный выстрел: прямой, быстрый, пробивает насквозь
+        player.castAnimTime = 0.3; player.basicAttackCd = player.attackInterval * 1.4;
+        const sh = rollArcherShot(1.7, 0); triggerScreenShake(3);
+        fireArrow({ ang, range: player.attackRange * 1.1, dmg: sh.dmg, crit: sh.crit, flat: true, speed: ARCHER_BALANCE.arrowSpeed * 1.35, pierce: true, color: '#fecaca' });
+    } else {
+        const shot = rollArcherShot(1, 0);
+        fireArrow({ ang, range, dmg: shot.dmg, crit: shot.crit });
+    }
 }
 
 // ---------- Арчер: стойки и клинки ----------
@@ -6503,12 +6546,13 @@ function toggleArcherStance() {
 
 function archerBladeAttack() {
     // Комбо из трёх ударов: правый, левый, перекрёстный вихрь с рывком
-    player.bladeComboStep = (player.bladeComboTimer > 0 ? (player.bladeComboStep % 3) : 0) + 1;
+    player.bladeComboStep = (player.bladeComboTimer > 0 ? (player.bladeComboStep % 4) : 0) + 1;
     player.bladeComboTimer = 1.0;
     const step = player.bladeComboStep;
-    player.basicAttackCd = player.attackInterval * (step === 3 ? 1.6 : 1);
+    player.basicAttackCd = player.attackInterval * (step === 4 ? 1.6 : (step === 3 ? 1.2 : 1));
     player.bladeSide = step === 1 ? 1 : -1;
     player.bladeSwing = 1;
+    player.slashAnimTime = step === 4 ? 0.3 : 0.22; // запуск анимации удара в 3D
     SoundFX.play('bolt');
     let ax = mouseWorldX, ay = mouseWorldY;
     const tgt = player.attackTarget;
@@ -6516,7 +6560,8 @@ function archerBladeAttack() {
     const ang = Math.atan2(ay - player.y, ax - player.x);
     player.facingAngle = ang;
     let reach = 84, halfArc = 1.2, mult = 1;
-    if (step === 3) {
+    if (step === 3) { reach = 90; halfArc = 1.4; mult = 1.35; } // перекрёстный удар обоими клинками
+    if (step === 4) {
         // Акробатический рывок вперёд и круговой удар обоими клинками
         for (let s2 = 0; s2 < 5; s2++) tryMoveEntity(player, Math.cos(ang) * 9, Math.sin(ang) * 9);
         player.leapAnim = 0.25;
@@ -6573,6 +6618,7 @@ function updateArcherState(dt) {
     if (player.stanceCd > 0) player.stanceCd -= dt;
     if (player.bladeSwing > 0) player.bladeSwing = Math.max(0, player.bladeSwing - dt * 5);
     if (player.bladeComboTimer > 0) player.bladeComboTimer -= dt;
+    if (player.comboTimer > 0) player.comboTimer -= dt;
     if (player.ubwSky > 0) player.ubwSky -= dt;
     // Подбор воткнувшихся клинков
     for (let i = playerFx.length - 1; i >= 0; i--) {
@@ -6597,8 +6643,11 @@ function updateArcherState(dt) {
 function castHeroSkill(key) {
     if (player.heroType === 'saber') castSaberSkillImpl(key);
     else if (player.heroType === 'archer') castArcherSkill(key);
+    else if (player.heroType === 'knight') Knight.cast(key);
 }
-function castSaberSkill(key) { castHeroSkill(key); } // совместимость со старыми кнопками панели
+function castSaberSkill(key) { castHeroSkill(key); }
+// Набор навыков текущего героя (для Кодекса, панели и прокачки)
+function heroSkillSet() { return player.heroType === 'archer' ? ARCHER_SKILLS : (player.heroType === 'knight' ? KNIGHT_SKILLS : SABER_SKILLS); } // совместимость со старыми кнопками панели
 
 function beginSkill(skill, key, deferCd) {
     if (player.controlLock) return 0;
@@ -7586,6 +7635,7 @@ function damageEnemy(en, dmg, isSpell, knockX = 0, knockY = 0, customColor = nul
 
 function killEnemy(en) {
     en.hp = 0;
+    Knight.onKill(en);
     en.deadTimer = en.tpl.respawn || (en.isBoss ? 90 : 22);
     if (en.camp) en.deadTimer = 1e9; // бойцы лагеря возвращаются только все вместе (resetCamp)
     en.state = 'chase';
@@ -7667,7 +7717,9 @@ function damagePlayer(rawDmg, kind = 'phys') {
     const arm = player.armor * (kind === 'magic' ? 0.4 : 1);
     let mult = armorMult(arm);
     if (player.ultCast) mult *= SABER_ULT.castDamageTaken;
-    const mitigated = Math.max(1, Math.round(rawDmg * mult));
+    if (player.heroType === 'knight' && Knight.inLake()) mult *= 0.75;   // в озере крови рыцарь получает меньше урона
+    let mitigated = Math.max(1, Math.round(rawDmg * mult));
+    if (player.heroType === 'knight') { mitigated = Knight.absorb(mitigated); if (mitigated <= 0) { player.invulnTime = 0.3; spawnFloatingText(player.x, player.y - 24, 'щит', '#fca5a5'); return; } }
     player.hp -= mitigated;
     player.invulnTime = 0.3;
     SoundFX.play('hit');
@@ -7676,6 +7728,7 @@ function damagePlayer(rawDmg, kind = 'phys') {
 
     if (player.hp <= 0) {
         player.ultCast = null;
+        player.knightRend = null; player.bloodLake = null; player.bloodShield = 0; player.knightBleed = 0; player.controlLock = false;
         player.excaliburChargeTime = 0;
         player.avalonBuffTimer = 0; player.saberHasteTimer = 0; player.alacrityTimer = 0; player.ghostWalkTimer = 0; player.lightningShieldTimer = 0;
         recalcPlayerStats();
@@ -8128,6 +8181,7 @@ function onPlayerProjectileHit(p, en) {
         spawnParticleBurst(en.x, en.y, '#7dd3fc', 8);
         return false; // волна проходит насквозь
     }
+    if (p.kind === 'arrow' && p.pierce) { spawnParticleBurst(en.x, en.y, '#fecaca', 10); return false; } // мощный выстрел (4-й в комбо) пробивает насквозь
     if (p.kind === 'ubw_blade') {
         // Пробивающий бросок: оглушение, отбрасывание, летит дальше сквозь врагов
         en.stunTimer = Math.max(en.stunTimer, en === p.homing ? 1.0 : 0.4);
@@ -8244,7 +8298,7 @@ function preUpdate25(dt) {
         if (zt.t >= zt.dur) zoneTransition = null;
     }
     updateSaberUlt(dt);
-    player.controlLock = !!(zoneTransition || player.ultCast);
+    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend);
 
     if (player.heroType === 'invoker' && player.attackTarget) {
         // Инвокер не умеет атаковать с руки: ПКМ по врагу лишь разворачивает мага к цели
@@ -8505,6 +8559,8 @@ function updateInvokerBarUI() {
     show('invokerTopPill', h === 'invoker'); show('invokerActionBar', h === 'invoker');
     show('saberTopPill', h === 'saber'); show('saberActionBar', h === 'saber');
     show('archerTopPill', h === 'archer'); show('archerActionBar', h === 'archer');
+    Knight.buildBar(); show('knightTopPill', h === 'knight'); show('knightActionBar', h === 'knight');
+    if (h === 'knight') Knight.refreshBar();
     document.getElementById('btnGrimoireLabel').textContent = h === 'invoker' ? 'Гримуар 27 (B)' : 'Кодекс (B)';
 
     const hasPts = player.skillPoints > 0;
@@ -8512,7 +8568,7 @@ function updateInvokerBarUI() {
     document.getElementById('hudSkillPoints').textContent = player.skillPoints;
 
     if (h !== 'invoker') {
-        const P = h === 'archer' ? 'Archer' : 'Saber';
+        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : 'Saber');
         [['Q', 'q', 7, 'active-q'], ['W', 'w', 7, 'active-w'], ['E', 'e', 7, 'active-e'], ['R', 'r', 4, 'active-r']].forEach(([K, k, max, cls]) => {
             const btn = document.getElementById(`btn${P}Lvl${K}`);
             if (btn) btn.classList.toggle('hidden', !(hasPts && player.orbLevels[k] < max));
@@ -8560,8 +8616,9 @@ function syncCharModalLabels() {
     });
 }
 
-function selectMenuHero(heroKey) {
+function selectMenuHero(heroKey, charId) {
     gameSettings.selectedHero = heroKey;
+    gameSettings.selectedChar = charId || heroKey;
     [['cardHeroInvoker', 'invoker'], ['cardHeroSaber', 'saber'], ['cardHeroArcher', 'archer']].forEach(([id, k]) => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('hero-card-selected', heroKey === k);
@@ -8571,6 +8628,7 @@ function selectMenuHero(heroKey) {
 
 function startNewGameFromMenu() {
     player.heroType = gameSettings.selectedHero;
+    player.charId = (charById(gameSettings.selectedChar) || {}).key === player.heroType ? gameSettings.selectedChar : player.heroType;
     const def = heroDef();
     Object.assign(player, {
         level: 1, xp: 0, xpNext: 100, gold: 100, skillPoints: 3,
@@ -8580,7 +8638,7 @@ function startNewGameFromMenu() {
         invokeCd: 0, basicAttackCd: 0,
         poiFound: {}, cachesOpened: {}, puzzlesSolved: {}, explored: '', lastWaypoint: null, stamina: 100, exhausted: false, shrineBuff: null,
         diamonds: 1600, gacha: null, refine: {}, saberAlter: false, shadowDuel: null,
-        archerStance: 'bow', ubwCharges: 0, bladeComboStep: 0, bladeSwing: 0, ubwSky: 0,
+        archerStance: 'bow', ubwCharges: 0, comboStep: 0, comboTimer: 0, knightSword: null, knightBleed: 0, bloodShield: 0, bloodShieldMax: 0, bloodShieldT: 0, bloodLake: null, knightRend: null, knightAnim: null, bladeComboStep: 0, bladeSwing: 0, ubwSky: 0,
         moveTargetX: null, moveTargetY: null, attackTarget: null, interactTargetGoal: null,
         questStage: 0, questKills: 0, bossKilled: false, draculaKilled: false, hellLordKilled: false,
         portalAnim: 0, checkpointZone: null, ultCast: null, runeFx: null, controlLock: false,
@@ -8607,7 +8665,7 @@ function startNewGameFromMenu() {
 function saveGame(manual = false) {
     try {
         const data = {
-            heroType: player.heroType, difficulty: gameSettings.difficulty,
+            heroType: player.heroType, charId: player.charId || player.heroType, difficulty: gameSettings.difficulty,
             x: player.x, y: player.y,
             level: player.level, xp: player.xp, xpNext: player.xpNext,
             gold: player.gold, skillPoints: player.skillPoints,
@@ -8619,6 +8677,7 @@ function saveGame(manual = false) {
             checkpointZone: player.checkpointZone || null, mapVer: 4,
             poiFound: player.poiFound || {}, cachesOpened: player.cachesOpened || {}, puzzlesSolved: player.puzzlesSolved || {},
             explored: exploredString(), lastWaypoint: player.lastWaypoint || null,
+            knightSword: player.knightSword || null,
             diamonds: player.diamonds || 0, gacha: gachaState(), refine: player.refine || {}, saberAlter: !!player.saberAlter,
             worldTimeHours
         };
@@ -8652,6 +8711,8 @@ function loadGame() {
         if (diff && DIFFICULTY_CONFIG[diff] && diff !== gameSettings.difficulty) { selectDifficulty(diff); populateWorldEntities(); }
         player.portalAnim = player.draculaKilled ? 1 : 0;
         gameSettings.selectedHero = player.heroType;
+        if (!player.charId || (charById(player.charId) || {}).key !== player.heroType) player.charId = player.heroType;
+        gameSettings.selectedChar = player.charId;
         recalcPlayerStats();
         updateHudPotions();
         updateInvokerBarUI();
@@ -8949,6 +9010,7 @@ function buildArcherSprite() {
 }
 
 function heroSpriteCanvas() {
+    if (player.heroType === 'knight') return saberAlterSpriteCanvas || (saberAlterSpriteCanvas = buildSaberAlterSprite());
     if (player.heroType === 'saber') return player.saberAlter && saberAlterSpriteCanvas ? saberAlterSpriteCanvas : saberSpriteCanvas;
     if (player.heroType === 'archer') return archerSpriteCanvas;
     return player.orbLevels?.r >= 4 ? goldenInvokerSpriteCanvas : invokerSpriteCanvas;
@@ -8959,7 +9021,7 @@ function updateHeroPortraitHUD() {
     if (!pCanvas) return;
     const pCtx = pCanvas.getContext('2d');
     pCtx.clearRect(0, 0, 64, 64);
-    const cols = { saber: ['#1e40af', '#090d16'], archer: ['#166534', '#07130b'], invoker: player.orbLevels?.r >= 4 ? ['#b45309', '#1c1917'] : ['#3b0764', '#090a0f'] }[player.heroType] || ['#3b0764', '#090a0f'];
+    const cols = { knight: ['#7f1d1d', '#0a0204'], saber: ['#1e40af', '#090d16'], archer: ['#166534', '#07130b'], invoker: player.orbLevels?.r >= 4 ? ['#b45309', '#1c1917'] : ['#3b0764', '#090a0f'] }[player.heroType] || ['#3b0764', '#090a0f'];
     const bg = pCtx.createRadialGradient(32, 32, 4, 32, 32, 32);
     bg.addColorStop(0, cols[0]); bg.addColorStop(1, cols[1]);
     pCtx.fillStyle = bg;
@@ -10005,7 +10067,7 @@ function drawArcherBlades(c, now) {
     const side = player.bladeSide || 1;
     c.save(); c.rotate(player.facingAngle);
     [[1, true], [-1, false]].forEach(([sg, white]) => {
-        const active = sw > 0 && (player.bladeComboStep === 3 || sg === side);
+        const active = sw > 0 && (player.bladeComboStep >= 3 || sg === side);
         const swing = active ? (1 - sw) : 0;
         const base = sg * (0.9 - swing * 1.9);
         c.save(); c.translate(4, sg * 10); c.rotate(base);
@@ -10661,6 +10723,7 @@ window.onload = function () {
     Controls.init();
     initGfx();
     Controls.refreshHints();
+    SoulsHUD.init();
     try { if (localStorage.getItem('eldoria_admin') === '1') toggleAdminMode(); } catch (e) {}
     setGameState('menu');
 

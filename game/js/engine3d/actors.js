@@ -46,7 +46,7 @@ const Actors3D = {
                 const geo = this.mergeGeos(parts); parts.forEach(g => g.dispose()); geos.push(geo);
                 const mt = mat.clone();
                 if (mt.emissive) { mt.userData.e0 = mt.emissive.clone(); mt.userData.i0 = mt.emissiveIntensity; }
-                G3.rimify(mt); mats.push(mt);
+                G3.rimify(mt); if (bone === rig.cape) G3.capeify(mt); mats.push(mt);
                 const mesh = new THREE.Mesh(geo, mt); mesh.castShadow = true; mesh.receiveShadow = true; bone.add(mesh);
                 if (outline && !mat.transparent && mat.side !== THREE.DoubleSide) outl.push(geo);
             }
@@ -114,11 +114,84 @@ const Actors3D = {
         } else if (style === 'craft') { // два удара «молотом» по наковальне
             const q = (p * 2) % 1, c = this.swingCurve(q, 0.4, 0.6);
             T.a1x = c.r > 0 ? L(0.4, -0.3, c.r) : (c.s > 0 ? L(-2.6, 0.4, c.s) : L(-0.3, -2.6, c.w)); T.bx = 0.2 * c.s * (1 - c.r); T.a0x = -0.8;
+        } else if (style === 'thrust') { // 1: быстрый выпад остриём вперёд
+            const c = this.swingCurve(p, 0.3, 0.5);
+            T.a1x = c.r > 0 ? L(-1.6, 0, c.r) : (c.s > 0 ? L(0.5, -1.6, c.s) : L(0, 0.5, c.w)); T.a1z = 0;
+            T.by = c.r > 0 ? L(-0.35, 0, c.r) : (c.s > 0 ? L(0.3, -0.35, c.s) : L(0, 0.3, c.w)); T.bx = c.s * 0.28 * (1 - c.r); T.a0x = -0.5 * c.w * (1 - c.r);
+        } else if (style === 'cross') { // 2: горизонтальный перекрёстный разрез
+            const c = this.swingCurve(p, 0.3, 0.52);
+            T.a1x = -1.25 * (1 - c.r); T.a1z = c.r > 0 ? L(0.9, 0, c.r) : (c.s > 0 ? L(-1.5, 0.9, c.s) : L(0, -1.5, c.w));
+            T.by = c.r > 0 ? L(-0.8, 0, c.r) : (c.s > 0 ? L(0.7, -0.8, c.s) : L(0, 0.7, c.w)); T.bx = 0.1 * c.s * (1 - c.r);
+        } else if (style === 'spin' || style === 'twinSpin') { // 3 (Сейбер) / 4 (клинки): удар с разворота — полный оборот
+            const c = this.swingCurve(p, 0.22, 0.7), E = this.ease;
+            T.a1x = -1.3 * (1 - c.r); T.a1z = -0.35 * (1 - c.r);
+            if (style === 'twinSpin') { T.a0x = -0.4 * (1 - c.r); T.a0z = 1.3 * (1 - c.r); T.a1x = -0.4 * (1 - c.r); T.a1z = -1.3 * (1 - c.r); }
+            T.spin = c.s > 0 ? -E.inOut(c.s) * Math.PI * 2 : 0; T.by = c.w * 0.5 * (1 - c.s); T.bx = 0.15 * c.s * (1 - c.r);
+        } else if (style === 'overhead') { // 4: сокрушительный финишер сверху вниз двумя руками
+            const c = this.swingCurve(p, 0.36, 0.52);
+            const ax = c.r > 0 ? L(0.95, 0, c.r) : (c.s > 0 ? L(-3.0, 0.95, c.s) : L(0, -3.0, c.w));
+            T.a0x = T.a1x = ax; T.a0z = 0.3; T.a1z = -0.3; T.bx = c.r > 0 ? L(0.45, 0, c.r) : (c.s > 0 ? L(-0.25, 0.45, c.s) : L(0, -0.25, c.w));
+        } else if (style === 'twin') { // 3 (клинки): оба клинка накрест сверху вниз
+            const c = this.swingCurve(p, 0.3, 0.5);
+            const ax = c.r > 0 ? L(0.5, 0, c.r) : (c.s > 0 ? L(-2.3, 0.5, c.s) : L(0, -2.3, c.w)), az = c.r > 0 ? L(-0.4, 0, c.r) : (c.s > 0 ? L(0.75, -0.4, c.s) : L(0, 0.75, c.w));
+            T.a0x = T.a1x = ax; T.a0z = az; T.a1z = -az; T.bx = 0.2 * c.s * (1 - c.r);
+        } else if (style === 'bowPower') { // 4 (лук): долгое натяжение с наклоном назад и мощный выстрел
+            const draw = p < 0.7 ? this.ease.out3(p / 0.7) : 1, rel = p > 0.7 ? this.ease.out3((p - 0.7) / 0.3) : 0;
+            T.a0x = -1.55 * Math.min(1, draw * 1.5); T.a0z = 0.15; T.a1x = L(-1.5, -1.05, draw) * (1 - rel) - 0.4 * rel; T.a1z = L(0, 1.15, draw) * (1 - rel); T.by = 0.45 * draw * (1 - rel * 0.6); T.bx = -0.15 * draw + 0.2 * rel;
+        } else if (style === 'castR' || style === 'castL') { // 1–2 (маг): толчок одной рукой
+            const c = this.swingCurve(p, 0.32, 0.55), right = style === 'castR';
+            const ax = c.r > 0 ? L(-1.55, 0, c.r) : (c.s > 0 ? L(-0.6, -1.55, c.s) : L(0, -0.6, c.w));
+            if (right) { T.a1x = ax; T.a1z = -0.25 * (1 - c.r); } else { T.a0x = ax; T.a0z = 0.25 * (1 - c.r); }
+            T.by = (right ? -1 : 1) * 0.35 * c.s * (1 - c.r);
+        } else if (style === 'castBig') { // 4 (маг): руки вверх, затем обрушить чары вперёд
+            const c = this.swingCurve(p, 0.4, 0.6);
+            const ax = c.r > 0 ? L(-1.4, 0, c.r) : (c.s > 0 ? L(-2.9, -1.4, c.s) : L(0, -2.9, c.w));
+            T.a0x = T.a1x = ax; T.a0z = 0.5 * (1 - c.r); T.a1z = -0.5 * (1 - c.r); T.bx = c.s > 0 ? 0.25 * (1 - c.r) : -0.2 * c.w;
+        } else if (style === 'clawR' || style === 'clawL') { // удар когтями: дикий рвущий взмах сверху наискось
+            const c = this.swingCurve(p, 0.26, 0.46), R = style === 'clawR';
+            const ax = c.r > 0 ? L(0.7, -0.2, c.r) : (c.s > 0 ? L(-2.1, 0.7, c.s) : L(-0.2, -2.1, c.w)), az = c.r > 0 ? L(0.6, 0, c.r) : (c.s > 0 ? L(-0.8, 0.6, c.s) : L(0, -0.8, c.w));
+            if (R) { T.a1x = ax; T.a1z = az; T.a0x = -0.6; } else { T.a0x = ax; T.a0z = -az; T.a1x = -0.6; }
+            T.by = (R ? 1 : -1) * (c.r > 0 ? L(-0.6, 0, c.r) : (c.s > 0 ? L(0.45, -0.6, c.s) : L(0, 0.45, c.w))); T.bx = 0.32 * c.s * (1 - c.r) + 0.12;
+        } else if (style === 'clawX' || style === 'clawRend') { // обе лапы: крест-накрест / финишер, разрывающий в стороны
+            const c = this.swingCurve(p, style === 'clawRend' ? 0.36 : 0.28, style === 'clawRend' ? 0.56 : 0.48), rend = style === 'clawRend';
+            const ax = c.r > 0 ? L(0.8, -0.2, c.r) : (c.s > 0 ? L(rend ? -2.7 : -2.0, 0.8, c.s) : L(-0.2, rend ? -2.7 : -2.0, c.w));
+            const az = rend ? (c.r > 0 ? L(-0.9, 0, c.r) : (c.s > 0 ? L(1.1, -0.9, c.s) : L(0, 1.1, c.w))) : (c.r > 0 ? L(-0.5, 0, c.r) : (c.s > 0 ? L(0.8, -0.5, c.s) : L(0, 0.8, c.w)));
+            T.a0x = T.a1x = ax; T.a0z = az; T.a1z = -az; T.bx = (rend ? 0.45 : 0.3) * c.s * (1 - c.r) + (rend ? -0.2 * c.w * (1 - c.s) : 0.1);
+        } else if (style === 'selfStab') { // жертва: клинок в собственную грудь, рыцаря скручивает
+            const k = this.ease.out3(Math.min(1, p * 2.2)), back = p > 0.6 ? (p - 0.6) / 0.4 : 0;
+            T.a1x = L(0, -1.35, k) * (1 - back); T.a1z = L(0, 1.15, k) * (1 - back); T.a0x = -0.9 * k * (1 - back); T.a0z = 0.6 * k * (1 - back); T.bx = 0.45 * k * (1 - back);
+        } else if (style === 'grab') { // пир: схватить жертву и рвануть к себе
+            const reach = p < 0.35 ? this.ease.out3(p / 0.35) : 1, pull = p > 0.35 ? this.ease.out3((p - 0.35) / 0.65) : 0;
+            T.a0x = T.a1x = L(0, -1.6, reach) * (1 - pull) - 0.7 * pull; T.a0z = 0.3 * (1 - pull) - 0.4 * pull; T.a1z = -T.a0z; T.bx = 0.3 * reach + 0.25 * pull;
+        } else if (style === 'rend') { // ульта: руки раскинуты, тело выгнуто, дрожь
+            const sh = Math.sin(Engine3D.t * 41) * 0.08;
+            T.a0x = T.a1x = -2.4 + sh; T.a0z = 1.0 + sh; T.a1z = -1.0 - sh; T.bx = -0.4 + sh * 0.5; T.by = sh;
         } else if (style === 'pray') { const k = Math.sin(Math.min(1, p) * Math.PI); T.a0x = T.a1x = -2.7 * k; T.a0z = 0.6 * k; T.a1z = -0.6 * k; T.bx = -0.2 * k; }
         return T;
     },
     spring(a, key, target, dt, k = 22) { const j = a.j || (a.j = {}); const v = j[key] === undefined ? target : j[key]; return (j[key] = v + (target - v) * (1 - Math.exp(-k * dt))); },
-    attack(a, style, dur) { a.atkStyle = style; a.atkT = 0; a.atkDur = dur; },
+    attack(a, style, dur) { a.atkStyle = style; a.atkT = 0; a.atkDur = dur; a.impDone = false; },
+    // Моменты удара в анимациях комбо
+    IMPACT: {
+        overhead: { at: 0.52, dist: 1.0, size: 1.4, kick: 0.7, sfx: 'heavy' },
+        twinSpin: { at: 0.68, dist: 0.3, size: 1.1, kick: 0.4, sfx: 'impact' },
+        castBig: { at: 0.6, dist: 1.2, size: 1.2, kick: 0.35, sfx: 'impact', magic: true },
+        bowPower: { at: 0.7, dist: 0.6, size: 0.5, kick: 0.25, sfx: 'whoosh', air: true },
+        spin: { at: 0.45, dist: 0, size: 0.8, sfx: 'slash', ring: true },
+        clawRend: { at: 0.56, dist: 0.7, size: 1.1, kick: 0.5, sfx: 'impact', blood: true },
+        clawX: { at: 0.48, dist: 0.6, size: 0.6, sfx: 'slash', blood: true }
+    },
+    impactFx(a, I) {
+        const fx = Math.sin(a.rot), fz = Math.cos(a.rot), x = a.base.position.x + fx * I.dist, z = a.base.position.z + fz * I.dist;
+        const col = this.heroColor();
+        if (I.blood || player.heroType === 'knight') { AnimFX.blood(x, a.base.position.y + 0.7, z, I.size * 30, fx, fz); AnimFX.shock(x, a.base.position.y + 0.05, z, 0x8a0010, 0.2, 1.2 * I.size, 0.4); }
+        else if (I.ring) AnimFX.shock(a.base.position.x, a.base.position.y + 0.6, a.base.position.z, col, 0.3, 1.6, 0.3, 0.8);
+        else if (I.air) AnimFX.emit({ x, y: a.base.position.y + 1.1, z, n: 18, color: [col, 0xffffff], speed: 2, life: 0.4, size: 0.07, grav: 0, dir: [fx, 0, fz] });
+        else AnimFX.impact(x, z, I.magic ? col : 0xfff0c0, I.size, { dust: 0x5a4a3a });
+        if (I.kick) AnimFX.kick(I.kick);
+        if (I.sfx) Sfx3D.play(I.sfx, 0.9);
+    },
+    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; return ht === 'saber' ? (player.saberAlter ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
     animate(a, dt, x, z, opts) {
         const t = Engine3D.t;
         if (a.lx === null) { a.lx = x; a.lz = z; }
@@ -138,6 +211,10 @@ const Actors3D = {
         let P = null;
         if (a.atkStyle) { a.atkT += dt; const p = a.atkT / a.atkDur; if (p >= 1) a.atkStyle = null; else P = this.pose(a, a.atkStyle, p); }
         if (!P && opts.hold) P = this.pose(a, opts.hold, 0);
+        a.root.rotation.y = a.rot + (P && P.spin ? P.spin : 0);
+        // Ключевой кадр удара: искры, волна, звук и камера синхронно с анимацией
+        const IMP = this.IMPACT[a.atkStyle];
+        if (P && IMP && !a.impDone && a.atkT / a.atkDur >= IMP.at) { a.impDone = true; this.impactFx(a, IMP); }
         // Реакция на попадание: отшатнуться
         a.hitT = Math.max(0, (a.hitT || 0) - dt);
         const hit = a.hitT > 0 ? Math.sin(a.hitT / 0.25 * Math.PI) : 0;
@@ -224,31 +301,33 @@ const Actors3D = {
         // ---------- герой ----------
         const ht = player.heroType || 'invoker';
         const gold = ht === 'invoker' && player.orbLevels && player.orbLevels.r >= 4;
-        const key = ht + (player.saberAlter ? 'A' : '') + (player.archerStance === 'blades' ? 'B' : '') + (gold ? 'G' : '');
+        const ch = typeof playerChar === 'function' ? playerChar() : null;
+        const key = ht + (player.saberAlter ? 'A' : '') + (player.archerStance === 'blades' ? 'B' : '') + (gold ? 'G' : '') + (ch ? ch.id : '') + (ht === 'knight' ? (player.knightSword ? player.knightSword.type : '-claw') : '');
         if (key !== this.playerKey) {
             if (this.player) this.drop(this.player);
-            this.player = this.make(Models3D.hero(ht, { alter: player.saberAlter, stance: player.archerStance, gold }), null);
+            this.player = this.make(Models3D.hero(ht, { alter: player.saberAlter, stance: player.archerStance, gold, pal: ch && ch.pal, sword: player.knightSword }), null);
             this.player.root.scale.setScalar(1.08);
             const aura = Models3D.glow(0xffd070, 1.8); aura.position.y = 0.7; aura.visible = false; this.player.base.add(aura); this.player.aura = aura;
             this.playerKey = key;
         }
+        G3.cape.t.value = Engine3D.t;
         const P = this.player;
         if (this.pendingTrans) { P.trans = P.transD = this.pendingTrans; this.pendingTrans = 0; }
         // Начало атаки героя → стиль и длительность удара по классу и стойке
         const slash = player.slashAnimTime || 0, cast = player.castAnimTime || 0, blades = player.archerStance === 'blades';
         if (slash > 0 && (P.lastSlash || 0) <= 0) {
-            P.combo = (P.combo || 0) + 1;
             let style = 'slash', dur = 0.42;
             if (ht === 'saber' && player.ultCast && player.ultCast.swing) { style = 'heavy'; dur = 0.6; }
-            else if (ht === 'saber') style = P.combo % 2 ? 'slash' : 'slashB';
-            else if (ht === 'archer') { style = P.combo % 2 ? 'slash' : 'slashL'; dur = 0.34; }
+            else if (ht === 'saber') { const k = (player.comboStep || 1) - 1; style = ['thrust', 'cross', 'spin', 'overhead'][k]; dur = [0.34, 0.4, 0.52, 0.62][k]; }
+            else if (ht === 'archer') { const k = (player.bladeComboStep || 1) - 1; style = ['slash', 'slashL', 'twin', 'twinSpin'][k]; dur = [0.32, 0.32, 0.42, 0.56][k]; }
+            else if (ht === 'knight') { const k = (player.comboStep || 1) - 1; if (player.knightSword) { style = ['thrust', 'cross', 'spin', 'overhead'][k]; dur = [0.36, 0.42, 0.54, 0.64][k]; } else { style = ['clawR', 'clawL', 'clawX', 'clawRend'][k]; dur = [0.26, 0.26, 0.34, 0.48][k]; } }
             this.attack(P, style, dur);
             Sfx3D.play(style === 'heavy' ? 'heavy' : 'slash', style === 'heavy' ? 1 : 0.8);
             if (style === 'heavy') AnimFX.kick(1.2);
         }
         if (cast > 0 && (P.lastCast || 0) <= 0 && slash <= 0) {
-            if (ht === 'archer' && !blades) { this.attack(P, 'bow', 0.4); Sfx3D.play('whoosh'); }
-            else this.attack(P, 'cast', ht === 'invoker' ? 0.48 : 0.4);
+            if (ht === 'archer' && !blades) { const k = (player.comboStep || 1) - 1; this.attack(P, ['bow', 'bow', 'bow2', 'bowPower'][k], [0.36, 0.36, 0.42, 0.62][k]); Sfx3D.play('whoosh'); }
+            else { P.castN = ((P.castN || 0) % 4) + 1; this.attack(P, ['castR', 'castL', 'cast', 'castBig'][P.castN - 1], [0.42, 0.42, 0.48, 0.62][P.castN - 1]); }
         }
         P.lastSlash = slash; P.lastCast = cast;
         // Получил урон: вспышка и отшатывание
@@ -256,7 +335,10 @@ const Actors3D = {
         P.lastHp = player.hp;
         P.flash = Math.max(0, (P.flash || 0) - dt * 4);
         const charging = ht === 'saber' && (player.excaliburChargeTime || 0) > 0;
-        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: charging ? 'raise' : null });
+        if (player.knightAnim && player.knightAnim !== P.kAnim) { P.kAnim = player.knightAnim; this.attack(P, player.knightAnim.kind, player.knightAnim.t); }
+        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: charging ? 'raise' : (player.knightRend ? 'rend' : null) });
+        // Ульта рыцаря: левитация и судороги, пока он разрывает себя
+        P.root.position.y = player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : 0;
         // Переход формы/стойки: импульс масштаба, оружие «проявляется»
         let wScale = 1;
         if (P.trans > 0) {
@@ -272,9 +354,14 @@ const Actors3D = {
         const heavy = P.atkStyle === 'heavy';
         const wp = this.weaponPts(P.rig.weapon);
         if (wp) {
-            const col = ht === 'saber' ? (heavy ? (player.saberAlter ? 0xff2030 : 0xffe070) : (player.saberAlter ? 0xff2a3a : 0x9fd0ff)) : 0xff2a40;
+            const col = ht === 'knight' ? 0xc0101a : ht === 'saber' ? (heavy ? (player.saberAlter ? 0xff2030 : 0xffe070) : (player.saberAlter ? 0xff2a3a : 0x9fd0ff)) : 0xff2a40;
             AnimFX.trail(P, wp[0], wp[1], col, heavy ? { life: 0.4, len: 34, fullSpeed: 12, core: 0.9 } : { life: 0.2, core: 0.6 });
         }
+        if (P.rig.claws && P.atkStyle && P.atkStyle.startsWith('claw')) P.rig.claws.forEach((c, i) => {
+            c.updateWorldMatrix(true, false);
+            const b = new THREE.Vector3(0, 0, 0).applyMatrix4(c.matrixWorld), tp = new THREE.Vector3(0, -0.15, 0.06).applyMatrix4(c.matrixWorld);
+            AnimFX.trail(c, b, tp, 0xff1a2a, { life: 0.22, core: 0.4, minSpeed: 2 });
+        });
         const op = this.weaponPts(P.rig.offhand);
         if (op) AnimFX.trail(P.rig.offhand, op[0], op[1], 0xff6070, { life: 0.2, core: 0.5 });
         if (P.rig.orbs) {
@@ -313,7 +400,15 @@ const Actors3D = {
                 a.base.visible = a.dying < 1.2;
                 continue;
             } else if (a.dying > 0) { a.dying = 0; a.dust = false; a.rig.body.rotation.x = 0; a.root.position.y = 0; a.blob.visible = true; a.base.visible = true; a.lx = null; }
-            if (en.hp < a.lastHp) { a.flash = 1; a.hitT = 0.25; }
+            if (en.hp < a.lastHp) {
+                a.flash = 1; a.hitT = 0.25;
+                if (Math.abs(ex - px) < 4 && Math.abs(ez - pz) < 4) { // брызги искр от удара
+                    const c = this.heroColor(), hy = a.base.position.y + 0.6 * a.base.scale.x, dx = ex - px, dz = ez - pz, dl = Math.hypot(dx, dz) || 1;
+                    AnimFX.emit({ x: ex, y: hy, z: ez, n: 14, color: [c, 0xffffff, 0xffe8a0], speed: 3.2, life: 0.35, size: 0.06, grav: 6, drag: 2, dir: [dx / dl, 0.4, dz / dl], spread: 1.6 });
+                    AnimFX.shock(ex, hy, ez, c, 0.1, 0.5, 0.18, 0.7);
+                    if (player.heroType === 'knight') AnimFX.blood(ex, hy, ez, 22, dx / dl, dz / dl);
+                }
+            }
             a.lastHp = en.hp;
             if ((en.attackCd || 0) > a.lastCd + 0.05) {
                 a.combo = (a.combo || 0) + 1;

@@ -322,9 +322,9 @@ const FX3D = {
         // ---------- следы на земле ----------
         for (const d of groundDecals) {
             if (!near(d.x, d.y)) continue;
-            const c = d.kind === 'ice' ? 0x9fe0ff : (d.kind === 'scorch' ? 0x0a0604 : (d.kind === 'blood' ? 0x5a0a0a : 0x1a1410));
+            const c = d.kind === 'ice' ? 0x9fe0ff : (d.kind === 'scorch' ? 0x0a0604 : (d.kind === 'blood' ? 0x4a0006 : 0x1a1410));
             const o = this.get(Object.assign(d, { color: c }), 'decal'); o.position.set(d.x / T, 0, d.y / T); o.scale.setScalar(d.radius / T);
-            o.userData.m.material.opacity = 0.55 * Math.min(1, d.life / d.maxLife * 2);
+            o.userData.m.material.opacity = (d.kind === 'blood' ? 0.85 : 0.55) * Math.min(1, d.life / d.maxLife * 2);
             if (d.kind === 'ice') o.userData.m.material.blending = THREE.AdditiveBlending;
         }
         // ---------- добыча и сундуки ----------
@@ -382,6 +382,7 @@ const FX3D = {
             o.userData.swirl.rotation.z = t * 2; o.userData.swirl.visible = open; o.userData.gl.visible = open;
             if (open) this.lights.push({ x: pt.x / T, z: pt.y / T, h: 1.4, c: col3(pt.color) });
         }
+        if (typeof Knight3D !== 'undefined') Knight3D.fxRunes();
         for (const [src, o] of this.live) {
             if (!this.seen.has(src)) { this.kill(src, o); continue; }
             if (o.userData.kind !== 'rift') o.position.y += World3D.hAt(o.position.x, o.position.z);  // эффекты следуют рельефу
