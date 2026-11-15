@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Хроники Эльдории — 3D Action RPG (Warcraft 3 / Dark Fantasy)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=15">
+</head>
+<body class="relative select-none">
+
+    <!-- Основной Canvas Игры -->
+    <canvas id="gl3d" aria-hidden="true"></canvas>
+    <canvas id="gameCanvas"></canvas>
+    <canvas id="labelCanvas"></canvas>
+
+    <!-- ==================== ГЛАВНОЕ МЕНЮ: МЕНЮ → ВЫБОР ГЕРОЯ → СЛОЖНОСТЬ → ИГРА ==================== -->
+    <div id="mainMenuOverlay" class="menu-root" data-state="menu">
+        <canvas id="menuBgCanvas"></canvas>
+        <div class="menu-vignette"></div>
+
+        <!-- Секретная кнопка режима администратора -->
+        <button id="btnAdminToggle" class="menu-admin-btn" onclick="toggleAdminMode()" title="Режим администратора" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm0 5a3 3 0 0 1 3 3c0 1.3-.8 2.4-2 2.8V15h-2v-2.2A3 3 0 0 1 12 7Z"/></svg>
+            <span class="menu-admin-label">ADMIN</span>
+        </button>
+
+        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
+        <section id="scrMenu" class="menu-screen is-active" aria-label="Главное меню">
+            <div class="menu-main">
+                <div class="menu-kicker">Королевство Забвения</div>
+                <h1 class="menu-title">Хроники Эльдории</h1>
+                <div class="menu-subtitle">Наследие Древних</div>
+                <nav class="menu-buttons">
+                    <button id="btnMenuResume" class="menu-btn hidden" onclick="resumeFromMenu()"><span>Вернуться в игру</span></button>
+                    <button class="menu-btn menu-btn-primary" onclick="setGameState('char_select')"><span>Играть</span></button>
+                    <button id="btnContinueGame" class="menu-btn hidden" onclick="continueSavedGameFromMenu()"><span>Продолжить сохранение</span></button>
+                    <button class="menu-btn" onclick="openSettingsModal()"><span>Настройки</span></button>
+                    <button class="menu-btn" onclick="setGameState('exit')"><span>Выйти</span></button>
+                </nav>
+                <div id="menuAdminNote" class="menu-admin-note">Режим администратора включён: бессмертие, мгновенная перезарядка, золото, предметы, телепорт</div>
+            </div>
+        </section>
+
+        <!-- ЭКРАН 2: ВЫБОР ГЕРОЯ -->
+        <section id="scrHeroes" class="menu-screen" aria-label="Выбор героя">
+            <header class="menu-screen-head">
+                <button class="menu-back" onclick="setGameState('menu')">← Назад</button>
+                <h2>Выберите героя</h2>
+                <div class="menu-step">Шаг 1 из 2</div>
+            </header>
+            <div class="hero-stage">
+                <button class="hero-arrow hero-arrow-left" onclick="heroSlide(-1)" aria-label="Предыдущий герой">‹</button>
+                <div id="heroTrack" class="hero-track"></div>
+                <button class="hero-arrow hero-arrow-right" onclick="heroSlide(1)" aria-label="Следующий герой">›</button>
+            </div>
+            <footer class="hero-foot">
+                <div id="heroDots" class="hero-dots"></div>
+                <button class="menu-btn menu-btn-primary hero-confirm" onclick="confirmHero()"><span>Выбрать героя</span></button>
+            </footer>
+        </section>
+
+        <!-- ЭКРАН 3: СЛОЖНОСТЬ -->
+        <section id="scrDifficulty" class="menu-screen" aria-label="Выбор сложности">
+            <header class="menu-screen-head">
+                <button class="menu-back" onclick="setGameState('char_select')">← К героям</button>
+                <h2>Уровень сложности</h2>
+                <div class="menu-step">Шаг 2 из 2</div>
+            </header>
+            <div id="diffGrid" class="diff-grid"></div>
+            <footer class="hero-foot">
+                <div id="diffSummary" class="diff-summary"></div>
+                <button class="menu-btn menu-btn-primary" onclick="startGameFromMenu()"><span>Начать путь</span></button>
+            </footer>
+        </section>
+
+        <!-- ЭКРАН: ВЫХОД -->
+        <section id="scrExit" class="menu-screen" aria-label="Выход">
+            <div class="menu-main">
+                <h1 class="menu-title" style="font-size:clamp(28px,5vw,52px)">Огни замка гаснут…</h1>
+                <div class="menu-subtitle">Спасибо за игру. Закройте вкладку, чтобы выйти.</div>
+                <nav class="menu-buttons"><button class="menu-btn" onclick="setGameState('menu')"><span>Вернуться в меню</span></button></nav>
+            </div>
+        </section>
+    </div>
+    <div id="menuCurtain" class="menu-curtain"></div>
+
+    <!-- Панель режима администратора (в игре) -->
+    <div id="adminPanel" class="admin-panel hidden" role="region" aria-label="Режим администратора">
+        <div class="admin-panel-head">⛧ ADMIN <button onclick="toggleAdminPanelCollapse()" class="admin-mini" title="Свернуть">▾</button></div>
+        <div id="adminPanelBody" class="admin-panel-body">
+            <label><input type="checkbox" id="chkGod" checked onchange="adminCheats.god = this.checked"> Бессмертие</label>
+            <label><input type="checkbox" id="chkNoCd" checked onchange="adminCheats.noCd = this.checked"> Мгновенный кулдаун</label>
+            <div class="admin-row">
+                <button onclick="adminGive('gold')">+5000 🪙</button>
+                <button onclick="adminGive('items')">Предметы</button>
+                <button onclick="adminGive('level')">+5 ур.</button>
+                <button onclick="adminGive('diamonds')">+16000 💎</button>
+            </div>
+            <div class="admin-row">
+                <button onclick="adminTeleportCursor()">Телепорт (T)</button>
+                <button onclick="adminGive('reveal')">Открыть карту</button>
+            </div>
+            <div id="adminHint" class="admin-hint">T — к курсору • на карте M клик — в любую точку</div>
+        </div>
+    </div>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО: НАСТРОЙКИ ГРАФИКИ И ОПТИМИЗАЦИИ ==================== -->
+    <div id="modalSettings" class="hidden fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-3">
+        <div id="settingsBox" class="rpg-panel w-full max-w-lg rounded-2xl p-5 flex flex-col gap-4 border-2 border-amber-700/70 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-stone-700 pb-3">
+                <h2 class="font-rpg text-xl font-bold text-amber-400 flex items-center gap-2">⚙️ Настройки</h2>
+                <button onclick="closeSettingsModal()" class="rpg-btn px-3 py-1 rounded-lg text-sm font-bold">✕</button>
+            </div>
+            <div class="settings-tabs">
+                <button id="tabGfx" class="on" onclick="setSettingsTab('gfx')">Графика</button>
+                <button id="tabControls" onclick="setSettingsTab('controls')">Управление <span id="controlsSchemeBadge" class="ctl-badge"></span></button>
+            </div>
+            <div id="controlsPane" class="hidden text-xs"></div>
+
+            <div id="gfxPane" class="space-y-3.5 text-xs">
+                <div class="bg-stone-950/90 p-3 rounded-xl border border-stone-800 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-stone-200 text-sm">Пресет качества графики</div>
+                        <div class="text-stone-400 text-[11px]">Влияет на освещение, детализацию воды и туман</div>
+                    </div>
+                    <select id="selGraphicsQuality" onchange="applyGraphicsSettings()" class="bg-stone-900 text-amber-300 font-bold px-3 py-1.5 rounded-lg border border-stone-700">
+                        <option value="high">Высокое (Ultra 2.5D)</option>
+                        <option value="medium">Среднее (Сбаланс.)</option>
+                        <option value="low">Производительное (Макс. FPS)</option>
+                    </select>
+                </div>
+
+                <div class="bg-stone-950/90 p-3 rounded-xl border border-stone-800 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-stone-200 text-sm">Графика</div>
+                        <div class="text-stone-400 text-[11px]">3D: модели, свет, тени, туман (колесо мыши — приближение). 2D — для слабых устройств</div>
+                    </div>
+                    <select id="selGfxStyle" onchange="setGfxStyle(this.value)" class="bg-stone-900 text-amber-300 font-bold px-3 py-1.5 rounded-lg border border-stone-700">
+                        <option value="3d">3D (Three.js, WebGL)</option>
+                        <option value="2d">Классический 2D</option>
+                    </select>
+                </div>
+
+                <div class="bg-stone-950/90 p-3 rounded-xl border border-stone-800 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-stone-200 text-sm">Псевдо-3D объем мира (Warcraft 3)</div>
+                        <div class="text-stone-400 text-[11px]">Объемные 2.5D стены Камелота, башни, скалы и деревья</div>
+                    </div>
+                    <input type="checkbox" id="chkPseudo3D" checked onchange="applyGraphicsSettings()" class="w-5 h-5 accent-amber-500 cursor-pointer">
+                </div>
+
+                <div class="bg-stone-950/90 p-3 rounded-xl border border-stone-800 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-stone-200 text-sm">Плотность частиц и погоды</div>
+                        <div class="text-stone-400 text-[11px]">Лимит частиц магии, дождя и искр в кадре</div>
+                    </div>
+                    <select id="selParticleDensity" onchange="applyGraphicsSettings()" class="bg-stone-900 text-cyan-300 font-bold px-3 py-1.5 rounded-lg border border-stone-700">
+                        <option value="1.0">100% (Максимум эффектов)</option>
+                        <option value="0.55">55% (Оптимально)</option>
+                        <option value="0.25">25% (Для слабых ПК)</option>
+                    </select>
+                </div>
+
+                <div class="bg-stone-950/90 p-3 rounded-xl border border-stone-800 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-stone-200 text-sm">Показывать счетчик FPS</div>
+                        <div class="text-stone-400 text-[11px]">Отображение частоты кадров в правом верхнем углу</div>
+                    </div>
+                    <input type="checkbox" id="chkShowFps" checked onchange="applyGraphicsSettings()" class="w-5 h-5 accent-amber-500 cursor-pointer">
+                </div>
+
+                <div class="bg-stone-950/90 p-3 rounded-xl border border-stone-800 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-stone-200 text-sm">Код-арт оверлей (ASCII)</div>
+                        <div class="text-stone-400 text-[11px]">Сетка символов поверх мира, как на референсе</div>
+                    </div>
+                    <input type="checkbox" id="chkCodeArt" checked onchange="applyGraphicsSettings()" class="w-5 h-5 accent-amber-500 cursor-pointer">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-stone-800">
+                <button onclick="closeSettingsModal()" class="rpg-btn-gold px-5 py-2 rounded-xl text-xs font-rpg font-bold">Сохранить и закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Верхний левый HUD: Герой (Древняя каменная плита со мхом) -->
+    <div class="ui-zoom fixed top-3 left-3 z-20 flex flex-col gap-2.5 pointer-events-none w-80 sm:w-88">
+        <div class="rpg-panel p-3.5 rounded-xl pointer-events-auto">
+            <!-- SVG Декор мха и корней по углам -->
+            <svg class="moss-vine-overlay w-full h-full" viewBox="0 0 320 140" preserveAspectRatio="none">
+                <path d="M0,0 Q35,4 58,14 Q30,10 14,28 Q8,45 3,65 L0,65 Z" fill="rgba(54, 83, 20, 0.55)"/>
+                <circle cx="12" cy="10" r="7" fill="#3f6212" opacity="0.75"/>
+                <circle cx="24" cy="7" r="5" fill="#4d7c0f" opacity="0.7"/>
+                <circle cx="7" cy="22" r="6" fill="#365314" opacity="0.75"/>
+                <path d="M320,0 Q285,5 268,16 Q295,12 310,32 L320,45 Z" fill="rgba(45, 75, 18, 0.5)"/>
+                <circle cx="308" cy="9" r="6" fill="#3f6212" opacity="0.7"/>
+            </svg>
+
+            <div class="flex items-center gap-3 mb-2.5 relative z-20">
+                <!-- Портрет Героя в кованой бронзово-мшистой раме -->
+                <div class="relative w-16 h-16 rounded-lg bg-stone-950 border-2 border-amber-700/90 flex items-center justify-center shadow-2xl shrink-0 overflow-hidden">
+                    <canvas id="portraitCanvas" width="64" height="64" class="w-full h-full"></canvas>
+                    <span id="hudLevel" class="absolute -bottom-0.5 -right-0.5 bg-stone-900 text-amber-300 text-[11px] font-rpg font-extrabold px-1.5 py-0.2 rounded-tl border border-amber-600 shadow">1</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center">
+                        <h1 id="hudHeroName" class="font-rpg font-extrabold text-amber-400/95 text-sm tracking-wider truncate drop-shadow">Карл • Архимаг</h1>
+                        <div class="flex items-center gap-1 text-amber-300 text-xs font-bold bg-stone-950/95 px-2 py-0.5 rounded border border-amber-800/70 shadow-inner">
+                            <span>🪙</span>
+                            <span id="hudGold">90</span>
+                        </div>
+                    </div>
+                    <div id="hudBiome" class="text-[11px] text-stone-400 truncate font-medium">🏛️ Руины Святилища</div>
+                    <div id="hudOrbBuffs" class="text-[10px] text-emerald-400/90 font-semibold mt-0.5 truncate">Сферы: +Реген / +Скор / +Мощь</div>
+                </div>
+            </div>
+
+            <!-- Уведомление об очках прокачки сфер -->
+            <div id="skillPointsBanner" class="hidden mt-2.5 pt-2 border-t border-stone-700/80 flex items-center justify-between relative z-20">
+                <span class="text-[11px] font-bold text-amber-300 animate-pulse">✨ Очки Древних Сфер: <span id="hudSkillPoints">2</span></span>
+                <span class="text-[10px] text-lime-400/90">Нажмите [+УР] внизу</span>
+            </div>
+        </div>
+
+        <!-- Каменная скрижаль активного квеста -->
+        <div class="rpg-panel p-3 rounded-xl pointer-events-auto border-l-4 border-l-lime-700">
+            <div class="flex items-center justify-between mb-0.5 relative z-20">
+                <span class="text-[10px] font-rpg font-bold uppercase tracking-wider text-lime-400/90">📜 Пророчество Бездны</span>
+                <span id="questStageNum" class="text-[10px] text-stone-400">Глава 1/5</span>
+            </div>
+            <div id="questTitle" class="text-xs font-rpg font-bold text-amber-200 mb-0.5 relative z-20">Аудиенция у Хранителя</div>
+            <div id="questDesc" class="text-[11px] text-stone-300 leading-tight relative z-20">Подойдите к Архимагу Рагмиру среди замшелых руин (клавиша G или клик).</div>
+            <div id="questProgress" class="mt-1.5 text-[11px] font-semibold text-lime-400 relative z-20">Прогресс: 0 / 1</div>
+        </div>
+    </div>
+
+    <!-- Верхний правый HUD: Мини-карта в каменной оправе и Кнопки окон -->
+    <div class="ui-zoom fixed top-3 right-3 z-20 flex flex-col items-end gap-2 pointer-events-none">
+        <div class="rpg-panel p-2.5 rounded-xl pointer-events-auto flex flex-col items-center">
+            <div class="relative rounded-lg overflow-hidden border-2 border-stone-700 bg-stone-950 shadow-2xl">
+                <canvas id="minimapCanvas" width="142" height="142" class="block cursor-pointer" title="Карта мира (M)" onclick="toggleModal('worldmap')"></canvas>
+                <!-- Угловой мох на мини-карте -->
+                <div class="absolute top-0 left-0 w-7 h-7 pointer-events-none" style="background: radial-gradient(circle at 20% 20%, rgba(77,124,15,0.75), transparent 70%);"></div>
+                <div class="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[10px] text-stone-300 font-mono border border-stone-700" id="hudCoords">14, 15</div>
+            </div>
+            <div class="w-full flex items-center justify-between mt-1.5 px-1 text-xs relative z-20">
+                <span id="hudTimeIcon" class="text-stone-300 font-medium">🕯️ Сумерки</span>
+                <div class="flex items-center gap-2">
+                    <span id="hudFps" class="font-mono text-[10px] text-lime-400 font-bold bg-stone-950 px-1.5 py-0.5 rounded border border-stone-800">60 FPS</span>
+                    <span id="hudClock" class="font-mono text-amber-400 font-bold">12:00</span>
+                </div>
+            </div>
+            <div class="w-full flex items-center justify-between mt-1 px-1 text-[11px] border-t border-stone-800 pt-1 relative z-20">
+                <span id="hudWeatherText" class="text-cyan-300 font-semibold">🌧️ Грозовой ливень</span>
+                <button onclick="cycleWeatherManual()" class="text-[10px] bg-stone-900 hover:bg-stone-800 text-amber-300 px-1.5 py-0.5 rounded border border-stone-700" title="Сменить погоду">Сменить</button>
+            </div>
+        </div>
+
+        <!-- Глобальный магазин: молитва за Алмазы (строго под мини-картой) -->
+        <button id="btnGachaShop" class="gacha-hud-btn pointer-events-auto" onclick="toggleModal('gacha')" title="Глобальный магазин — Звёздная Молитва">
+            <span class="gacha-hud-star" aria-hidden="true">✦</span>
+            <span class="gacha-hud-label">Звёздная Молитва</span>
+            <span class="gacha-hud-dia">💎 <b id="hudDiamonds">0</b></span>
+        </button>
+
+        <!-- Кнопки меню -->
+        <div class="flex flex-wrap justify-end gap-1.5 pointer-events-auto max-w-xs">
+            <button onclick="openMainMenu()" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-rpg font-bold text-amber-200 border-amber-700/70 flex items-center gap-1" title="Главное меню и смена героя">
+                <span>🏰</span><span>Меню</span>
+            </button>
+            <button onclick="toggleModal('spellbook')" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-rpg font-bold text-amber-300 border-amber-700/70 flex items-center gap-1" title="Гримуар способностей (B)">
+                <span>📖</span><span id="btnGrimoireLabel">Гримуар 27 (B)</span>
+            </button>
+            <button onclick="toggleModal('char')" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1" title="Снаряжение и Инвентарь (C)">
+                <span>🎒</span><span id="lblInventoryBtn" class="hidden sm:inline">Котомка (C)</span>
+            </button>
+            <button onclick="toggleModal('craft')" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1" title="Алхимия и Артефакты (K)">
+                <span>⚗️</span><span id="lblCraftBtn" class="hidden sm:inline">Алтарь (K)</span>
+            </button>
+            <button onclick="grantTestPower()" class="rpg-btn px-2 py-1.5 rounded-lg text-[11px] font-semibold text-lime-300" title="Получить +3 очка навыков и золото для теста">
+                <span>⚡+Очки</span>
+            </button>
+            <button onclick="openSettingsModal()" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold" title="Настройки графики и оптимизации">
+                ⚙️
+            </button>
+            <button onclick="toggleSound()" id="btnSound" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold" title="Звук">
+                🔊
+            </button>
+            <button onclick="saveGame(true)" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-300" title="Сохранить">
+                💾
+            </button>
+            <a href="https://github.com/kaori050" target="_blank" rel="noopener noreferrer" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-purple-300 border-purple-700/80 flex items-center gap-1 no-underline" title="Перейти на GitHub: kaori050">
+                <span>🐙</span><span class="hidden sm:inline">kaori050</span>
+            </a>
+            <button onclick="toggleModal('help')" class="rpg-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-amber-300" title="Управление">
+                ❓
+            </button>
+        </div>
+    </div>
+    <!-- ==================== НИЖНЯЯ ПАНЕЛЬ: ЗДОРОВЬЕ И МАНА | НАВЫКИ | ОСОБЫЕ ДЕЙСТВИЯ ==================== -->
+    <div id="bottomDock" class="bottom-dock">
+        <div class="dock-vitals">
+            <div id="vitalHp" class="vital vital-hp" title="Здоровье">
+                <span class="vital-icon" aria-hidden="true">❤</span>
+                <div class="vital-track">
+                    <div id="barHpGhost" class="vital-ghost" style="width:100%"></div>
+                    <div id="barHp" class="vital-fill" style="width:100%"></div>
+                    <span id="txtHp" class="vital-text">140 / 140 HP</span>
+                </div>
+            </div>
+            <div id="vitalMp" class="vital vital-mp" title="Мана — ресурс навыков">
+                <span class="vital-icon" aria-hidden="true">✦</span>
+                <div class="vital-track">
+                    <div id="barMpGhost" class="vital-ghost" style="width:100%"></div>
+                    <div id="barMp" class="vital-fill" style="width:100%"></div>
+                    <span id="txtMp" class="vital-text">160 / 160 MP</span>
+                </div>
+            </div>
+            <div class="vital vital-sta" title="Выносливость: Shift — бег">
+                <span class="vital-icon" aria-hidden="true">➹</span>
+                <div class="vital-track">
+                    <div id="barSta" class="vital-fill" style="width:100%"></div>
+                    <span id="txtSta" class="vital-text">ВЫНОСЛИВОСТЬ</span>
+                </div>
+            </div>
+            <div class="vital-xp" title="Опыт до следующего уровня"><div id="barXp" style="width:0%"></div><span id="txtXp"></span></div>
+        </div>
+        <div class="dock-center">
+
+        <!-- Верхняя плашка матрицы сфер Инвокера ИЛИ стойки Сейбер -->
+        <div id="invokerTopPill" class="rpg-panel px-4 py-1.5 rounded-full flex items-center gap-3 border border-stone-600 shadow-2xl">
+            <span class="text-[10px] font-rpg font-bold uppercase tracking-wider text-stone-400 relative z-20">Порядок Сфер (27):</span>
+            <div id="activeOrbsQueue" class="flex items-center gap-2 relative z-20">
+                <div class="w-5 h-5 rounded-full orb-quas"></div>
+                <div class="w-5 h-5 rounded-full orb-quas"></div>
+                <div class="w-5 h-5 rounded-full orb-quas"></div>
+            </div>
+            <span id="currentComboHint" class="text-[11px] font-rpg font-bold text-amber-300 pl-2 border-l border-stone-700 relative z-20">Cold Snap (Холодная хватка)</span>
+        </div>
+
+        <div id="saberTopPill" class="hidden rpg-panel px-4 py-1.5 rounded-full items-center gap-3 border border-sky-700 shadow-2xl">
+            <span class="text-[10px] font-rpg font-bold uppercase tracking-wider text-sky-300 relative z-20">⚔️ Король Рыцарей Камелота:</span>
+            <span id="saberAuraStatus" class="text-[11px] font-rpg font-bold text-amber-300 relative z-20">Незримый Воздух активен • Экскалибур готов к бою</span>
+        </div>
+
+        <div id="archerTopPill" class="hidden rpg-panel px-4 py-1.5 rounded-full items-center gap-3 border border-lime-700 shadow-2xl">
+            <span class="text-[10px] font-rpg font-bold uppercase tracking-wider text-lime-300 relative z-20">🏹 Арчер:</span>
+            <span id="archerHint" class="text-[11px] font-rpg font-bold text-amber-300 relative z-20">ЛКМ / Пробел — атака • ПКМ по врагу — цель • D — лук / клинки • F — метнуть клинок</span>
+        </div>
+
+        <!-- ПАНЕЛЬ 1: АЛТАРЬ ИНВОКЕРА (Q, W, E | D, F | R + Зелья) -->
+        <div id="invokerActionBar" class="rpg-panel p-2.5 rounded-2xl flex items-end gap-1.5 sm:gap-2.5">
+            <!-- Декоративные лозы мха вдоль нижней панели -->
+            <svg class="moss-vine-overlay w-full h-full" viewBox="0 0 560 90" preserveAspectRatio="none">
+                <path d="M0,0 Q45,8 90,3 Q40,18 12,45 Z" fill="rgba(63, 98, 18, 0.55)"/>
+                <circle cx="18" cy="8" r="8" fill="#365314" opacity="0.8"/>
+                <circle cx="38" cy="5" r="6" fill="#4d7c0f" opacity="0.75"/>
+                <circle cx="8" cy="24" r="7" fill="#14532d" opacity="0.8"/>
+                <path d="M560,0 Q515,8 475,4 Q525,18 548,48 Z" fill="rgba(54, 83, 20, 0.55)"/>
+                <circle cx="542" cy="8" r="8" fill="#3f6212" opacity="0.8"/>
+                <circle cx="520" cy="6" r="5" fill="#4d7c0f" opacity="0.7"/>
+                <circle cx="275" cy="3" r="6" fill="#365314" opacity="0.65"/>
+                <circle cx="288" cy="4" r="4" fill="#4d7c0f" opacity="0.65"/>
+            </svg>
+
+            <!-- QUAS (Q) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button id="btnLvlQ" onclick="levelUpOrb('q')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
+                <button onclick="pressOrb('q')" id="btnOrbQ" class="relative w-12 h-12 sm:w-14 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group border-cyan-700/80" title="Quas (Вечная Мерзлота) — Регенерация крови, усиление ледяных заклинаний и снижение их КД.">
+                    <span class="hotkey-badge">Q</span>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full orb-quas group-hover:scale-110 transition-transform"></div>
+                    <span class="text-[9px] font-rpg text-cyan-300 font-bold mt-1">QUAS</span>
+                </button>
+                <div id="pipsQ" class="level-pips"></div>
+            </div>
+
+            <!-- WEX (W) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button id="btnLvlW" onclick="levelUpOrb('w')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
+                <button onclick="pressOrb('w')" id="btnOrbW" class="relative w-12 h-12 sm:w-14 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group border-fuchsia-700/80" title="Wex (Грозовой Эфир) — Скорость шага и каста, усиление молний и снижение их КД.">
+                    <span class="hotkey-badge">W</span>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full orb-wex group-hover:scale-110 transition-transform"></div>
+                    <span class="text-[9px] font-rpg text-fuchsia-300 font-bold mt-1">WEX</span>
+                    <div id="lockW" class="absolute inset-0 bg-stone-950/90 rounded-xl flex flex-col items-center justify-center text-[9px] text-stone-400 font-bold border border-stone-800">🔒 Ур.0</div>
+                </button>
+                <div id="pipsW" class="level-pips"></div>
+            </div>
+
+            <!-- EXORT (E) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button id="btnLvlE" onclick="levelUpOrb('e')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
+                <button onclick="pressOrb('e')" id="btnOrbE" class="relative w-12 h-12 sm:w-14 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group border-orange-700/80" title="Exort (Пламя Хаоса) — Разрушительная мощь огненных заклинаний и снижение их КД.">
+                    <span class="hotkey-badge">E</span>
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full orb-exort group-hover:scale-110 transition-transform"></div>
+                    <span class="text-[9px] font-rpg text-orange-300 font-bold mt-1">EXORT</span>
+                    <div id="lockE" class="absolute inset-0 bg-stone-950/90 rounded-xl flex flex-col items-center justify-center text-[9px] text-stone-400 font-bold border border-stone-800">🔒 Ур.0</div>
+                </button>
+                <div id="pipsE" class="level-pips"></div>
+            </div>
+
+            <div class="h-12 w-[2px] bg-stone-800 mx-0.5 self-center relative z-20"></div>
+
+            <!-- СЛОТ ЗАКЛИНАНИЯ 1 (D) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button onclick="castInvokedSpell(0)" id="btnSpellD" class="relative w-13 h-13 sm:w-14 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group border-2 border-amber-600/80" title="Первое скомбинированное заклинание (Клавиша D)">
+                    <span class="hotkey-badge">D</span>
+                    <span id="iconSpellD" class="text-xl sm:text-2xl group-hover:scale-110 transition-transform drop-shadow">❄️</span>
+                    <span id="costSpellD" class="text-[9px] text-cyan-300 font-semibold mt-0.5">30 MP</span>
+                    <div id="cdSpellD" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
+                </button>
+                <span class="text-[9px] font-rpg text-stone-300 mt-1 truncate max-w-[58px]" id="nameSpellD">Cold Snap</span>
+            </div>
+
+            <!-- СЛОТ ЗАКЛИНАНИЯ 2 (F) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button onclick="castInvokedSpell(1)" id="btnSpellF" class="relative w-13 h-13 sm:w-14 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group border-2 border-stone-700" title="Второе скомбинированное заклинание (Клавиша F)">
+                    <span class="hotkey-badge">F</span>
+                    <span id="iconSpellF" class="text-xl sm:text-2xl opacity-40">✨</span>
+                    <span id="costSpellF" class="text-[9px] text-stone-400 font-semibold mt-0.5">—</span>
+                    <div id="cdSpellF" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
+                </button>
+                <span class="text-[9px] font-rpg text-stone-400 mt-1 truncate max-w-[58px]" id="nameSpellF">Пусто</span>
+            </div>
+
+            <!-- INVOKE (R) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button id="btnLvlR" onclick="levelUpOrb('r')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
+                <button onclick="invokeSpell()" id="btnInvoke" class="relative w-12 h-12 sm:w-14 sm:h-14 rpg-btn-gold rounded-xl flex flex-col items-center justify-center group" title="Invoke (Клавиша R) — Сплести 3 активные сферы в одно из 27 заклинаний! На 4 уровне дарует Золотой Божественный Облик!">
+                    <span class="hotkey-badge">R</span>
+                    <span class="text-xl sm:text-2xl group-hover:rotate-90 transition-transform duration-300 drop-shadow">✡️</span>
+                    <span class="text-[9px] font-rpg font-extrabold text-amber-200 mt-0.5">INVOKE</span>
+                    <div id="cdInvoke" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
+                </button>
+                <div id="pipsR" class="level-pips"></div>
+            </div>
+
+            <div class="h-12 w-[2px] bg-stone-800 mx-0.5 self-center hidden sm:block relative z-20"></div>
+
+            <!-- Зелье здоровья (1) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button onclick="useQuickPotion('hp')" class="relative w-11 h-12 sm:w-12 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group" title="Фиал Крови (Клавиша 1)">
+                    <span class="hotkey-badge">1</span>
+                    <span class="text-lg sm:text-xl">🧪</span>
+                    <span id="countHpPot" class="text-[10px] font-bold text-rose-400">x3</span>
+                </button>
+                <span class="text-[9px] text-stone-500 mt-1">Кровь</span>
+            </div>
+
+            <!-- Зелье маны (2) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button onclick="useQuickPotion('mp')" class="relative w-11 h-12 sm:w-12 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group" title="Эссенция Арканы (Клавиша 2)">
+                    <span class="hotkey-badge">2</span>
+                    <span class="text-lg sm:text-xl">⚗️</span>
+                    <span id="countMpPot" class="text-[10px] font-bold text-cyan-400">x3</span>
+                </button>
+                <span class="text-[9px] text-stone-500 mt-1">Мана</span>
+            </div>
+        </div>
+
+        <!-- ПАНЕЛЬ 2: АЛТАРЬ СЕЙБЕР (КОРОЛЬ АРТУР — 4 СПОСОБНОСТИ Q, W, E, R + ЗЕЛЬЯ) -->
+        <div id="saberActionBar" class="hidden rpg-panel p-2.5 rounded-2xl items-end gap-2 sm:gap-3 border-2 border-sky-700/80">
+            <!-- Q: Удар Ветра (Strike Air) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button id="btnSaberLvlQ" onclick="levelUpOrb('q')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
+                <button onclick="castSaberSkill('q')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="Q — Разлом и Волна: меч вырубает трещину в земле, из неё вперёд вырывается энергетическая волна.">
+                    <span class="hotkey-badge">Q</span>
+                    <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🌋</span>
+                    <span class="text-[9px] font-rpg font-bold text-cyan-200 mt-0.5">25 MP</span>
+                    <div id="cdSaberQ" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
+                </button>
+                <span class="text-[9px] font-rpg text-sky-200 mt-1">Разлом</span>
+                <div id="pipsSaberQ" class="level-pips"></div>
+            </div>
+
+            <!-- W: Рывок Праны (Mana Burst Dash) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button id="btnSaberLvlW" onclick="levelUpOrb('w')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
+                <button onclick="castSaberSkill('w')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="W — Рывок Праны: блинк сквозь врагов к курсору с уроном, затем кратковременное ускорение.">
+                    <span class="hotkey-badge">W</span>
+                    <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">⚡</span>
+                    <span class="text-[9px] font-rpg font-bold text-cyan-200 mt-0.5">30 MP</span>
+                    <div id="cdSaberW" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
+                </button>
+                <span class="text-[9px] font-rpg text-sky-200 mt-1">Рывок Праны</span>
+                <div id="pipsSaberW" class="level-pips"></div>
+            </div>
+
+            <!-- E: Благословение Авалона (Avalon & King's Charisma) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button id="btnSaberLvlE" onclick="levelUpOrb('e')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
+                <button onclick="castSaberSkill('e')" class="relative w-13 h-13 sm:w-15 sm:h-15 saber-btn-skill rounded-xl flex flex-col items-center justify-center group" title="E — Колоссальный Клинок: меч увеличивается в разы, атаки бьют по огромной дуге.">
+                    <span class="hotkey-badge">E</span>
+                    <span class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🗡️</span>
+                    <span class="text-[9px] font-rpg font-bold text-cyan-200 mt-0.5">40 MP</span>
+                    <div id="cdSaberE" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
+                </button>
+                <span class="text-[9px] font-rpg text-sky-200 mt-1">Колосс</span>
+                <div id="pipsSaberE" class="level-pips"></div>
+            </div>
+
+            <!-- R: ЭКСКАЛИБУР! (Excalibur Ultimate) -->
+            <div class="flex flex-col items-center relative z-20">
+                <button id="btnSaberLvlR" onclick="levelUpOrb('r')" class="hidden mb-1 w-full py-0.5 bg-gradient-to-b from-amber-400 to-amber-600 text-stone-950 font-extrabold text-[10px] rounded border border-yellow-200 shadow animate-bounce">+ УР</button>
+                <button onclick="castSaberSkill('r')" class="relative w-14 h-14 sm:w-16 sm:h-16 rpg-btn-gold rounded-xl flex flex-col items-center justify-center group border-2 border-yellow-300" title="R — ЛУЧ ЭКСКАЛИБУРА: каст (3.6с → 2.25с), затем направленный луч энергии вперёд. Остаются светящиеся осколки. S — отмена.">
+                    <span class="hotkey-badge">R</span>
+                    <span class="text-2xl sm:text-3xl group-hover:scale-125 transition-transform drop-shadow">🔆</span>
+                    <span class="text-[9px] font-rpg font-extrabold text-amber-100 mt-0.5">100 MP</span>
+                    <div id="cdSaberR" class="absolute inset-0 bg-black/85 rounded-xl hidden items-center justify-center text-xs font-bold text-amber-300"></div>
+                </button>
+                <span class="text-[9px] font-rpg font-bold text-amber-300 mt-1">EXCALIBUR</span>
+                <div id="pipsSaberR" class="level-pips"></div>
+            </div>
+
+            <div class="h-12 w-[2px] bg-stone-800 mx-0.5 self-center relative z-20"></div>
+
+            <!-- Зелья для Сейбер -->
+            <div class="flex flex-col items-center relative z-20">
+                <button onclick="useQuickPotion('hp')" class="relative w-11 h-12 sm:w-12 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group">
+                    <span class="hotkey-badge">1</span>
+                    <span class="text-lg sm:text-xl">🧪</span>
+                    <span id="countHpPotSaber" class="text-[10px] font-bold text-rose-400">x3</span>
+                </button>
+                <span class="text-[9px] text-stone-500 mt-1">Кровь</span>
+            </div>
+            <div class="flex flex-col items-center relative z-20">
+                <button onclick="useQuickPotion('mp')" class="relative w-11 h-12 sm:w-12 sm:h-14 rpg-btn rounded-xl flex flex-col items-center justify-center group">
+                    <span class="hotkey-badge">2</span>
+                    <span class="text-lg sm:text-xl">⚗️</span>
+                    <span id="countMpPotSaber" class="text-[10px] font-bold text-cyan-400">x3</span>
+                </button>
+                <span class="text-[9px] text-stone-500 mt-1">Прана</span>
+            </div>
+        </div>
+
+        <!-- ПАНЕЛЬ 3: АРЧЕР (заполняется из ARCHER_SKILLS функцией buildArcherBar) -->
+        <div id="archerActionBar" class="hidden rpg-panel p-2.5 rounded-2xl items-end gap-2 sm:gap-3 border-2 border-lime-700/80"></div>
+        </div>
+        <div class="dock-specials">
+            <button id="btnShadowChallenge" class="dock-special shadow-call hidden" onclick="openShadowPrompt()" title="Все навыки на максимуме. Сразиться со своей тенью?">
+                <span class="dock-special-icon">☾</span>
+                <span class="dock-special-text">Хотите сразиться<br>со своей тенью?</span>
+            </button>
+            <div id="dockBuffs" class="dock-buffs"></div>
+        </div>
+    </div>
+
+    <!-- Полоса здоровья босса -->
+    <div id="bossHud" class="hidden fixed top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none" style="width: min(560px, 46vw);">
+        <div class="rpg-panel px-4 py-2 rounded-xl">
+            <div class="flex justify-between items-center text-xs font-rpg font-bold text-rose-300 relative z-20">
+                <span id="bossName">Босс</span><span id="bossHpText" class="font-mono text-stone-200"></span>
+            </div>
+            <div class="h-3 bg-stone-950 rounded overflow-hidden border border-stone-700 mt-1 relative z-20">
+                <div id="bossHpBar" class="h-full liquid-bar-hp" style="width: 100%"></div>
+            </div>
+            <div id="bossPhaseText" class="text-[10px] text-amber-300 font-semibold mt-0.5 relative z-20"></div>
+        </div>
+    </div>
+
+    <!-- Подсказка взаимодействия -->
+    <div id="chestReward" class="hidden" onclick="hideChestReward()"></div>
+
+    <!-- ГЛОБАЛЬНАЯ КАРТА МИРА (M). Ад — скрытый ярус, на ней не отображается -->
+    <div id="modalWorldMap" class="hidden fixed inset-0 z-40 bg-black/80 flex items-center justify-center p-3" onclick="if (event.target === this) toggleModal('worldmap')">
+        <div class="rpg-panel rounded-2xl p-3 w-full max-w-[920px]">
+            <div class="flex items-center justify-between mb-2 relative z-20">
+                <h2 class="font-rpg text-lg font-extrabold text-amber-300">🗺️ The Realm of Oblivion</h2>
+                <div class="flex items-center gap-3 text-[11px] text-stone-300">
+                    <span>🗿 статуя</span><span>⛩️ святилище</span><span>🔮 загадка</span><span>💰 тайник</span><span><span class="text-rose-400">⚔</span> лагерь</span><span><span class="text-amber-300">🎁</span> сундук ждёт</span><span><span class="text-stone-500">✓</span> зачищен</span>
+                    <button onclick="toggleModal('worldmap')" class="rpg-btn px-2 py-1 rounded-lg text-xs">✕ (M)</button>
+                </div>
+            </div>
+            <canvas id="worldMapCanvas" width="1000" height="834" class="block mx-auto rounded-xl relative z-20 bg-black cursor-pointer" style="max-width:100%; max-height:calc(100vh - 110px); width:auto; height:auto;" onclick="onWorldMapClick(event)"></canvas>
+        </div>
+    </div>
+
+    <div id="interactPrompt" class="hidden fixed bottom-40 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+        <div class="rpg-panel px-4 py-1.5 rounded-full text-xs font-bold text-amber-200">
+            <span class="relative z-20"><kbd class="bg-stone-800 px-1.5 py-0.5 rounded border border-amber-500 text-amber-300">G</kbd> <span id="interactText"></span></span>
+        </div>
+    </div>
+
+    <!-- Мобильный джойстик -->
+    <div id="touchJoystickArea" class="hidden fixed bottom-28 left-4 z-30 w-28 h-28 rounded-full bg-stone-900/60 border-2 border-stone-600 items-center justify-center">
+        <div id="touchJoystickKnob" class="w-12 h-12 rounded-full bg-amber-600/70 border border-amber-300"></div>
+    </div>
+    <!-- ==================== МОДАЛЬНОЕ ОКНО: ГРИМУАР ИНВОКЕРА (27 ЗАКЛИНАНИЙ WARCRAFT 3) И КОДЕКС СЕЙБЕР ==================== -->
+    <div id="modalSpellbook" class="hidden fixed inset-0 z-40 bg-black/75 flex items-center justify-center p-3">
+        <div class="rpg-panel w-full max-w-5xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700 pb-3 gap-2">
+                <div>
+                    <h2 id="spellbookTitle" class="font-rpg text-xl sm:text-2xl font-bold text-amber-400 flex items-center gap-2">📖 Гримуар Карла: 27 Заклинаний Канона Warcraft 3</h2>
+                    <p id="spellbookSubtitle" class="text-xs text-slate-400 mt-0.5">В каноне старых карт Warcraft 3 порядок сфер <span class="text-cyan-400 font-bold">Q</span>, <span class="text-fuchsia-400 font-bold">W</span>, <span class="text-orange-400 font-bold">E</span> имеет значение (3×3×3 = 27 уникальных заклинаний)!</p>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <div id="spellbookFilterTabs" class="flex gap-1 mr-2">
+                        <button onclick="filterSpellbook('all')" class="rpg-btn px-2.5 py-1 rounded text-xs font-bold text-amber-300">Все (27)</button>
+                        <button onclick="filterSpellbook('q')" class="rpg-btn px-2.5 py-1 rounded text-xs font-bold text-cyan-300">❄️ Quas (9)</button>
+                        <button onclick="filterSpellbook('w')" class="rpg-btn px-2.5 py-1 rounded text-xs font-bold text-fuchsia-300">⚡ Wex (9)</button>
+                        <button onclick="filterSpellbook('e')" class="rpg-btn px-2.5 py-1 rounded text-xs font-bold text-orange-300">🔥 Exort (9)</button>
+                    </div>
+                    <button onclick="closeAllModals()" class="rpg-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-200">✕ Закрыть (Esc)</button>
+                </div>
+            </div>
+
+            <div id="spellbookGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+    </div>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО: МАГ И ИНВЕНТАРЬ ==================== -->
+    <div id="modalChar" class="hidden fixed inset-0 z-40 bg-black/75 flex items-center justify-center p-3">
+        <div class="rpg-panel w-full max-w-4xl rounded-2xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h2 class="font-rpg text-xl sm:text-2xl font-bold text-amber-400 flex items-center gap-2">🎒 Снаряжение героя и Инвентарь</h2>
+                <button onclick="closeAllModals()" class="rpg-btn px-3 py-1 rounded-lg text-sm font-bold text-slate-300">✕ Закрыть</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+                <div class="md:col-span-5 flex flex-col gap-4">
+                    <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-3.5">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">Артефакты Мага</h3>
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <div onclick="unequipSlot('weapon')" class="cursor-pointer bg-slate-950 border-2 border-slate-700 hover:border-amber-500 rounded-xl p-2 flex flex-col items-center justify-center min-h-[82px] text-center transition" id="equipSlotWeapon">
+                                <span class="text-2xl">🪄</span>
+                                <span class="text-[10px] text-slate-400 mt-1">Посох / Сфера</span>
+                            </div>
+                            <div onclick="unequipSlot('armor')" class="cursor-pointer bg-slate-950 border-2 border-slate-700 hover:border-amber-500 rounded-xl p-2 flex flex-col items-center justify-center min-h-[82px] text-center transition" id="equipSlotArmor">
+                                <span class="text-2xl">👘</span>
+                                <span class="text-[10px] text-slate-400 mt-1">Мантия</span>
+                            </div>
+                            <div onclick="unequipSlot('ring')" class="cursor-pointer bg-slate-950 border-2 border-slate-700 hover:border-amber-500 rounded-xl p-2 flex flex-col items-center justify-center min-h-[82px] text-center transition" id="equipSlotRing">
+                                <span class="text-2xl">💎</span>
+                                <span class="text-[10px] text-slate-400 mt-1">Реликвия Аганима</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-3.5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400">Магическое Мастерство</h3>
+                                <span class="text-xs bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full font-bold">
+                                    Очки сфер: <span id="modalSkillPoints">0</span>
+                                </span>
+                            </div>
+                            <div class="space-y-2 text-xs">
+                                <div class="flex justify-between items-center bg-slate-950 p-2 rounded-lg border border-cyan-900/60">
+                                    <span>❄️ <strong>Quas (Лёд)</strong>: Уровень <span id="charQuasLvl" class="text-cyan-300 font-bold">1</span>/7</span>
+                                    <button onclick="levelUpOrb('q'); renderCharacterModal();" id="modalBtnQ" class="rpg-btn-gold px-2 py-0.5 rounded font-bold disabled:opacity-30">+1</button>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-950 p-2 rounded-lg border border-fuchsia-900/60">
+                                    <span>⚡ <strong>Wex (Шторм)</strong>: Уровень <span id="charWexLvl" class="text-fuchsia-300 font-bold">0</span>/7</span>
+                                    <button onclick="levelUpOrb('w'); renderCharacterModal();" id="modalBtnW" class="rpg-btn-gold px-2 py-0.5 rounded font-bold disabled:opacity-30">+1</button>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-950 p-2 rounded-lg border border-orange-900/60">
+                                    <span>🔥 <strong>Exort (Огонь)</strong>: Уровень <span id="charExortLvl" class="text-orange-300 font-bold">0</span>/7</span>
+                                    <button onclick="levelUpOrb('e'); renderCharacterModal();" id="modalBtnE" class="rpg-btn-gold px-2 py-0.5 rounded font-bold disabled:opacity-30">+1</button>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-950 p-2 rounded-lg border border-amber-900/60">
+                                    <span>✡️ <strong>Invoke (Призыв)</strong>: Уровень <span id="charInvokeLvl" class="text-amber-300 font-bold">1</span>/4</span>
+                                    <button onclick="levelUpOrb('r'); renderCharacterModal();" id="modalBtnR" class="rpg-btn-gold px-2 py-0.5 rounded font-bold disabled:opacity-30">+1</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-800 grid grid-cols-2 gap-2 text-xs text-slate-300">
+                            <div>⚔️ Урон атаки: <span id="calcHandDmg" class="font-bold text-white">24</span></div>
+                            <div>🔥 Мощь заклинаний: <span id="calcSpellAmp" class="font-bold text-amber-300">+15%</span></div>
+                            <div>🛡️ Маг. броня: <span id="calcArmor" class="font-bold text-white">4</span></div>
+                            <div>⏱️ Снижение КД: <span id="calcCdr" class="font-bold text-cyan-300">8%</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Правая колонка: Рюкзак -->
+                <div class="md:col-span-7 flex flex-col gap-3">
+                    <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-3.5 flex-1 flex flex-col">
+                        <div class="flex justify-between items-center mb-2.5">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400">Рюкзак (<span id="invCount">0</span>/24)</h3>
+                            <span class="text-[11px] text-slate-400">Нажмите на артефакт для осмотра</span>
+                        </div>
+                        <div id="inventoryGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 min-h-[210px] content-start"></div>
+                        <div id="itemDetailBox" class="mt-4 bg-slate-950 border border-slate-700 rounded-xl p-3 min-h-[96px] flex flex-col justify-between">
+                            <div class="text-xs text-slate-500 italic text-center my-auto">Выберите предмет в рюкзаке, чтобы надеть или использовать его.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО: АЛХИМИЯ И КРАФТ АРТЕФАКТОВ ==================== -->
+    <!-- ==================== ГЛОБАЛЬНЫЙ МАГАЗИН: ЗВЁЗДНАЯ МОЛИТВА (ГАЧА ЗА АЛМАЗЫ) ==================== -->
+    <div id="modalGacha" class="hidden fixed inset-0 z-40 bg-black/85 flex items-center justify-center p-3" onclick="if (event.target === this) toggleModal('gacha')">
+        <div class="gacha-wrap">
+            <header class="gacha-head">
+                <div>
+                    <div class="gacha-kicker">Глобальный магазин</div>
+                    <h2>✦ Звёздная Молитва</h2>
+                </div>
+                <div class="gacha-head-right">
+                    <div class="gacha-wallet">💎 <b id="gachaDiamonds">0</b> <span>Алмазы</span></div>
+                    <button class="gacha-close" onclick="toggleModal('gacha')" aria-label="Закрыть">✕</button>
+                </div>
+            </header>
+            <nav class="gacha-tabs">
+                <button data-tab="banner" class="on" onclick="gachaTab('banner')">Баннер</button>
+                <button data-tab="pool" onclick="gachaTab('pool')">Оружие и пассивки</button>
+                <button data-tab="history" onclick="gachaTab('history')">История</button>
+            </nav>
+            <section id="gachaBanner" class="gacha-page"></section>
+            <section id="gachaPool" class="gacha-page hidden"></section>
+            <section id="gachaHistory" class="gacha-page hidden"></section>
+            <div id="gachaReveal" class="gacha-reveal hidden" onclick="gachaRevealClick()"></div>
+        </div>
+    </div>
+
+    <!-- Вызов тени Сейбер -->
+    <div id="modalShadow" class="hidden fixed inset-0 z-40 bg-black/85 flex items-center justify-center p-3">
+        <div class="shadow-dialog">
+            <div class="shadow-moon" aria-hidden="true"></div>
+            <h2>Хотите сразиться со своей тенью?</h2>
+            <p>Вы постигли все приёмы меча. В зеркале тьмы ждёт ваше отражение — с теми же навыками и без жалости.
+               Победите его, и Сейбер навсегда примет <b>Тёмную форму</b>. Поражение вернёт вас на место вызова.</p>
+            <div class="shadow-actions">
+                <button class="shadow-yes" onclick="startShadowDuel()">Принять вызов</button>
+                <button class="shadow-no" onclick="closeAllModals()">Не сейчас</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalCraft" class="hidden fixed inset-0 z-40 bg-black/75 flex items-center justify-center p-3">
+        <div class="rpg-panel w-full max-w-4xl rounded-2xl p-4 sm:p-6 max-h-[92vh] overflow-y-auto flex flex-col gap-3">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h2 class="font-rpg text-xl sm:text-2xl font-bold text-amber-400 flex items-center gap-2">⚗️ Кузня Тайных Артефактов</h2>
+                <button onclick="closeAllModals()" class="rpg-btn px-3 py-1 rounded-lg text-sm font-bold text-slate-300">✕ Закрыть</button>
+            </div>
+            <p class="text-xs text-slate-300">Комбинируйте ресурсы с мобов, боссов и сундуков: зелья и эликсиры усиления, компоненты, оружие, броня и кольца. Наведите на ингредиент, чтобы узнать, где его добыть.</p>
+            <div class="craft-toolbar">
+                <div id="craftTabs" class="craft-tabs"></div>
+                <input id="craftSearch" type="search" placeholder="Поиск рецепта…" oninput="renderCraftModal()" class="craft-search">
+                <label class="craft-only"><input type="checkbox" id="craftOnlyReady" onchange="renderCraftModal()"> только доступные</label>
+            </div>
+            <div id="craftRecipesList" class="space-y-2.5"></div>
+        </div>
+    </div>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО: ДИАЛОГ С NPC ==================== -->
+    <div id="modalNpc" class="hidden fixed inset-0 z-40 bg-black/75 flex items-center justify-center p-3">
+        <div class="rpg-panel w-full max-w-2xl rounded-2xl p-5 flex flex-col gap-4">
+            <div class="flex items-start gap-4 border-b border-slate-700 pb-3">
+                <div id="npcPortrait" class="w-16 h-16 rounded-2xl bg-slate-800 border-2 border-amber-500 flex items-center justify-center text-4xl shrink-0">🧙‍♂️</div>
+                <div class="flex-1">
+                    <h2 id="npcName" class="font-rpg text-xl font-bold text-amber-400">Архимаг Рагмир</h2>
+                    <div id="npcRole" class="text-xs text-slate-400 mb-2">Хранитель Цитадели</div>
+                    <p id="npcDialogText" class="text-sm text-slate-200 leading-relaxed bg-slate-900/90 p-3 rounded-xl border border-slate-700"></p>
+                </div>
+            </div>
+
+            <div id="npcShopSection" class="hidden flex-col gap-2">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400">Лавка Магических Реликвий</h3>
+                    <span class="text-xs font-bold text-amber-300">Золото: 🪙 <span id="shopPlayerGold">0</span></span>
+                </div>
+                <div id="npcShopList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1"></div>
+            </div>
+
+            <div id="npcChoices" class="flex flex-wrap justify-end gap-2 pt-2"></div>
+        </div>
+    </div>
+
+    <!-- ==================== МОДАЛЬНОЕ ОКНО: СПРАВКА ==================== -->
+    <div id="modalHelp" class="hidden fixed inset-0 z-40 bg-black/80 flex items-center justify-center p-3">
+        <div class="rpg-panel w-full max-w-xl rounded-2xl p-5 flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h2 class="font-rpg text-xl font-bold text-amber-400">📖 Управление (как в Dota 2 / Warcraft 3)</h2>
+                <button onclick="closeAllModals()" class="rpg-btn px-3 py-1 rounded-lg text-sm font-bold">✕</button>
+            </div>
+            <div class="space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                <p><strong class="text-emerald-400">ПКМ:</strong> движение в точку, атака врага под курсором (Сейбер и Арчер), разговор/сбор по NPC и предметам. Также работают стрелки.</p>
+                <p><strong class="text-rose-400">ЛКМ / Пробел:</strong> атака в сторону курсора. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-rose-500 text-rose-300">A</kbd> — Attack-Move, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-amber-500 text-amber-300">S</kbd> — стоп (и отмена каста Экскалибура).</p>
+                <p><strong class="text-amber-300">Инвокер:</strong> автоатак нет. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-cyan-500 text-cyan-300">Q</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-fuchsia-500 text-fuchsia-300">W</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-orange-500 text-orange-300">E</kbd> — сферы, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded border border-amber-500 text-amber-300">R</kbd> — Invoke (27 заклинаний), <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">D</kbd>/<kbd class="bg-slate-800 px-1.5 py-0.5 rounded">F</kbd> — каст в точку курсора (ЛКМ тоже применяет слот D). Над магом и под ним появляется руна заклинания.</p>
+                <p><strong class="text-sky-300">Сейбер:</strong> только ближний бой. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">Q</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">W</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">E</kbd> — навыки, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">R</kbd> — Экскалибур: 5.5с каста (3.4с на 4 ур.), двигаться нельзя.</p>
+                <p><strong class="text-lime-300">Арчер:</strong> стрелы летят по дуге и падают в точку прицеливания; издалека урон выше (до +30%), в упор — ниже. <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">Q</kbd> замедление, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">W</kbd> залп, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">E</kbd> отскок, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">R</kbd> Бесконечный Арсенал (дождь клинков; наступите на меч, чтобы подобрать), <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">D</kbd> лук ↔ парные клинки, <kbd class="bg-slate-800 px-1.5 py-0.5 rounded">F</kbd> метнуть клинок в цель.</p>
+                <p><strong class="text-rose-300">Маршрут:</strong> южные ворота Камелота → тракт на восток → Замок Дракулы → тронный зал → портал → Ад.</p>
+                <hr class="border-slate-700 my-2">
+                <div class="flex justify-between items-center pt-1">
+                    <button onclick="resetSaveData()" class="px-3 py-1.5 bg-red-900/60 hover:bg-red-800 text-red-200 border border-red-600 rounded-lg text-xs font-bold">🗑️ Сбросить сохранение</button>
+                    <button onclick="closeAllModals()" class="rpg-btn-gold px-4 py-1.5 rounded-lg text-xs font-bold">В бой!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер уведомлений -->
+    <div id="toastContainer" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1.5 pointer-events-none"></div>
+
+    <!-- Three.js (WebGL) — обычный скрипт с CDN: без сборщиков и без CORS при открытии файла двойным кликом -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+    <script src="js/engine3d/engine.js?v=15"></script>
+    <script src="js/engine3d/materials.js?v=15"></script>
+    <script src="js/engine3d/world.js?v=15"></script>
+    <script src="js/engine3d/models.js?v=15"></script>
+    <script src="js/engine3d/actors.js?v=15"></script>
+    <script src="js/engine3d/effects.js?v=15"></script>
+    <script src="js/engine3d/weather.js?v=15"></script>
+    <script src="js/engine3d/animfx.js?v=15"></script>
+    <script src="js/controls.js?v=15"></script>
+    <script src="js/game.js?v=15"></script>
+</body>
+</html>
