@@ -340,13 +340,13 @@ const FX3D = {
                 case 'ubw_sword': { const o = this.get(f, 'sword'); o.position.set(f.x / T, 0.25 - (1 - lifeK) * 0.2, f.y / T); o.rotation.set(f.tilt || 0, (f.seed || 0) * 0.1, 0); break; }
                 case 'light_shard': { const o = this.get(f, 'shard'); o.position.set(f.x / T, 0.4 + Math.sin(t * 3 + f.x) * 0.08, f.y / T); o.userData.m.rotation.y = t * 2; o.scale.setScalar(Math.min(1, lifeK * 4)); this.lights.push({ x: f.x / T, z: f.y / T, h: 0.8, c: 0xfde047 }); break; }
                 case 'excalibur_beam': {
-                    const col = f.alter ? 0xff2a30 : 0xffe060;
-                    const o = this.get(Object.assign(f, { color: f.alter ? '#ef4444' : '#fde047' }), 'xbeam'), L = f.len / T, W = f.width / T;
+                    const col = f.color ? col3(f.color) : (f.alter ? 0xff2a30 : 0xffe060);
+                    const o = this.get(Object.assign(f, { color: f.color || (f.alter ? '#ef4444' : '#fde047') }), 'xbeam'), L = f.len / T, W = f.width / T;
                     const a = Math.atan2(Math.cos(f.ang), Math.sin(f.ang)), cx = Math.cos(f.ang), cz = Math.sin(f.ang);
                     o.position.set(f.x / T + cx * L / 2, 0.9, f.y / T + cz * L / 2); o.rotation.set(0, a, 0);
                     // Вспышка выстрела: волны, свет вдоль луча, удар камеры, звук
                     if (!f.__fired) {
-                        f.__fired = true; Sfx3D.play('ult'); AnimFX.kick(2);
+                        f.__fired = true; Sfx3D.play(f.small ? 'impact' : 'ult'); AnimFX.kick(f.small ? 0.4 : 2);
                         const ox = f.x / T, oz = f.y / T;
                         AnimFX.shock(ox, 0.1, oz, col, 0.5, 5, 0.8); AnimFX.shock(ox, 0.1, oz, 0xffffff, 0.3, 3, 0.5);
                         for (let k = 0; k < 6; k++) AnimFX.flash(ox + cx * L * k / 5, oz + cz * L * k / 5, col, 6, 1.0, 1.5);
@@ -453,6 +453,7 @@ const FX3D = {
             }
         }
         if (typeof Knight3D !== 'undefined') Knight3D.fxRunes();
+        if (typeof Eliza3D !== 'undefined') Eliza3D.fxRunes();
         if (typeof Cinema !== 'undefined') Cinema.fxRunes();
         for (const [src, o] of this.live) {
             if (!this.seen.has(src)) { this.kill(src, o); continue; }

@@ -1389,7 +1389,7 @@ function updateDockHud(dt) {
     // Доступность навыков по мане
     const h = player.heroType;
     if (h !== 'invoker') {
-        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : 'Saber'), SK = heroSkillSet();
+        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : 'Saber')), SK = heroSkillSet();
         ['q', 'w', 'e', 'r'].forEach(k => { const el = document.getElementById(`cd${P}${k.toUpperCase()}`); if (el && el.parentElement) el.parentElement.classList.toggle('no-mana', player.mp < SK[k].manaCost); });
     } else {
         [['cdSpellD', 0], ['cdSpellF', 1]].forEach(([id, slot]) => {
@@ -2422,7 +2422,7 @@ function updateGame(dt) {
     // Регенерация в безопасных зонах (Святилище или Королевство Камелот)
     const safeZ = playerZone();
     const inSanctuary = safeZ === 'sanctuary' || safeZ === 'camelot';
-    Knight.update(dt);
+    Knight.update(dt); Eliza.update(dt);
     player.hp = Math.min(player.maxHp, player.hp + (player.hpRegen + (inSanctuary ? 5 : 0)) * dt);
     player.mp = Math.min(player.maxMp, player.mp + (player.mpRegen + (inSanctuary ? 6 : 0)) * dt);
 
@@ -4797,7 +4797,8 @@ function updateHudUI() {
     document.getElementById('hudOrbBuffs').textContent = heroStatLine();
 
     if (player.heroType !== 'invoker') {
-        const cdP = player.heroType === 'archer' ? 'cdArcher' : (player.heroType === 'knight' ? 'cdKnight' : 'cdSaber');
+        const cdP = player.heroType === 'archer' ? 'cdArcher' : (player.heroType === 'knight' ? 'cdKnight' : (player.heroType === 'elizabeth' ? 'cdEliza' : 'cdSaber'));
+        if (player.heroType === 'elizabeth') { updateCooldownBadge('cdElizaD', player.saberCooldowns.d || 0); Eliza.refreshBar(); }
         if (player.heroType === 'knight') { updateCooldownBadge('cdKnightD', player.saberCooldowns.d || 0); Knight.refreshBar(); }
         updateCooldownBadge(cdP + 'Q', player.saberCooldowns.q || 0);
         updateCooldownBadge(cdP + 'W', player.saberCooldowns.w || 0);
@@ -4846,10 +4847,10 @@ function renderSpellbookModal() {
     document.getElementById('spellbookFilterTabs').classList.toggle('hidden', isSaber);
 
     if (isSaber) {
-        document.getElementById('spellbookTitle').textContent = player.heroType === 'knight' ? '🩸 Кодекс Павшего Рыцаря: Магия Крови' : isArcherBook
+        document.getElementById('spellbookTitle').textContent = player.heroType === 'elizabeth' ? '🌑 Кодекс Падшей Богини: Магия Пустоты' : player.heroType === 'knight' ? '🩸 Кодекс Павшего Рыцаря: Магия Крови' : isArcherBook
             ? '🏹 Кодекс Следопыта: Способности Арчер (кастомки Warcraft 3)'
             : '⚔️ Кодекс Короля Рыцарей: Способности Сейбер (Fate / Warcraft 3)';
-        document.getElementById('spellbookSubtitle').textContent = player.heroType === 'knight' ? 'Маны нет: каждый навык платит процентом ТЕКУЩЕГО здоровья и никогда не убивает. Чем сильнее ранен — тем быстрее регенерация. Меч — трофей с убитого мечника, он ломается; без него рыцарь рвёт врагов когтями.' : isArcherBook
+        document.getElementById('spellbookSubtitle').textContent = player.heroType === 'elizabeth' ? 'Каждое попадание навыком даёт стак «Скверны» (до 10, +3% к силе навыков за стак). Проклятые враги получают на 25% больше урона и лечат Элизабет.' : player.heroType === 'knight' ? 'Маны нет: каждый навык платит процентом ТЕКУЩЕГО здоровья и никогда не убивает. Чем сильнее ранен — тем быстрее регенерация. Меч — трофей с убитого мечника, он ломается; без него рыцарь рвёт врагов когтями.' : isArcherBook
             ? 'Стрелы летят по баллистической дуге. Издалека урон выше (до +30%), ближе 90px — ниже на 25%. Крит зависит от уровня и ультимейта.'
             : 'Все навыки Сейбер — ближний бой. Они усиливаются от очков мастерства и экипировки Камелота.';
 
@@ -6287,6 +6288,8 @@ const HERO_DEFS = {
                hello: '🏰 Сейбер прибыла в Королевство Камелот!' },
     archer:  { title: 'Арчер • Страж Клинков', short: 'Арчер', home: { x: 14, y: 18.5 }, equip: { weapon: 'hunter_bow', armor: 'ranger_leather', ring: null },
                hello: '🏹 Арчер явился в Руины Святилища. Trace on.' },
+    elizabeth: { title: 'Элизабет Альтер • Падшая Богиня', short: 'Элизабет', home: { x: 14, y: 16 }, equip: { weapon: null, armor: null, ring: null },
+               hello: '🌑 Элизабет Альтер расправила крылья. Пустота слушает её песнь.' },
     knight:  { title: 'Павший Рыцарь • Магия Крови', short: 'Рыцарь', home: { x: 57.5, y: 17 }, equip: { weapon: null, armor: null, ring: null },
                hello: '🩸 Павший Рыцарь поднялся из пепла. Клинок он заберёт у первого же мечника.' }
 };
@@ -6307,6 +6310,7 @@ function heroDisplayName() {
 function heroStatLine() {
     if (player.heroType === 'invoker') return `Мощь: +${player.spellAmp}% | Скор: ${player.moveSpeed} | Сниж.КД: ${player.cdrPct}%`;
     if (player.heroType === 'archer') return `Атака: ${player.handDmg} | Крит: ${player.critChance}% | Дальность: ${player.attackRange}`;
+    if (player.heroType === 'elizabeth') return `Мощь: +${player.spellAmp}% | Скверна: ${player.elizaStacks || 0}/10 | Скор: ${player.moveSpeed}`;
     if (player.heroType === 'knight') return `Атака: ${player.handDmg} | Реген: ${player.hpRegen}/с | ${player.knightSword ? 'Меч ' + player.knightSword.dur + '/' + player.knightSword.max : 'Когти'}`;
     return `Атака: ${player.handDmg} | Броня: ${player.armor} | Скор: ${player.moveSpeed}`;
 }
@@ -6364,6 +6368,8 @@ function recalcPlayerStats() {
         }
     } else if (player.heroType === 'knight') {
         Knight.stats(L, q, w, e, r, eq);
+    } else if (player.heroType === 'elizabeth') {
+        Eliza.stats(L, q, w, e, r, eq);
     } else {
         // Инвокер: чистый кастер. Автоатак и физического урона нет — весь урон только от заклинаний.
         const activeQ = player.activeOrbs.filter(o => o === 'q').length;
@@ -6458,7 +6464,7 @@ function performMageBasicAttack() {
         return;
     }
     if (player.basicAttackCd > 0) return;
-    if (player.heroType === 'knight') Knight.attack(); else if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
+    if (player.heroType === 'knight') Knight.attack(); else if (player.heroType === 'elizabeth') Eliza.attack(); else if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
 }
 
 // Цепочка автоатак: 1 → 2 → 3 → 4 → снова 1 (сбрасывается, если пауза между ударами дольше 1.3 с)
@@ -6676,10 +6682,11 @@ function castHeroSkill(key) {
     if (player.heroType === 'saber') castSaberSkillImpl(key);
     else if (player.heroType === 'archer') castArcherSkill(key);
     else if (player.heroType === 'knight') Knight.cast(key);
+    else if (player.heroType === 'elizabeth') Eliza.cast(key);
 }
 function castSaberSkill(key) { castHeroSkill(key); }
 // Набор навыков текущего героя (для Кодекса, панели и прокачки)
-function heroSkillSet() { return player.heroType === 'archer' ? ARCHER_SKILLS : (player.heroType === 'knight' ? KNIGHT_SKILLS : SABER_SKILLS); } // совместимость со старыми кнопками панели
+function heroSkillSet() { return player.heroType === 'archer' ? ARCHER_SKILLS : (player.heroType === 'knight' ? KNIGHT_SKILLS : (player.heroType === 'elizabeth' ? ELIZA_SKILLS : SABER_SKILLS)); } // совместимость со старыми кнопками панели
 
 function beginSkill(skill, key, deferCd) {
     if (player.controlLock) return 0;
@@ -7753,7 +7760,8 @@ function damagePlayer(rawDmg, kind = 'phys') {
     const arm = player.armor * (kind === 'magic' ? 0.4 : 1);
     let mult = armorMult(arm);
     if (player.ultCast) mult *= SABER_ULT.castDamageTaken;
-    if (player.heroType === 'knight' && Knight.inLake()) mult *= 0.75;   // в озере крови рыцарь получает меньше урона
+    if (player.heroType === 'knight' && Knight.inLake()) mult *= 0.75;
+    mult *= Eliza.damageMult();   // Элизабет в полёте ульты получает вдвое меньше урона   // в озере крови рыцарь получает меньше урона
     let mitigated = Math.max(1, Math.round(rawDmg * mult));
     if (player.heroType === 'knight') { mitigated = Knight.absorb(mitigated); if (mitigated <= 0) { player.invulnTime = 0.3; spawnFloatingText(player.x, player.y - 24, 'щит', '#fca5a5'); return; } }
     player.hp -= mitigated;
@@ -7764,7 +7772,7 @@ function damagePlayer(rawDmg, kind = 'phys') {
 
     if (player.hp <= 0) {
         player.ultCast = null;
-        player.knightRend = null; player.bloodLake = null; player.bloodShield = 0; player.knightBleed = 0; player.controlLock = false;
+        player.knightRend = null; player.bloodLake = null; player.elizaUlt = null; player.elizaChannel = null; player.elizaRunes = null; player.bloodShield = 0; player.knightBleed = 0; player.controlLock = false;
         player.excaliburChargeTime = 0;
         player.avalonBuffTimer = 0; player.saberHasteTimer = 0; player.alacrityTimer = 0; player.ghostWalkTimer = 0; player.lightningShieldTimer = 0;
         recalcPlayerStats();
@@ -8334,7 +8342,7 @@ function preUpdate25(dt) {
         if (zt.t >= zt.dur) zoneTransition = null;
     }
     updateSaberUlt(dt);
-    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend || Cinema.active);
+    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend || player.elizaUlt || Cinema.active);
 
     if (player.heroType === 'invoker' && player.attackTarget) {
         // Инвокер не умеет атаковать с руки: ПКМ по врагу лишь разворачивает мага к цели
@@ -8597,6 +8605,8 @@ function updateInvokerBarUI() {
     show('archerTopPill', h === 'archer'); show('archerActionBar', h === 'archer');
     Knight.buildBar(); show('knightTopPill', h === 'knight'); show('knightActionBar', h === 'knight');
     if (h === 'knight') Knight.refreshBar();
+    Eliza.buildBar(); show('elizaTopPill', h === 'elizabeth'); show('elizaActionBar', h === 'elizabeth');
+    if (h === 'elizabeth') Eliza.refreshBar();
     document.getElementById('btnGrimoireLabel').textContent = h === 'invoker' ? 'Гримуар 27 (B)' : 'Кодекс (B)';
 
     const hasPts = player.skillPoints > 0;
@@ -8604,7 +8614,7 @@ function updateInvokerBarUI() {
     document.getElementById('hudSkillPoints').textContent = player.skillPoints;
 
     if (h !== 'invoker') {
-        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : 'Saber');
+        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : 'Saber'));
         [['Q', 'q', 7, 'active-q'], ['W', 'w', 7, 'active-w'], ['E', 'e', 7, 'active-e'], ['R', 'r', 4, 'active-r']].forEach(([K, k, max, cls]) => {
             const btn = document.getElementById(`btn${P}Lvl${K}`);
             if (btn) btn.classList.toggle('hidden', !(hasPts && player.orbLevels[k] < max));
@@ -9049,6 +9059,7 @@ function buildArcherSprite() {
 
 function heroSpriteCanvas() {
     if (player.heroType === 'knight') return saberAlterSpriteCanvas || (saberAlterSpriteCanvas = buildSaberAlterSprite());
+    if (player.heroType === 'elizabeth') return invokerSpriteCanvas;
     if (player.heroType === 'saber') return player.saberAlter && saberAlterSpriteCanvas ? saberAlterSpriteCanvas : saberSpriteCanvas;
     if (player.heroType === 'archer') return archerSpriteCanvas;
     return player.orbLevels?.r >= 4 ? goldenInvokerSpriteCanvas : invokerSpriteCanvas;

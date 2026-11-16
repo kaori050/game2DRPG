@@ -169,7 +169,7 @@ const Controls = {
             else castHeroSkill(sk);
             return true;
         }
-        if (a === 'skill5') { aimed(); if (ht === 'invoker') castInvokedSpell(0); else if (ht === 'archer') toggleArcherStance(); else if (ht === 'knight') castHeroSkill('d'); return true; }
+        if (a === 'skill5') { aimed(); if (ht === 'invoker') castInvokedSpell(0); else if (ht === 'archer') toggleArcherStance(); else if (ht === 'knight' || ht === 'elizabeth') castHeroSkill('d'); return true; }
         if (a === 'skill6') { aimed(); if (ht === 'invoker') castInvokedSpell(1); else if (ht === 'archer') throwUbwSword(); return true; }
         if (a === 'attack') { aimed(); performMageBasicAttack(); return true; }
         if (a === 'attack_move') { player.attackMoveMode = !player.attackMoveMode; return true; }

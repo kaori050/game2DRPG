@@ -217,7 +217,7 @@ const Actors3D = {
         a.base.add(g); (a.scars = a.scars || []).push({ g, t: 0 });
         if (a.scars.length > 4) { const old = a.scars.shift(); a.base.remove(old.g); old.g.children.forEach(m => m.material.dispose()); }
     },
-    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; return ht === 'saber' ? (saberRed() ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
+    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; if (ht === 'elizabeth') return 0xe879f9; return ht === 'saber' ? (saberRed() ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
     animate(a, dt, x, z, opts) {
         const t = Engine3D.t;
         if (a.lx === null) { a.lx = x; a.lz = z; }
@@ -382,10 +382,10 @@ const Actors3D = {
         const charging = ht === 'saber' && (player.excaliburChargeTime || 0) > 0;
         if (player.knightAnim && player.knightAnim !== P.kAnim) { P.kAnim = player.knightAnim; this.attack(P, player.knightAnim.kind, player.knightAnim.t); }
         const cine = typeof Cinema !== 'undefined' ? Cinema.heroPose() : null;
-        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: cine ? cine.hold : (charging ? 'raise' : (player.knightRend ? 'rend' : null)), alt: player.charId === 'mordred' && (player.avalonBuffTimer || 0) > 0, bigBlade: ht === 'saber' && (player.avalonBuffTimer || 0) > 0 ? 0.9 : (charging ? 0.35 : 0),
+        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: cine ? cine.hold : (charging ? 'raise' : (player.knightRend ? 'rend' : (player.elizaUlt ? 'ultcast' : (player.elizaChannel ? 'channel' : null)))), alt: player.charId === 'mordred' && (player.avalonBuffTimer || 0) > 0, bigBlade: ht === 'saber' && (player.avalonBuffTimer || 0) > 0 ? 0.9 : (charging ? 0.35 : 0),
             vis: P.rig.kind === 'mdx' && P.rig.mdx.modelName === 'archer' ? (player.archerStance === 'blades' ? { 1: true, 2: false } : { 1: false, 2: true }) : null });
         // Ульта рыцаря: левитация и судороги, пока он разрывает себя
-        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : 0);
+        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : player.elizaUlt ? this.spring(P, 'cineY', 0.9 + Math.sin(Engine3D.t * 3) * 0.08, dt, 4) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : 0);
         // Переход формы/стойки: импульс масштаба, оружие «проявляется»
         let wScale = 1;
         if (P.trans > 0) {
