@@ -205,7 +205,7 @@ const AnimFX = {
         Object.assign(s, { x, y, z, r0, r1, life, max: life, op }); s.m.material.color.setHex(color); s.m.visible = true;
     },
     flash(x, z, color, i = 3, life = 0.35, h = 1.5) { this.flashes.push({ x, z, h, c: color, i, life, max: life }); if (this.flashes.length > 6) this.flashes.shift(); },
-    kick(s) { this.kickAmt = Math.max(this.kickAmt, s); if (typeof triggerScreenShake === 'function') triggerScreenShake(s * 9); },
+    kick(s) { this.kickAmt = Math.max(this.kickAmt, s); if (typeof triggerScreenShake === 'function') triggerScreenShake(s * 9); if (s >= 1 && typeof Feel !== 'undefined') Feel.hitstop(0.05); },   // мощные навыки — с микро-фризом
     // Готовый «удар» по земле: волна, искры, пыль, вспышка
     impact(x, z, color, size = 1, opts = {}) {
         const y = World3D.hAt(x, z) + 0.05;

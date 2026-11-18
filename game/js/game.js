@@ -2002,8 +2002,13 @@ function initAmbientAtmosphere() {
     initWeatherParticles();
 }
 
-function triggerScreenShake(intensity = 6) {
+function triggerScreenShake(intensity = 6, dirX, dirY) {
     screenShake = Math.max(screenShake, intensity);
+    // 3D: не хаотичная дрожь, а затухающий импульс вдоль одной оси (по умолчанию — направление взгляда героя)
+    if (typeof Feel !== 'undefined') {
+        const a = player ? player.facingAngle || 0 : 0;
+        Feel.shake(dirX !== undefined ? dirX : Math.cos(a), dirY !== undefined ? dirY : Math.sin(a), intensity * 0.009, 18, 7);
+    }
 }
 
 // performMageBasicAttack(), навыки Сейбер и Арчер — см. раздел 18
@@ -7669,6 +7674,12 @@ function damageEnemy(en, dmg, isSpell, knockX = 0, knockY = 0, customColor = nul
         tryMoveEntity(en, (knockX / len) * force, (knockY / len) * force);
     }
     const crit = opts && opts.crit;
+    // Импакт: фриз и тряска вдоль линии удара — для ударов оружием, критов и тяжёлых попаданий
+    if (typeof Feel !== 'undefined' && Math.hypot(en.x - player.x, en.y - player.y) < 260) {
+        const heavyHit = final >= en.maxHp * 0.2 || en.hp <= 0, melee = !isSpell && (player.slashAnimTime || 0) > 0;
+        if (crit || melee || heavyHit) Feel.impact(en.x - player.x, en.y - player.y, (melee ? 0.5 : 0.2) + (heavyHit ? 0.6 : 0) + (en.isBoss ? 0.3 : 0), crit);
+        Actors3D.jolt(en, en.x - player.x, en.y - player.y, crit || heavyHit ? 1 : 0.6);
+    }
     spawnFloatingText(en.x + (Math.random() - 0.5) * 18, en.y - 24 - (crit ? 8 : 0), crit ? `💥${final}!` : `${final}`,
         crit ? '#fb923c' : (customColor || (isSpell ? '#fde047' : '#ffffff')));
     spawnParticleBurst(en.x, en.y, customColor || '#991b1b', crit ? 14 : 8);
@@ -7769,6 +7780,14 @@ function damagePlayer(rawDmg, kind = 'phys') {
     SoundFX.play('hit');
     spawnFloatingText(player.x, player.y - 24, `-${mitigated} HP`, kind === 'magic' ? '#f0abfc' : '#f87171');
     spawnParticleBurst(player.x, player.y, '#ef4444', 10);
+    // Тяжёлый удар по герою: короткий фриз и толчок камеры от ближайшего врага
+    if (typeof Feel !== 'undefined' && mitigated >= player.maxHp * 0.08) {
+        let src = null, best = 1e9;
+        for (const en of enemies) { if (en.deadTimer > 0) continue; const d = Math.hypot(en.x - player.x, en.y - player.y); if (d < best) { best = d; src = en; } }
+        const k = Math.min(1, mitigated / (player.maxHp * 0.25));
+        Feel.hitstop(0.02 + 0.04 * k);
+        Feel.shake(src ? player.x - src.x : 0, src ? player.y - src.y : 0, 0.08 + 0.14 * k, 16, 7);
+    }
 
     if (player.hp <= 0) {
         player.ultCast = null;
@@ -10792,10 +10811,12 @@ window.onload = function () {
             if (fpsEl) fpsEl.textContent = `${currentFps} FPS`;
         }
 
-        updateGame(dt);
+        // Хитстоп: на 2–4 кадра мир почти замирает, камера и тряска идут в реальном времени
+        const gdt = dt * (typeof Feel !== 'undefined' ? Feel.tick(dt) : 1);
+        updateGame(gdt);
         if (gameState === 'playing') { // под непрозрачным меню мир не рисуем
             if (Engine3D.active) {
-                Engine3D.frame(dt);
+                Engine3D.frame(gdt);
                 if (now - hudTick.map > 120) { hudTick.map = now; renderMinimap(); }
             } else { ctx.setTransform(1, 0, 0, 1, 0, 0); renderGame(); }
         }

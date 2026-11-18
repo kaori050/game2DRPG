@@ -24,7 +24,7 @@ const MDX3D = {
         const ext = D.sequences[0].extent, height = Math.max(50, ext[6] - ext[3]);
         const sc = (opts.height || 1.2) / height; axes.matrix.premultiply(new THREE.Matrix4().makeScale(sc, sc, sc));
         root.add(axes);
-        const inst = { modelName: name, D, root, axes, meshes: [], world: [], seq: 0, time: D.sequences[0].start, gtime: 0, rate: 1, loop: true, done: false, mats: [] };
+        const inst = { sc, modelName: name, D, root, axes, meshes: [], world: [], seq: 0, time: D.sequences[0].start, gtime: 0, rate: 1, loop: true, done: false, mats: [] };
         // Текстуры (цвет команды — красный)
         const tex = D.textures.map((t, i) => {
             if (t.repl || t.missing) return null;
@@ -161,6 +161,58 @@ const MDX3D = {
             // Принудительная видимость частей (например, лук или клинки Арчера по стойке)
             if (inst.forceVis && inst.forceVis[M.index] !== undefined) M.mesh.visible = inst.forceVis[M.index];
         }
+    },
+    // Анализ походки (один раз на модель и анимацию): находим стопы — самые низкие кости слева и справа,
+    // прогоняем цикл ходьбы и меряем, с какой скоростью опорная стопа едет назад (единицы WC3 в секунду),
+    // и в какие доли цикла стопы встают на землю. Это даёт точную скорость проигрывания без скольжения.
+    gaitCache: {},
+    gait(inst, name, alt) {
+        const si = this.find(inst, name, alt); if (si < 0) return null;
+        const key = inst.modelName + ':' + si;
+        if (key in this.gaitCache) return this.gaitCache[key];
+        const D = inst.D, s = D.sequences[si], len = s.end - s.start;
+        const bones = D.nodes.filter(n => n.type === 'bone' && D.pivots[n.id]);
+        const low = side => bones.filter(n => side * D.pivots[n.id][1] > 2).sort((a, b) => D.pivots[a.id][2] - D.pivots[b.id][2])[0];
+        const feet = [low(1), low(-1)].filter(Boolean);
+        let res = null;
+        if (feet.length === 2 && len > 100) {
+            const N = 48, tr = feet.map(() => []), W = {}, saved = this.cur;
+            this.cur = inst;
+            for (let i = 0; i <= N; i++) {
+                const t = s.start + len * i / N; this.nodesAt(inst, s, t, W);
+                feet.forEach((f, k) => { const p = D.pivots[f.id], e = W[f.id].elements; tr[k].push([e[0] * p[0] + e[4] * p[1] + e[8] * p[2] + e[12], e[2] * p[0] + e[6] * p[1] + e[10] * p[2] + e[14]]); });
+            }
+            this.cur = saved;
+            const speeds = [], contacts = [];
+            tr.forEach(T => {
+                const zs = T.map(q => q[1]), mn = Math.min(...zs), mx = Math.max(...zs), th = mn + (mx - mn) * 0.25;
+                for (let i = 0; i < N; i++) {
+                    const on = zs[i] <= th, was = zs[(i + N - 1) % N] <= th;
+                    if (on && zs[i + 1] <= th) { const v = -(T[i + 1][0] - T[i][0]) / (len / N) * 1000; if (v > 0) speeds.push(v); }
+                    if (on && !was) contacts.push(i / N);
+                }
+            });
+            speeds.sort((a, b) => a - b);
+            const sp = speeds.length >= 4 ? speeds[Math.floor(speeds.length / 2)] : 0;
+            if (sp > 20) res = { speed: sp, contacts: contacts.length ? contacts : [0.25, 0.75] };
+        }
+        return (this.gaitCache[key] = res);
+    },
+    // Матрицы костей в момент t без смешивания и скиннинга (для анализа)
+    nodesAt(inst, s, time, W) {
+        const D = inst.D, byId = inst.byId || (inst.byId = (() => { const o = {}; D.nodes.forEach(nd => o[nd.id] = nd); return o; })()), done = {};
+        const q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), tmp = new THREE.Matrix4();
+        const calc = id => {
+            if (done[id]) return W[id];
+            const nd = byId[id]; if (!nd) return (W[id] = new THREE.Matrix4());
+            const tr = this.sample(nd.tr, time, s, 3, [0, 0, 0]), rt = this.sample(nd.rot, time, s, 4, [0, 0, 0, 1]), sl = this.sample(nd.sc, time, s, 3, [1, 1, 1]);
+            const p = D.pivots[id] || [0, 0, 0];
+            q.set(rt[0], rt[1], rt[2], rt[3]).normalize(); sc.set(sl[0], sl[1], sl[2]); v.set(tr[0] + p[0], tr[1] + p[1], tr[2] + p[2]);
+            const L = (W[id] || (W[id] = new THREE.Matrix4())).compose(v, q, sc).multiply(tmp.makeTranslation(-p[0], -p[1], -p[2]));
+            if (nd.parent >= 0 && byId[nd.parent]) L.premultiply(calc(nd.parent));
+            done[id] = 1; return L;
+        };
+        D.nodes.forEach(nd => calc(nd.id));
     },
     // Точки клинка в мире (для шлейфа)
     bladePts(inst) {

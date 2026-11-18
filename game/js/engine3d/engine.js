@@ -135,11 +135,12 @@ const Engine3D = {
         // Камера: наклон ~56° как в Warcraft 3, мягкое следование и зум колесом
         this.zoom += (this.zoomTarget - this.zoom) * Math.min(1, dt * 6);
         const tgt = this.camTarget;
-        tgt.x += (px - tgt.x) * Math.min(1, dt * 8); tgt.z += (pz - tgt.z) * Math.min(1, dt * 8); tgt.y = 0.6 + World3D.hAt(tgt.x, tgt.z);
-        const shake = (typeof screenShake !== 'undefined' && screenShake > 0) ? screenShake * 0.012 : 0;
+        // Пружинное следование с отставанием на рывках + тряска по оси удара + покачивание в такт шагам
+        Feel.follow(tgt, px, pz); tgt.y = 0.6 + World3D.hAt(tgt.x, tgt.z);
+        const o = Feel.offset(Actors3D.player && Actors3D.player.step);
         const pitch = 0.98 + (this.zoom - 19) * 0.006, d = this.zoom * (1 - (typeof AnimFX !== 'undefined' ? AnimFX.kickAmt : 0) * 0.05);
-        this.camera.position.set(tgt.x + (Math.random() - 0.5) * shake, tgt.y + Math.sin(pitch) * d, tgt.z + Math.cos(pitch) * d + (Math.random() - 0.5) * shake);
-        this.camera.lookAt(tgt.x, tgt.y, tgt.z);
+        this.camera.position.set(tgt.x + o.x, tgt.y + o.y + Math.sin(pitch) * d, tgt.z + o.z + Math.cos(pitch) * d);
+        this.camera.lookAt(tgt.x + o.x, tgt.y + o.y * 0.6, tgt.z + o.z);
         if (typeof Cinema !== 'undefined') { Cinema.update(dt); Cinema.camera(this.camera, tgt); }
 
         // Свет по времени суток и зоне

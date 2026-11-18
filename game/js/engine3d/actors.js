@@ -183,7 +183,7 @@ const Actors3D = {
         return T;
     },
     spring(a, key, target, dt, k = 22) { const j = a.j || (a.j = {}); const v = j[key] === undefined ? target : j[key]; return (j[key] = v + (target - v) * (1 - Math.exp(-k * dt))); },
-    attack(a, style, dur) { a.atkStyle = style; a.atkT = 0; a.atkDur = dur; a.impDone = false; },
+    attack(a, style, dur) { a.atkStyle = style; a.atkT = 0; a.atkDur = dur; a.impDone = false; a.atkLean = -0.05; a.strikeLean = false; },
     // Моменты удара в анимациях комбо
     IMPACT: {
         overhead: { at: 0.52, dist: 1.0, size: 1.4, kick: 0.7, sfx: 'heavy' },
@@ -217,6 +217,46 @@ const Actors3D = {
         a.base.add(g); (a.scars = a.scars || []).push({ g, t: 0 });
         if (a.scars.length > 4) { const old = a.scars.shift(); a.base.remove(old.g); old.g.children.forEach(m => m.material.dispose()); }
     },
+    BIPED_CONTACTS: [0.25, 0.75],
+    // Время удара: медленно в замахе (натяжение), быстро в ударе, медленно в доводке. u(0)=0, u(1)=1, монотонно
+    strikeWarp(p) { const k = 0.62; return Math.max(0, Math.min(1, p - k * Math.sin(Math.PI * 2 * p) / (Math.PI * 2))); },
+    // Импульс при постановке стопы: резкое проседание и мягкий подъём
+    stepImpulse(v) { return v < 0.07 ? v / 0.07 : Math.exp(-(v - 0.07) * 8); },
+    // Вес тела: проседание корпуса на шаге, наклоны при разгоне/торможении и крен в поворотах
+    weightFx(a, dt, rot0, rig) {
+        if (rig.kind === 'bat' || rig.kind === 'float' || rig.kind === 'slime' || dt <= 0) return;
+        const W = a.walkW || 0, wt = a.weight || 1;
+        // 1) Проседание на контакте стопы
+        let dip = 0;
+        if (a.contacts && W > 0.05) for (const c of a.contacts) { const v = ((a.cycle - c) % 1 + 1) % 1; dip = Math.max(dip, this.stepImpulse(v)); }
+        dip *= W;
+        a.bobY = -dip * 0.045 * wt;
+        // 2) Наклон вперёд-назад: пружина с недодемпфированием — масса доспехов «доезжает» и покачивается
+        const L = a.lean || (a.lean = { p: 0, pv: 0, r: 0, rv: 0, acc: 0, lastSpd: 0 });
+        const acc = (a.spd - L.lastSpd) / dt; L.lastSpd = a.spd;
+        L.acc += (acc - L.acc) * Math.min(1, dt * 10);
+        const accTerm = Math.min(0.1, L.acc > 0 ? 0.012 * L.acc : -0.01 * L.acc);   // старт — корпус вперёд, резкий стоп — инерция вперёд
+        const pT = Math.max(-0.25, Math.min(0.3, 0.06 * W + accTerm / wt * 0.9)) + (a.atkLean || 0);
+        const k = 90 / wt, c = 9 / Math.sqrt(wt);
+        L.pv += (k * (pT - L.p) - c * L.pv) * dt; L.p += L.pv * dt;
+        // 3) Крен в повороте: корпус заваливается внутрь дуги пропорционально скорости и угловой скорости
+        let dr = a.rot - rot0; while (dr > Math.PI) dr -= Math.PI * 2; while (dr < -Math.PI) dr += Math.PI * 2;
+        const rT = Math.max(-0.22, Math.min(0.22, -(dr / dt) * Math.min(1, a.spd / 3) * 0.06));
+        L.rv += (k * (rT - L.r) - c * L.rv) * dt; L.r += L.rv * dt;
+        a.root.rotation.x = L.p; a.root.rotation.z = L.r;
+        a.root.position.y = a.bobY;
+        a.atkLean = (a.atkLean || 0) * Math.exp(-dt * 6);
+        a.step = { dip, cycle: a.cycle || 0, spd: a.spd, weight: wt, rx: Math.cos(a.rot), rz: -Math.sin(a.rot) };
+    },
+    // Отдача по жертве: короткая дрожь вдоль линии удара (в реальном времени — видна и во время хитстопа)
+    jolt(en, dx, dy, k) { const a = this.map && this.map.get(en); if (!a) return; const l = Math.hypot(dx, dy) || 1; a.jolt = { dx: dx / l, dz: dy / l, t: 0, k }; a.lean && (a.lean.pv -= 2.5 * k); },
+    applyJolt(a) {
+        const j = a.jolt; if (!j) return;
+        j.t += typeof Feel !== 'undefined' ? Feel.realDt : 1 / 60;
+        if (j.t > 0.25) { a.jolt = null; return; }
+        const o = Math.sin(j.t * 70) * Math.exp(-j.t * 16) * 0.07 * j.k + Math.exp(-j.t * 10) * 0.05 * j.k;
+        a.base.position.x += j.dx * o; a.base.position.z += j.dz * o;
+    },
     heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; if (ht === 'elizabeth') return 0xe879f9; return ht === 'saber' ? (saberRed() ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
     animate(a, dt, x, z, opts) {
         const t = Engine3D.t;
@@ -226,13 +266,22 @@ const Actors3D = {
         a.lx = x; a.lz = z;
         let want = opts.face;
         if (want === undefined && d > 0.002) want = Math.atan2(dx, dz);
+        const rot0 = a.rot;
         if (want !== undefined) { let df = want - a.rot; while (df > Math.PI) df -= Math.PI * 2; while (df < -Math.PI) df += Math.PI * 2; a.rot += df * (1 - Math.exp(-14 * dt)); }
-        a.base.position.set(x, World3D.hAt(x, z), z); a.root.rotation.y = a.rot;
+        a.base.position.set(x, World3D.hAt(x, z), z); a.root.rotation.order = 'YXZ'; a.root.rotation.y = a.rot;
+        this.applyJolt(a);
         const rig = a.rig;
-        // Вес ходьбы плавно растёт и спадает; фаза шага зависит от скорости
+        // Вес ходьбы плавно растёт и спадает
         a.walkW = (a.walkW || 0) + (Math.min(1, a.spd / 2.2) - (a.walkW || 0)) * (1 - Math.exp(-8 * dt));
-        a.phase += dt * (2.2 + a.spd * 2.6);
-        const W = a.walkW, sw = Math.sin(a.phase) * (0.25 + Math.min(0.6, a.spd * 0.13)) * W;
+        const W = a.walkW, amp = 0.25 + Math.min(0.6, a.spd * 0.13);
+        // Фаза шага привязана к скорости в мире: за полцикла стопа проходит ровно длину шага 2·L·sin(amp),
+        // поэтому опорная нога стоит на месте и не скользит
+        if (rig.kind === 'biped') {
+            const L = 0.4 * a.root.scale.x * a.base.scale.x, stride = 2 * L * Math.sin(amp * Math.max(0.35, W));
+            a.phase += dt * (W > 0.08 ? Math.PI * a.spd / Math.max(0.05, stride) : 2.2);
+            a.cycle = (a.phase / (Math.PI * 2)) % 1; a.contacts = this.BIPED_CONTACTS;
+        } else a.phase += dt * (2.2 + a.spd * 2.6);
+        const sw = Math.sin(a.phase) * amp * W;
         // Атака по фазам
         let P = null;
         if (a.atkStyle) { a.atkT += dt; const p = a.atkT / a.atkDur; if (p >= 1) a.atkStyle = null; else P = this.pose(a, a.atkStyle, p); }
@@ -241,6 +290,8 @@ const Actors3D = {
         // Ключевой кадр удара: искры, волна, звук и камера синхронно с анимацией
         const IMP = this.IMPACT[a.atkStyle];
         if (P && IMP && !a.impDone && a.atkT / a.atkDur >= IMP.at) { a.impDone = true; this.impactFx(a, IMP); }
+        // Доводка корпуса: на пике удара тело по инерции уходит вперёд
+        if (a.atkStyle && !a.strikeLean && a.atkT / a.atkDur >= 0.45) { a.strikeLean = true; a.atkLean = 0.1; if (a.lean) a.lean.pv += 1.4 * (IMP && IMP.kick ? 1 + IMP.kick : 1); }
         // Реакция на попадание: отшатнуться
         a.hitT = Math.max(0, (a.hitT || 0) - dt);
         const hit = a.hitT > 0 ? Math.sin(a.hitT / 0.25 * Math.PI) : 0;
@@ -267,9 +318,23 @@ const Actors3D = {
             else if (A && SEQ[A]) { name = SEQ[A]; const s = X.D.sequences[MDX3D.find(X, name, alt)]; rate = s ? (s.end - s.start) / Math.max(150, a.atkDur * 1000) : 1; restart = a.atkT <= dt * 1.5; loop = false; }
             else if (A) { name = SEQ.slash || SEQ.thrust; const s = X.D.sequences[MDX3D.find(X, name, alt)]; rate = s ? (s.end - s.start) / Math.max(150, a.atkDur * 1000) : 1; restart = a.atkT <= dt * 1.5; loop = false; }
             else if (opts.hold && SEQ[opts.hold]) { name = SEQ[opts.hold]; loop = true; }
-            else if (a.spd > 0.4) { name = SEQ.walk || 'Walk'; rate = Math.max(0.6, Math.min(2.2, a.spd / 1.9)); loop = true; }
+            else if (a.spd > 0.4) {
+                name = SEQ.walk || 'Walk'; loop = true;
+                // Скорость шага модели = скорость в мире / скорость, с которой стопа едет назад в родной анимации
+                const g = MDX3D.gait(X, name, alt), wsc = (X.sc || 0.005) * a.root.scale.x * a.base.scale.x;
+                rate = g ? Math.max(0.45, Math.min(2.6, a.spd / (g.speed * wsc))) : Math.max(0.6, Math.min(2.2, a.spd / 1.9));
+            }
             else loop = true;
             if (!MDX3D.play(X, name, { alt, rate, restart, loop })) MDX3D.play(X, SEQ.idle || 'Stand', { alt, loop: true });
+            // Удар: замах с натяжением → резкий рывок → инерционная доводка (нелинейное время родной анимации)
+            const cs = X.D.sequences[X.seq];
+            if (A && a.dying <= 0 && X.name === name) {
+                const p = Math.min(1, a.atkT / a.atkDur);
+                X.time = cs.start + this.strikeWarp(p) * (cs.end - cs.start); X.rate = 0;
+            }
+            // Фаза шага для покачивания: берём из самой анимации ходьбы
+            if (!A && loop && name === (SEQ.walk || 'Walk')) { const g = MDX3D.gait(X, name, alt); a.cycle = (X.time - cs.start) / Math.max(1, cs.end - cs.start); a.contacts = g ? g.contacts : this.BIPED_CONTACTS; }
+            else a.contacts = null;
             // Увеличенный клинок (3-й навык Сейбер — «Колоссальный Клинок»)
             X.boneScale = X.blade && opts.bigBlade ? { id: X.blade.node, s: 1 + opts.bigBlade } : null;
             X.forceVis = opts.vis || null;
@@ -296,6 +361,7 @@ const Actors3D = {
             const reach = a.atkStyle ? Math.sin(a.atkT / a.atkDur * Math.PI) : 0;
             rig.arms.forEach((ar, i) => ar.rotation.x = S('a' + i, -0.4 + Math.sin(t * 2.4 + i) * 0.2 - reach * 1.4, 14));
         }
+        this.weightFx(a, dt, rot0, rig);
         // Вспышка урона (белым) и заморозка (голубым)
         const fl = Math.max(0, a.flash), fr = opts.frozen ? 1 : 0;
         if (fl > 0 || fr || a.tint) {
@@ -382,10 +448,12 @@ const Actors3D = {
         const charging = ht === 'saber' && (player.excaliburChargeTime || 0) > 0;
         if (player.knightAnim && player.knightAnim !== P.kAnim) { P.kAnim = player.knightAnim; this.attack(P, player.knightAnim.kind, player.knightAnim.t); }
         const cine = typeof Cinema !== 'undefined' ? Cinema.heroPose() : null;
+        // Масса героя: рыцарь в доспехах тяжелее всех, маги легче
+        P.weight = { knight: 1.35, saber: player.charId === 'mordred' ? 1.2 : 1.1, archer: 0.9, elizabeth: 0.75 }[ht] || 0.8;
         this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: cine ? cine.hold : (charging ? 'raise' : (player.knightRend ? 'rend' : (player.elizaUlt ? 'ultcast' : (player.elizaChannel ? 'channel' : null)))), alt: player.charId === 'mordred' && (player.avalonBuffTimer || 0) > 0, bigBlade: ht === 'saber' && (player.avalonBuffTimer || 0) > 0 ? 0.9 : (charging ? 0.35 : 0),
             vis: P.rig.kind === 'mdx' && P.rig.mdx.modelName === 'archer' ? (player.archerStance === 'blades' ? { 1: true, 2: false } : { 1: false, 2: true }) : null });
         // Ульта рыцаря: левитация и судороги, пока он разрывает себя
-        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : player.elizaUlt ? this.spring(P, 'cineY', 0.9 + Math.sin(Engine3D.t * 3) * 0.08, dt, 4) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : 0);
+        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : player.elizaUlt ? this.spring(P, 'cineY', 0.9 + Math.sin(Engine3D.t * 3) * 0.08, dt, 4) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : (P.bobY || 0));
         // Переход формы/стойки: импульс масштаба, оружие «проявляется»
         let wScale = 1;
         if (P.trans > 0) {
@@ -444,6 +512,7 @@ const Actors3D = {
                 const sc = Math.max(0.7, Math.min(2.2, (en.radius || 16) / 16)) * (en.isBoss ? 1 : 1);
                 a.base.scale.setScalar(sc);
                 a.lastHp = en.hp; a.lastCd = en.attackCd || 0;
+                a.weight = en.isBoss ? 1.5 : (en.tpl && en.tpl.miniBoss ? 1.3 : (en.elite ? 1.15 : 1));
                 this.map.set(en, a);
             }
             seen.add(en);
