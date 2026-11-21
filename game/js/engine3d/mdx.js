@@ -12,6 +12,12 @@ const MDX3D = {
         saber_alter: { idle: 'Stand', walk: 'Walk', thrust: 'Attack 1', slash: 'Attack 1', cross: 'Attack 2', slashB: 'Attack 2', spin: 'Attack 3', overhead: 'Attack 4', heavy: 'Spell Four', cast: 'Spell One', raise: 'Spell Three', kneel: 'Stand', rise: 'Morph', plunge: 'Spell Slam', stance: 'Stand', death: 'Death' },
         elizabeth: { idle: 'stand', walk: 'walk', castR: 'attack - 1', castL: 'attack - 2', cast: 'attack - 3', castBig: 'attack - 3', slash: 'attack - 1', thrust: 'attack - 1', cross: 'attack - 2', spin: 'attack - 3', overhead: 'spell - 1',
             spell1: 'spell - 1', channel: 'spell channel', ultcast: 'spell - 2', raise: 'spell channel', kneel: 'stand ready', rise: 'stand ready', plunge: 'spell - 1', stance: 'stand ready', pray: 'spell - 1', craft: 'attack - 1', death: 'death' },
+        medea: { idle: 'Stand - 1', walk: 'Walk', castR: 'Spell - 7', castL: 'Spell - 1', cast: 'Spell - 7', castBig: 'Spell - 1', slash: 'Attack - 1', cross: 'Attack - 2', thrust: 'Attack - 1', spin: 'Attack - 2',
+            overhead: 'Spell - 5', heavy: 'Spell - 5', volley: 'Spell - 5', sow: 'Spell - 3', appear: 'Birth', blink: 'Spell - 2', storm: 'Spell - 4', rulebreaker: 'Attack - 1', ultcast: 'Spell - 4',
+            channel: 'Spell - 6', raise: 'Spell - 6', kneel: 'Stand Defend', rise: 'Stand - 2', plunge: 'Spell - 3', stance: 'Stand Defend', pray: 'Spell - 6', craft: 'Spell - 1', death: 'Death' },
+        frankenstein: { idle: 'Stand 1', walk: 'Walk 1', slash: 'Attack 1', cross: 'Attack 2', thrust: 'Attack 1', slashB: 'Attack 2', spin: 'Attack 2', overhead: 'Spell 1', heavy: 'Spell 1',
+            slam: 'Spell 1', slam2: 'Spell 2', throw: 'Throw 1', pull: 'Recall', ultcast: 'Spell 4', cast: 'Spell 2', castR: 'Attack 1', castL: 'Attack 2', castBig: 'Spell 1',
+            raise: 'Spell 4', kneel: 'Stand 2', rise: 'Stand 3', plunge: 'Spell 1', stance: 'Stand 3', pray: 'Stand 2', craft: 'Attack 1', death: 'Death' },
         archer: { idle: 'Stand', walk: 'Walk', bow: 'Spell Throw', bow2: 'Spell Throw', bowPower: 'Spell Throw', slash: 'Attack 1', slashL: 'Attack 2', twin: 'Attack Slam', twinSpin: 'Spell Slam', cast: 'Spell Two', throw: 'Spell Throw', raise: 'Spell Gold', kneel: 'Stand', rise: 'Stand', bowUp: 'Spell Gold', stance: 'Stand', death: 'Death' }
     },
     // Матрица перехода из осей WC3 (X — вперёд, Y — влево, Z — вверх) в оси движка (Y — вверх, Z — вперёд)

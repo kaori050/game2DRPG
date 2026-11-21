@@ -84,6 +84,15 @@ const FX3D = {
             case 'meteor': { const r = new THREE.Mesh(G.orb, G3.mat(0x3a1a0a, { emissive: 0xff4a10, emissiveIntensity: 1.2, flatShading: true })); r.scale.setScalar(0.6); g.add(r); g.add(B.glow(0xff7a20, 2.6)); g.userData.r = r; break; }
             case 'icewall': { const n = 9; for (let i = 0; i < n; i++) { const m = new THREE.Mesh(G.crystal, G3.mat(0xbfe8ff, { transparent: true, opacity: 0.8, emissive: 0x3a8ac8, emissiveIntensity: 0.6 })); m.scale.set(0.3, 0.8 + (i % 3) * 0.3, 0.3); m.userData.k = (i / (n - 1)) * 2 - 1; g.add(m); } break; }
             case 'sword': { const s = B.sword(0xe8e8f0, 0x8a1a1a, 0.7); s.rotation.set(Math.PI, 0, 0); s.position.set(0, 0, 0); g.add(s); break; }
+            case 'ubwsword': {
+                // Клинок Арсенала: крупный, светящийся, с багрово-золотым ореолом и чётким силуэтом
+                const s = B.sword(0xf4f4ff, 0x8a1a1a, 1.05, { emissive: 0xff5a3a, emissiveIntensity: 0.55 }); s.rotation.set(Math.PI, 0, 0); g.add(s);
+                const halo = []; s.traverse(m => { if (m.isMesh) halo.push(m); });
+                halo.forEach(m => { const h = new THREE.Mesh(m.geometry, this.basic(0xff3a2a, { opacity: 0.55, side: THREE.BackSide })); h.position.copy(m.position); h.quaternion.copy(m.quaternion); h.scale.copy(m.scale).multiplyScalar(1.18); m.parent.add(h); });
+                const gl = B.glow(0xff6a40, 1.5); gl.position.y = 0.55; g.add(gl);
+                const mark = new THREE.Mesh(G.ring, this.basic(0xff3a2a, { opacity: 0.8 })); mark.scale.setScalar(0.55); g.add(mark);
+                g.userData = { gl, mark }; break;
+            }
             case 'shard': { const m = new THREE.Mesh(G.crystal, G3.mat(0xfff4a0, { emissive: 0xffd040, emissiveIntensity: 1.4 })); m.scale.set(0.16, 0.5, 0.16); g.add(m); g.add(B.glow(0xfde047, 1.0)); g.userData.m = m; break; }
             case 'rune': case 'runeRect': { const r = AnimFX.rune(c, { rect: kind === 'runeRect', crack: src.crack || 0, spin: src.spin }); g.add(r); g.userData.u = r.userData.rune; break; }
             case 'xbeam': {
@@ -95,15 +104,29 @@ const FX3D = {
             case 'spirit': { const m = new THREE.Mesh(G.orb, G3.mat(0xff7a20, { emissive: 0xff5a10, emissiveIntensity: 1.3, flatShading: true })); m.scale.set(0.25, 0.4, 0.25); m.position.y = 0.8; g.add(m); const gl = B.glow(0xff8a30, 1.6); gl.position.y = 0.8; g.add(gl); g.userData.m = m; break; }
             case 'decal': { const m = new THREE.Mesh(G.disc, new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.5, depthWrite: false })); m.position.y = 0.03; g.add(m); g.userData.m = m; break; }
             case 'chest': {
-                const T = (typeof CAMP_TIERS !== 'undefined' && CAMP_TIERS[src.tier]) || { color: '#e2e8f0', glow: '226,232,240' };
-                const wood = src.tier === 'precious' ? 0x4a2a6a : (src.tier === 'rich' ? 0x6a3a14 : 0x5a3a22), trim = col3(T.color);
-                const body = new THREE.Mesh(G.box, G3.mat(wood)); body.scale.set(0.7, 0.4, 0.46); body.position.y = 0.2; body.castShadow = true; g.add(body);
-                [-0.25, 0.25].forEach(x => { const b = new THREE.Mesh(G.box, G3.mat(trim, { emissive: trim, emissiveIntensity: 0.2 })); b.scale.set(0.06, 0.42, 0.48); b.position.set(x, 0.2, 0); g.add(b); });
-                const lid = new THREE.Group(); lid.position.set(0, 0.4, -0.23); g.add(lid);
-                const lm = new THREE.Mesh(new THREE.CylinderGeometry(0.23, 0.23, 0.7, 8, 1, false, 0, Math.PI), G3.mat(wood)); lm.rotation.z = Math.PI / 2; lm.position.z = 0.23; lm.castShadow = true; lid.add(lm);
-                const lock = new THREE.Mesh(G.box, G3.mat(trim, { emissive: trim, emissiveIntensity: 0.5 })); lock.scale.set(0.1, 0.12, 0.04); lock.position.set(0, 0.32, 0.24); g.add(lock);
-                const gl = B.glow(col3(T.glow), 1.6); gl.position.y = 0.4; g.add(gl);
-                g.userData = { lid, gl, seal: null };
+                // Сундук своего биома: дуб, море, корни, топь, кости, Пустота, кровь Сангвинии, адский обсидиан
+                const BC = (typeof chestBiome === 'function') ? chestBiome(src) : { wood: 0x5a3a22, trim: 0x8a8a94, glow: '226,232,240' };
+                const bk = (typeof REGION_CHEST !== 'undefined' && REGION_CHEST[chestRegion(src)]) || 'oak';
+                const q = typeof chestQuality === 'function' ? chestQuality(src.camp || src) : 0, wood = BC.wood, trim = BC.trim, glowC = col3(BC.glow);
+                const sz = 1 + q * 0.04, emiT = bk === 'void' || bk === 'infernal' ? 0.9 : 0.25;
+                const body = new THREE.Mesh(G.box, G3.mat(wood, { roughness: bk === 'void' || bk === 'infernal' ? 0.3 : 0.8 })); body.scale.set(0.7 * sz, 0.4 * sz, 0.46 * sz); body.position.y = 0.2 * sz; body.castShadow = true; g.add(body);
+                [-0.25, 0.25].forEach(x => { const b = new THREE.Mesh(G.box, G3.mat(trim, { emissive: trim, emissiveIntensity: emiT, metalness: 0.6 })); b.scale.set(0.06 * sz, 0.42 * sz, 0.48 * sz); b.position.set(x * sz, 0.2 * sz, 0); g.add(b); });
+                const lid = new THREE.Group(); lid.position.set(0, 0.4 * sz, -0.23 * sz); g.add(lid);
+                const lm = new THREE.Mesh(new THREE.CylinderGeometry(0.23 * sz, 0.23 * sz, 0.7 * sz, 10, 1, false, 0, Math.PI), G3.mat(wood)); lm.rotation.z = Math.PI / 2; lm.position.z = 0.23 * sz; lm.castShadow = true; lid.add(lm);
+                const lock = new THREE.Mesh(bk === 'bone' ? G.orb : G.box, G3.mat(bk === 'bone' ? 0xe8e0cc : trim, { emissive: trim, emissiveIntensity: 0.5 })); lock.scale.set(0.1, 0.12, bk === 'bone' ? 0.1 : 0.04); lock.position.set(0, 0.32 * sz, 0.24 * sz); g.add(lock);
+                const deco = (geo, color, sx, sy, sz2, x, y, z, opt) => { const m = new THREE.Mesh(geo, G3.mat(color, opt)); m.scale.set(sx, sy, sz2); m.position.set(x, y, z); g.add(m); return m; };
+                if (bk === 'sea') for (let i = 0; i < 5; i++) deco(G.orb, i % 2 ? 0xf0e0c8 : 0xd8b890, 0.05, 0.03, 0.05, (i - 2) * 0.13, 0.05 + (i % 3) * 0.1, 0.24, { roughness: 0.4 });
+                if (bk === 'root' || bk === 'bog') {
+                    for (let i = 0; i < 4; i++) { const r = deco(G.box, 0x3a2a14, 0.04, 0.04, 0.55, -0.3 + i * 0.2, 0.03, 0.05); r.rotation.y = (i - 1.5) * 0.5; }
+                    for (let i = 0; i < 3; i++) deco(G.orb, bk === 'bog' ? 0x6a8a2a : 0x3a7a2a, 0.14, 0.05, 0.12, (i - 1) * 0.22, 0.62, -0.02, { roughness: 1 });
+                    for (let i = 0; i < 3; i++) deco(G.orb, 0x9affc0, 0.03, 0.03, 0.03, 0.3, 0.06 + i * 0.03, 0.2 - i * 0.08, { emissive: 0x6affa0, emissiveIntensity: 1.2 });
+                }
+                if (bk === 'bone') for (let i = 0; i < 4; i++) { const r = deco(G.box, 0xe8e0cc, 0.03, 0.34, 0.03, -0.27 + i * 0.18, 0.2, 0.25); r.rotation.z = 0.15 * (i % 2 ? 1 : -1); }
+                if (bk === 'void') { const c = deco(G.crystal, 0xb08aff, 0.08, 0.2, 0.08, 0, 0.95, 0, { emissive: 0x8a4aff, emissiveIntensity: 1.6 }); g.userData.float = c; }
+                if (bk === 'blood') [[-0.33, 0.24], [0.33, 0.24], [-0.33, -0.24], [0.33, -0.24]].forEach(([x, z]) => deco(G.box, 0xe0b050, 0.07, 0.42, 0.07, x * sz, 0.2 * sz, z * sz, { metalness: 0.9, roughness: 0.3, emissive: 0x5a3a08, emissiveIntensity: 0.4 }));
+                if (bk === 'infernal') [-1, 1].forEach(sd => { const h = deco(G.crystal, 0x2a1a14, 0.05, 0.22, 0.05, sd * 0.3, 0.62, -0.05); h.rotation.z = -sd * 0.5; });
+                const gl2 = B.glow(glowC, 1.3 + q * 0.12); gl2.position.y = 0.4; g.add(gl2);
+                g.userData = { lid, gl: gl2, seal: null, float: g.userData.float || null };
                 if (src.sealed) { const s = new THREE.Mesh(G.ring, this.basic(0x9a6aff, { opacity: 0.7 })); s.scale.setScalar(0.7); s.position.y = 0.05; g.add(s); g.userData.seal = s; }
                 break;
             }
@@ -333,11 +356,16 @@ const FX3D = {
                 }
                 case 'stuck_arrow': { const o = this.get(f, 'arrow'); o.position.set(f.x / T, 0.2, f.y / T); o.rotation.set(0.7, Math.atan2(Math.cos(f.ang), Math.sin(f.ang)), 0); break; }
                 case 'ubw_fall': {
-                    const o = this.get(f, 'sword'); o.position.set(f.x / T, 0.3 + Math.max(0, f.delay) * 16, f.y / T); o.rotation.set(f.tilt || 0, (f.seed || 0) * 0.1, 0);
-                    if (f.delay < 0.6) AnimFX.trail(f, o.position.clone().add(new THREE.Vector3(0.05, 0.9, 0)), o.position.clone().add(new THREE.Vector3(-0.05, 0.1, 0)), 0xff3040, { always: true, life: 0.12, len: 10, core: 0.5 });
+                    const o = this.get(f, 'ubwsword'), hgt = 0.3 + Math.max(0, f.delay) * 16; o.position.set(f.x / T, hgt, f.y / T); o.rotation.set(f.tilt || 0, (f.seed || 0) * 0.1, 0);
+                    // Метка на земле — куда упадёт клинок: сжимается к моменту удара
+                    const mk = o.userData.mark, k = Math.max(0, Math.min(1, f.delay / Math.max(0.01, f.maxDelay)));
+                    mk.position.set(0, -hgt + 0.04, 0); mk.rotation.set(-(f.tilt || 0), 0, 0); mk.scale.setScalar(0.35 + 0.6 * k); mk.material.opacity = 0.9 - 0.5 * k;
+                    o.userData.gl.material.opacity = 0.9;
+                    this.lights.push({ x: f.x / T, z: f.y / T, h: Math.min(3, hgt), c: 0xff4a30 });
+                    if (f.delay < 0.6) AnimFX.trail(f, o.position.clone().add(new THREE.Vector3(0.05, 1.3, 0)), o.position.clone().add(new THREE.Vector3(-0.05, 0.1, 0)), 0xff3040, { always: true, life: 0.16, len: 12, core: 0.8 });
                     o.userData.onDie = { color: 0xff4050, size: 0.6, sfx: Math.random() < 0.3 ? 'impact' : null, vol: 0.6 }; break;
                 }
-                case 'ubw_sword': { const o = this.get(f, 'sword'); o.position.set(f.x / T, 0.25 - (1 - lifeK) * 0.2, f.y / T); o.rotation.set(f.tilt || 0, (f.seed || 0) * 0.1, 0); break; }
+                case 'ubw_sword': { const o = this.get(f, 'ubwsword'); o.position.set(f.x / T, 0.25 - (1 - lifeK) * 0.2, f.y / T); o.rotation.set(f.tilt || 0, (f.seed || 0) * 0.1, 0); o.userData.mark.visible = false; o.userData.gl.material.opacity = 0.35 + Math.sin(t * 4 + (f.seed || 0)) * 0.15; break; }
                 case 'light_shard': { const o = this.get(f, 'shard'); o.position.set(f.x / T, 0.4 + Math.sin(t * 3 + f.x) * 0.08, f.y / T); o.userData.m.rotation.y = t * 2; o.scale.setScalar(Math.min(1, lifeK * 4)); this.lights.push({ x: f.x / T, z: f.y / T, h: 0.8, c: 0xfde047 }); break; }
                 case 'excalibur_beam': {
                     const col = f.color ? col3(f.color) : (f.alter ? 0xff2a30 : 0xffe060);
@@ -390,7 +418,7 @@ const FX3D = {
                 const o = this.get(l, 'chest'); o.position.set(l.x / T, 0, l.y / T);
                 const open = l.opened ? Math.min(1, l.openAnim || 1) : 0;
                 o.userData.lid.rotation.x = -Actors3D.ease.back(open) * 1.75;
-                const cx = l.x / T, cz = l.y / T, tc = col3((typeof CAMP_TIERS !== 'undefined' && CAMP_TIERS[l.tier] || {}).glow || '226,232,240');
+                const cx = l.x / T, cz = l.y / T, tc = col3(typeof chestBiome === 'function' ? chestBiome(l).glow : '226,232,240');
                 if (l.__sealed === undefined) { l.__sealed = !!l.sealed; l.__opened = !!l.opened; }
                 if (l.__sealed && !l.sealed) { // печать сорвана
                     Sfx3D.play('seal'); AnimFX.shock(cx, 0.1, cz, 0x9a6aff, 0.3, 2.2, 0.6);
@@ -405,6 +433,7 @@ const FX3D = {
                 l.__sealed = !!l.sealed; l.__opened = !!l.opened;
                 if (l.opened && open < 1 && Math.random() < 0.6) AnimFX.emit({ x: cx, y: 0.5, z: cz, n: 2, color: [tc, 0xffffff], speed: 0.4, up: 2, life: 0.8, size: 0.06, grav: -0.5, r: 0.2 });
                 o.userData.gl.material.opacity = l.opened ? 0.2 : 0.55 + Math.sin(t * 3) * 0.25;
+                if (o.userData.float) { o.userData.float.position.y = 0.95 + Math.sin(t * 2 + l.uid * 9) * 0.08; o.userData.float.rotation.y = t * 1.5; }
                 if (o.userData.seal) { o.userData.seal.visible = !!l.sealed; o.userData.seal.rotation.y = t; }
             } else if (l.kind === 'herb_node') { if (l.respawnTimer > 0) continue; const o = this.get(l, 'herb'); o.position.set(l.x / T, 0, l.y / T); }
             else {
@@ -454,6 +483,8 @@ const FX3D = {
         }
         if (typeof Knight3D !== 'undefined') Knight3D.fxRunes();
         if (typeof Eliza3D !== 'undefined') Eliza3D.fxRunes();
+        if (typeof Frank3D !== 'undefined') Frank3D.fxRunes();
+        if (typeof Medea3D !== 'undefined') Medea3D.fxRunes();
         if (typeof Cinema !== 'undefined') Cinema.fxRunes();
         for (const [src, o] of this.live) {
             if (!this.seen.has(src)) { this.kill(src, o); continue; }
@@ -505,6 +536,14 @@ const Labels3D = {
             const bw = en.isBoss ? 90 : 48, f = Math.max(0, en.hp / en.maxHp);
             c.fillStyle = 'rgba(0,0,0,0.75)'; c.fillRect(sx - bw / 2 - 1, sy - 1, bw + 2, 6);
             c.fillStyle = en.isBoss ? '#dc2626' : (en.rare ? '#a855f7' : (en.elite ? '#f59e0b' : '#ef4444')); c.fillRect(sx - bw / 2, sy, bw * f, 4);
+            // Уровень врага: цвет — насколько он опасен для героя (серый → зелёный → жёлтый → оранжевый → красный → череп)
+            if (en.level) {
+                const d = en.level - player.level, lc = d <= -4 ? '#94a3b8' : d <= -1 ? '#4ade80' : d <= 1 ? '#fde047' : d <= 3 ? '#fb923c' : '#ef4444';
+                const lt = d >= 6 ? '☠' : String(en.level), bx = sx - bw / 2 - 15;
+                c.fillStyle = 'rgba(0,0,0,0.8)'; c.fillRect(bx, sy - 5, 13, 13);
+                c.strokeStyle = lc; c.lineWidth = 1; c.strokeRect(bx + 0.5, sy - 4.5, 12, 12);
+                c.font = 'bold 9px Inter, system-ui, sans-serif'; c.fillStyle = lc; c.fillText(lt, bx + 6.5, sy + 4.5);
+            }
             if (special) {
                 c.font = 'bold 11px Cinzel, Georgia, serif';
                 c.fillStyle = '#000'; c.fillText(en.name || '', sx + 1, sy - 4);

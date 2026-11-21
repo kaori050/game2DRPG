@@ -9,9 +9,13 @@ const SoulsHUD = {
         if (!dock || !vit || this.ready) return;
         vit.classList.add('souls-vitals');
         vit.insertAdjacentHTML('afterbegin', this.orbHTML('hp', 'Здоровье'));
-        dock.insertAdjacentHTML('beforeend', `<div class="souls-right">${this.orbHTML('mp', 'Мана')}</div>`);
+        dock.insertAdjacentHTML('beforeend', `<div class="souls-right">${this.orbHTML('mp', 'Мана')}
+            <div class="souls-mad hidden" id="orb_mad" title="Безумие берсерка: навыки быстро наполняют шкалу, со временем она медленно спадает. На 100% герой теряет контроль">
+                <canvas width="240" height="240"></canvas><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="#050506" stroke-width="3.5"/><circle cx="20" cy="20" r="18" fill="none" stroke="url(#silv_mp)" stroke-width="1.8"/><path d="M21 7 L15 21 H20 L18 33 L26 17 H21 Z" fill="rgba(253,224,71,.16)"/></svg><b></b>
+            </div></div>`);
         this.orbs.hp = this.makeOrb('hp');
         this.orbs.mp = this.makeOrb('mp');
+        { const root = document.getElementById('orb_mad'), cv = root.querySelector('canvas'); this.orbs.mad = { id: 'mad', root, cv, g: cv.getContext('2d'), val: root.querySelector('b'), level: 0, vel: 0, slosh: 0, phase: 0, bubbles: [], pops: [], last: null }; }
         this.ready = true;
         FullscreenUI.init();
         requestAnimationFrame(t => this.loop(t));
@@ -76,6 +80,7 @@ const SoulsHUD = {
         blood: { top: '#b0121e', mid: '#6a0610', deep: '#1e0204', foam: 'rgba(255,120,120,.55)', glow: 'rgba(255,40,40,.35)' },
         mana: { top: '#3b6fe0', mid: '#163a9a', deep: '#050c2a', foam: 'rgba(170,210,255,.6)', glow: 'rgba(80,140,255,.35)' },
         gold: { top: '#d8a92a', mid: '#8a5a08', deep: '#2a1802', foam: 'rgba(255,236,170,.6)', glow: 'rgba(255,200,80,.3)' },
+        madness: { top: '#fde047', mid: '#ca8a04', deep: '#3a2a02', foam: 'rgba(255,250,200,.75)', glow: 'rgba(255,220,60,.45)' },
         shield: { top: '#9a1a28', mid: '#4a0a12', deep: '#120204', foam: 'rgba(255,190,190,.6)', glow: 'rgba(255,80,80,.3)' }
     },
     loop(now) {
@@ -95,6 +100,16 @@ const SoulsHUD = {
             } else {
                 this.step(mp, player.mp / Math.max(1, player.maxMp), dt, ht === 'invoker' && player.orbLevels && player.orbLevels.r >= 4 ? this.LIQ.gold : this.LIQ.mana);
                 mp.val.textContent = Math.ceil(player.mp); mp.sub.textContent = '/ ' + player.maxMp; mp.root.title = 'Мана';
+            }
+            // Безумие берсерка: маленький шар с жёлтой булькающей жидкостью над маной
+            const mad = this.orbs.mad, berserk = typeof Frank !== 'undefined' && Frank.isBerserker();
+            mad.root.classList.toggle('hidden', !berserk);
+            if (berserk) {
+                const m = (player.madness || 0) / 100, frenzy = !!player.frankFrenzy;
+                if (Math.random() < dt * (3 + m * 14)) this.bubble(mad, true);   // жидкость сильнее бурлит у края
+                this.step(mad, frenzy ? 1 : m, dt, this.LIQ.madness);
+                mad.val.textContent = frenzy ? '!' : Math.round(m * 100) + '%';
+                mad.root.classList.toggle('hot', m >= 0.7 && !frenzy); mad.root.classList.toggle('frenzy', frenzy);
             }
         }
         requestAnimationFrame(t => this.loop(t));

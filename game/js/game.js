@@ -16,11 +16,13 @@ const gameSettings = {
     selectedHero: 'invoker' // 'invoker' | 'saber'
 };
 
+// Хардкорный баланс: даже «Искатель» — серьёзный бой, «Рыцарь» — хардкор, «Кошмар» и «Бездна» — борьба за выживание.
+// aggro — дальность, с которой враги замечают героя; speed — скорость врагов; atkCd — множитель паузы между ударами (меньше — чаще бьют)
 const DIFFICULTY_CONFIG = {
-    easy:   { name: 'Искатель приключений', hpMult: 0.75, dmgMult: 0.75, rewardMult: 1.0 },
-    normal: { name: 'Рыцарь',    hpMult: 1.0,  dmgMult: 1.0,  rewardMult: 1.0 },
-    hard:   { name: 'Кошмар',    hpMult: 1.4,  dmgMult: 1.35, rewardMult: 1.35 },
-    insane: { name: 'Адская Бездна', hpMult: 2.0, dmgMult: 1.75, rewardMult: 1.8 }
+    easy:   { name: 'Искатель приключений', hpMult: 1.35, dmgMult: 1.4, rewardMult: 1.0, aggro: 1.1, speed: 1.0, atkCd: 0.95 },
+    normal: { name: 'Рыцарь',    hpMult: 1.9,  dmgMult: 2.0,  rewardMult: 1.0, aggro: 1.3, speed: 1.08, atkCd: 0.82 },
+    hard:   { name: 'Кошмар',    hpMult: 2.7,  dmgMult: 2.9,  rewardMult: 1.1, aggro: 1.55, speed: 1.15, atkCd: 0.7 },
+    insane: { name: 'Адская Бездна', hpMult: 3.8, dmgMult: 4.0, rewardMult: 1.2, aggro: 1.8, speed: 1.22, atkCd: 0.6 }
 };
 
 let fpsFrames = 0;
@@ -30,7 +32,7 @@ let spellbookCurrentFilter = 'all';
 
 const SoundFX = {
     ctx: null,
-    muted: false,
+    muted: true,   // по умолчанию звук выключен; включается в главном меню (выбор запоминается)
     rainGain: null,
     windGain: null,
     ambientStarted: false,
@@ -231,9 +233,20 @@ const SoundFX = {
 
 function toggleSound() {
     SoundFX.muted = !SoundFX.muted;
-    document.getElementById('btnSound').textContent = SoundFX.muted ? '🔇' : '🔊';
+    try { localStorage.setItem('eldoria_sound', SoundFX.muted ? 'off' : 'on'); } catch (e) {}
+    syncSoundUI();
+    if (!SoundFX.muted) { try { SoundFX.init(); if (SoundFX.ctx && SoundFX.ctx.state === 'suspended') SoundFX.ctx.resume(); } catch (e) {} SoundFX.play('orb'); }
     SoundFX.updateWeatherAudio(0, 0);
 }
+// Кнопки звука в главном меню и на панели игры показывают одно и то же состояние
+function syncSoundUI() {
+    const hud = document.getElementById('btnSound'); if (hud) hud.textContent = SoundFX.muted ? '🔇' : '🔊';
+    const m = document.getElementById('btnMenuSound'); if (m) { m.querySelector('span').textContent = SoundFX.muted ? 'Звук: выключен' : 'Звук: включён'; m.classList.toggle('is-on', !SoundFX.muted); }
+}
+// Звук включается, только если игрок сам включил его раньше
+try { if (localStorage.getItem('eldoria_sound') === 'on') SoundFX.muted = false; } catch (e) {}
+document.addEventListener('DOMContentLoaded', syncSoundUI);
+if (document.readyState !== 'loading') syncSoundUI();
 
 // ============================================================================
 // 2. МОДЕЛИ ГЕРОЕВ: ОБЫЧНЫЙ ИНВОКЕР, ЛЕГЕНДАРНЫЙ ЗОЛОТОЙ ИНВОКЕР И СЕЙБЕР (FATE)
@@ -965,9 +978,11 @@ const ARCHER_SKILLS = {
         key: 'r', name: 'Unlimited Blade Works', ruName: 'Бесконечный Арсенал',
         icon: '⚔️', manaCost: 90, baseCd: 40.0,
         desc: 'Ультимейт. С неба на огромную область вокруг Арчера обрушиваются проекции клинков. Упавшие мечи остаются в земле: наступите на меч, чтобы подобрать его, и метните клавишей F в выделенную цель (ПКМ по врагу) — пробивает всех на пути.',
-        stats: l => `Клинков: ${22 + 6 * l} • урон каждого: 70% атаки + ${30 + 18 * l} • радиус 340 • бросок: 260% атаки + ${80 + 45 * l}, пробивает насквозь`
+        stats: l => `Клинков: ${ubwBladeCount(l)} • урон каждого: 170% атаки + ${70 + 45 * l} • сначала бьют по врагам в круге • радиус 340 • бросок: 260% атаки + ${80 + 45 * l}, пробивает насквозь`
     }
 };
+// Число клинков ульты по рангу (1–4): 6, 7, 9 и ровно 13 на максимуме
+function ubwBladeCount(l) { return [6, 7, 9, 13][Math.max(1, Math.min(4, l)) - 1]; }
 // Стойка Арчера (клавиша D): лук ↔ парные клинки Канто и Бакуя
 const ARCHER_STANCE = {
     bladeRange: 74, bladeIntervalMult: 0.5, bladeDmgMult: 1.2,
@@ -1025,7 +1040,7 @@ CRAFT_RECIPES.push(
 );
 
 // ============================================================================
-// ОРУЖИЕ МОЛИТВЫ (ГАЧА): 3★ / 4★ / 5★ С УНИКАЛЬНЫМИ ПАССИВКАМИ
+// ЛЕГЕНДАРНОЕ ОРУЖИЕ: 3★ / 4★ / 5★ С УНИКАЛЬНЫМИ ПАССИВКАМИ (только из сундуков опасных земель и с редких врагов)
 // ============================================================================
 // Пассивки: dmgPct (+% урона), critDmg (+% крит. урона), crit (+% шанса), lifesteal (% от урона в HP), execute (+% урона по врагам <30% HP),
 // proc { chance, mult, name } (шанс доп. удара), manaOnHit, moveSpd (+% скорости), spellPct (+% мощи), cdr (−% перезарядки).
@@ -1094,157 +1109,6 @@ function weaponPassive() {
     const r = (player.refine && player.refine[id]) || 1, k = 1 + 0.25 * (r - 1), pv = def.passive, out = {};
     for (const key in pv) out[key] = key === 'proc' ? Object.assign({}, pv.proc, { chance: pv.proc.chance * k }) : (typeof pv[key] === 'number' ? pv[key] * k : pv[key]);
     return out;
-}
-
-// ============================================================================
-// АЛМАЗЫ И ЗВЁЗДНАЯ МОЛИТВА
-// ============================================================================
-const GACHA = { cost: 160, base5: 0.006, base4: 0.051, soft: 74, hard: 90, pity4: 10 };
-const GACHA_FEATURED = { saber: 'g_sw_oath', archer: 'g_bw_starfall', invoker: 'g_gr_oblivion' };
-const GACHA_REFUND = { 3: 15, 4: 60, 5: 300 };
-function gachaState() {
-    if (!player.gacha) player.gacha = { pity5: 0, pity4: 0, guarantee: false, history: [], total: 0 };
-    return player.gacha;
-}
-function addDiamonds(n, x, y) {
-    if (!n) return;
-    player.diamonds = (player.diamonds || 0) + n;
-    if (x !== undefined) spawnFloatingText(x, y - 46, `+${n} 💎`, '#7dd3fc');
-}
-function rollGacha(cls) {
-    const g = gachaState();
-    g.pity5++; g.pity4++;
-    let p5 = GACHA.base5;
-    if (g.pity5 >= GACHA.soft) p5 += (g.pity5 - GACHA.soft + 1) * 0.06;
-    if (g.pity5 >= GACHA.hard) p5 = 1;
-    const r = Math.random();
-    let stars = 3, id;
-    if (r < p5) {
-        stars = 5; g.pity5 = 0;
-        const feat = GACHA_FEATURED[cls];
-        // 50/50 как в Genshin: проиграл — следующий легендарный гарантированно с баннера
-        if (g.guarantee || Math.random() < 0.5) { id = feat; g.guarantee = false; }
-        else { const others = GACHA_POOL[cls][5].filter(x => x !== feat); id = others[Math.floor(Math.random() * others.length)] || feat; g.guarantee = true; }
-    } else if (g.pity4 >= GACHA.pity4 || r < p5 + GACHA.base4) {
-        stars = 4; g.pity4 = 0;
-    }
-    if (!id) { const pool = GACHA_POOL[cls][stars]; id = pool[Math.floor(Math.random() * pool.length)]; }
-    return { id, stars };
-}
-function ownsItem(id) { return player.equipment.weapon === id || player.inventory.some(s => s.id === id); }
-function doGachaPulls(n) {
-    const cls = player.heroType, cost = GACHA.cost * n;
-    if ((player.diamonds || 0) < cost) { showToast(`Нужно ${cost} 💎 — алмазы падают с элиты, боссов и из сундуков`, 'error'); return; }
-    player.diamonds -= cost;
-    const g = gachaState(), res = [];
-    for (let i = 0; i < n; i++) {
-        const { id, stars } = rollGacha(cls);
-        if (!player.refine) player.refine = {};
-        let note = 'Новое оружие!';
-        if (ownsItem(id)) {
-            const cur = player.refine[id] || 1;
-            if (cur < 5) { player.refine[id] = cur + 1; note = `Пробуждение R${cur + 1}`; }
-            else { addDiamonds(GACHA_REFUND[stars]); note = `R5 — возврат ${GACHA_REFUND[stars]} 💎`; }
-        } else if (!addItemToInventory(id, 1)) { addDiamonds(GACHA_REFUND[stars]); note = `Сумка полна — возврат ${GACHA_REFUND[stars]} 💎`; }
-        else player.refine[id] = 1;
-        g.total++;
-        g.history.unshift({ id, stars, t: Date.now() });
-        res.push({ id, stars, note });
-    }
-    g.history = g.history.slice(0, 120);
-    recalcPlayerStats();
-    playGachaReveal(res);
-}
-let gachaRevealStage = 0, gachaRevealData = null, gachaRevealTimer = null;
-function playGachaReveal(res) {
-    const el = document.getElementById('gachaReveal'), best = Math.max(...res.map(r => r.stars));
-    const met = best === 5 ? '#facc15' : (best === 4 ? '#c084fc' : '#60a5fa');
-    gachaRevealData = res; gachaRevealStage = 1;
-    el.style.setProperty('--met', met);
-    el.innerHTML = `<div class="gacha-meteor"></div><div class="gacha-burst"></div><div class="gacha-skip">нажмите, чтобы пропустить</div>`;
-    el.classList.remove('hidden');
-    SoundFX.play('meteor');
-    clearTimeout(gachaRevealTimer);
-    gachaRevealTimer = setTimeout(showGachaCards, 1900);
-}
-function showGachaCards() {
-    if (gachaRevealStage !== 1) return;
-    gachaRevealStage = 2;
-    const el = document.getElementById('gachaReveal'), res = gachaRevealData;
-    const best = Math.max(...res.map(r => r.stars));
-    SoundFX.fanfare(best === 5 ? 3 : (best === 4 ? 2 : 1));
-    el.innerHTML = `<div class="gacha-results">${res.map((r, i) => {
-        const d = ITEMS_DB[r.id];
-        return `<div class="gacha-card r${r.stars}" style="animation-delay:${i * 0.09}s"><div class="gs">${'★'.repeat(r.stars)}</div><div class="gi">${d.icon}</div><div class="gn">${d.name}</div><div class="gnote">${r.note}</div></div>`;
-    }).join('')}</div><div class="gacha-skip">нажмите, чтобы закрыть</div>`;
-    renderGachaModal();
-}
-function gachaRevealClick() {
-    if (gachaRevealStage === 1) { clearTimeout(gachaRevealTimer); showGachaCards(); return; }
-    gachaRevealStage = 0;
-    document.getElementById('gachaReveal').classList.add('hidden');
-}
-let gachaCurTab = 'banner';
-function gachaTab(t) {
-    gachaCurTab = t;
-    document.querySelectorAll('.gacha-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
-    ['banner', 'pool', 'history'].forEach(k => document.getElementById('gacha' + k[0].toUpperCase() + k.slice(1)).classList.toggle('hidden', k !== t));
-    renderGachaModal();
-}
-function renderGachaModal() {
-    const cls = player.heroType, g = gachaState(), feat = ITEMS_DB[GACHA_FEATURED[cls]];
-    const kind = { saber: 'Мечи', archer: 'Луки', invoker: 'Гримуары' }[cls] || 'Оружие';
-    document.getElementById('gachaDiamonds').textContent = player.diamonds || 0;
-    const dia = player.diamonds || 0;
-    document.getElementById('gachaBanner').innerHTML = `<div class="gacha-banner">
-        <div class="gacha-art"><canvas id="gachaArtCanvas" width="700" height="420"></canvas>
-            <div class="gacha-art-info"><span class="tag">Баннер оружия • ${kind} для героя «${heroDef().short}»</span>
-                <h3>${feat.icon} ${feat.name}</h3><p>★★★★★ • Пассивка «${feat.passive.name}»: ${passiveText(feat.passive, 1)}</p></div></div>
-        <div class="gacha-side">
-            <div class="gacha-box"><h4>Шансы</h4><div class="gacha-rate">
-                <span class="s5c">★★★★★</span><span>легендарное</span><b>0.6%</b>
-                <span class="s4c">★★★★</span><span>эпическое (гарантия каждые 10)</span><b>5.1%</b>
-                <span class="s3c">★★★</span><span>редкое</span><b>94.3%</b></div>
-                <div style="margin-top:6px;color:#a5b4fc">С ${GACHA.soft}-й молитвы шанс ★5 растёт, на ${GACHA.hard}-й — гарантия. 50/50 на оружие баннера.</div></div>
-            <div class="gacha-box"><h4>Гарантия</h4>
-                <div>★★★★★: ${g.pity5} / ${GACHA.hard} ${g.guarantee ? '<b class="s5c">• следующий — с баннера</b>' : ''}</div><div class="gacha-pity"><i style="width:${g.pity5 / GACHA.hard * 100}%"></i></div>
-                <div style="margin-top:6px">★★★★: ${g.pity4} / ${GACHA.pity4}</div><div class="gacha-pity"><i style="width:${g.pity4 / GACHA.pity4 * 100}%; background:linear-gradient(90deg,#6d28d9,#c084fc)"></i></div></div>
-            <div class="gacha-box">Повторное оружие пробуждает его (R2–R5): пассивка сильнее на 25% за ранг. Алмазы падают с элиты, мини-боссов, боссов, из сундуков лагерей и за открытия мест.</div>
-            <div class="gacha-btns">
-                <button class="gacha-pull" ${dia < GACHA.cost ? 'disabled' : ''} onclick="doGachaPulls(1)">Молитва ×1<small>💎 ${GACHA.cost}</small></button>
-                <button class="gacha-pull" ${dia < GACHA.cost * 10 ? 'disabled' : ''} onclick="doGachaPulls(10)">Молитва ×10<small>💎 ${GACHA.cost * 10}</small></button>
-            </div>
-        </div></div>`;
-    drawGachaArt(feat);
-    document.getElementById('gachaPool').innerHTML = `<div class="gacha-pool">${[5, 4, 3].flatMap(st => GACHA_POOL[cls][st].map(id => {
-        const d = ITEMS_DB[id], r = (player.refine && player.refine[id]) || 0, own = ownsItem(id);
-        const stats = ['handDmg', 'spellAmp', 'crit', 'range', 'cdr', 'maxHp', 'maxMp'].filter(k => d[k]).map(k => `${{ handDmg: 'урон', spellAmp: 'мощь %', crit: 'крит %', range: 'дальн.', cdr: 'КД −%', maxHp: 'HP', maxMp: 'MP' }[k]} +${d[k]}`).join(' • ');
-        return `<div class="gacha-item s${st}"><div><span class="st s${st}c">${'★'.repeat(st)}</span> ${d.icon} <b>${d.name}</b>${own ? ` <span style="color:#86efac">• есть R${r || 1}</span>` : ''}</div><div style="color:#a8a29e;margin-top:3px">${stats}</div><div class="pas">«${d.passive.name}»: ${passiveText(d.passive, r || 1)}</div></div>`;
-    })).join('')}</div>`;
-    document.getElementById('gachaHistory').innerHTML = g.history.length ? `<div class="gacha-hist">${g.history.map(h => `<div><span class="s${h.stars}c">${'★'.repeat(h.stars)} ${ITEMS_DB[h.id].name}</span><span style="color:#78716c">${new Date(h.t).toLocaleString('ru-RU')}</span></div>`).join('')}</div><div style="margin-top:8px;font-size:12px;color:#a5b4fc">Всего молитв: ${g.total}</div>` : '<div style="color:#a5b4fc;font-size:13px">Молитв пока не было.</div>';
-}
-function drawGachaArt(feat) {
-    const cv = document.getElementById('gachaArtCanvas'); if (!cv) return;
-    const g = cv.getContext('2d'), W = cv.width, H = cv.height;
-    const bg = g.createRadialGradient(W * 0.68, H * 0.45, 10, W * 0.68, H * 0.45, W * 0.7);
-    bg.addColorStop(0, '#a16207'); bg.addColorStop(0.25, '#4c1d95'); bg.addColorStop(1, '#07040f');
-    g.fillStyle = bg; g.fillRect(0, 0, W, H);
-    g.save(); g.translate(W * 0.68, H * 0.45);
-    for (let i = 0; i < 18; i++) { g.rotate(Math.PI / 9); g.fillStyle = 'rgba(253,230,138,0.07)'; g.beginPath(); g.moveTo(0, 0); g.lineTo(-30, -W); g.lineTo(30, -W); g.closePath(); g.fill(); }
-    g.restore();
-    for (let i = 0; i < 90; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.8})`; g.fillRect(Math.random() * W, Math.random() * H, 1.6, 1.6); }
-    // ASCII-арт оружия баннера
-    const art = ASCII_WEAPON_ART[player.heroType] || ASCII_WEAPON_ART.saber, fs = 22;
-    g.font = `800 ${fs}px "JetBrains Mono", ui-monospace, monospace`; g.textAlign = 'left'; g.textBaseline = 'top';
-    const aw = art[0].length * fs * 0.6, ax = W * 0.68 - aw / 2, ay = H * 0.42 - art.length * fs * 0.6;
-    art.forEach((line, i) => {
-        g.shadowColor = '#facc15'; g.shadowBlur = 18; g.fillStyle = i % 2 ? '#fde68a' : '#facc15';
-        g.fillText(line, ax, ay + i * fs * 1.15);
-    });
-    g.shadowBlur = 0;
-    const fog = g.createLinearGradient(0, H * 0.55, 0, H); fog.addColorStop(0, 'rgba(7,4,15,0)'); fog.addColorStop(1, 'rgba(7,4,15,0.95)');
-    g.fillStyle = fog; g.fillRect(0, 0, W, H);
-    microArtInPlace(cv, { glow: 1.0, expo: 1.5, fog: 0.08, shaft: 0.6 });
 }
 
 // ============================================================================
@@ -1384,12 +1248,11 @@ function updateDockHud(dt) {
     const vh = document.getElementById('vitalHp');
     vh.classList.toggle('hit', hudGhost.hitT > 0);
     vh.classList.toggle('low', hpF < 0.3);
-    document.getElementById('hudDiamonds').textContent = player.diamonds || 0;
     document.getElementById('btnShadowChallenge').classList.toggle('hidden', !(saberSkillsMaxed() && !player.saberAlter && !player.shadowDuel));
     // Доступность навыков по мане
     const h = player.heroType;
     if (h !== 'invoker') {
-        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : 'Saber')), SK = heroSkillSet();
+        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : (h === 'frankenstein' ? 'Frank' : (h === 'medea' ? 'Medea' : 'Saber')))), SK = heroSkillSet();
         ['q', 'w', 'e', 'r'].forEach(k => { const el = document.getElementById(`cd${P}${k.toUpperCase()}`); if (el && el.parentElement) el.parentElement.classList.toggle('no-mana', player.mp < SK[k].manaCost); });
     } else {
         [['cdSpellD', 0], ['cdSpellF', 1]].forEach(([id, slot]) => {
@@ -1570,6 +1433,7 @@ function invokeSpell() {
 // levelUpOrb() — см. раздел 17
 
 function grantTestPower() {
+    if (!adminMode) { showToast('Очки навыков нельзя добавить вручную — только за уровни и задания', 'error'); return; }
     player.skillPoints += 3;
     player.gold += 150;
     SoundFX.play('levelup');
@@ -2366,22 +2230,33 @@ function findFreeTile(minX, maxX, minY, maxY) {
 
 // createEnemy(), damageEnemy(), killEnemy() — см. раздел 19 (броня, сопротивление магии, новые враги)
 
+// Прокачка: 1-й уровень — пара-тройка мобов у точки спавна, дальше каждый уровень в ~1.5 раза дороже
+function xpForLevel(L) { return Math.round(70 * Math.pow(1.5, L - 1)); }
+// Поэтапное открытие навыков: на 1-м уровне только Q, ультимейт R — с 6-го.
+// Ранги: обычные навыки — следующий ранг через каждые 2 уровня, ультимейт — на 6, 11, 16, 21 уровнях
+const SKILL_UNLOCK = { q: 1, w: 2, e: 4, d: 5, r: 6 };
+function skillReqLevel(key, rank) { return key === 'r' ? 6 + (rank - 1) * 5 : SKILL_UNLOCK[key] + (rank - 1) * 2; }
+function canLearnSkill(key) {
+    const max = key === 'r' ? 4 : 7, next = (player.orbLevels[key] || 0) + 1;
+    return next <= max && (adminMode || player.level >= skillReqLevel(key, next));
+}
 function gainXp(amount) {
     if (player.shrineBuff && player.shrineBuff.kind === 'insight') amount = Math.round(amount * 1.3);
     player.xp += amount;
     while (player.xp >= player.xpNext) {
         player.xp -= player.xpNext;
         player.level++;
-        player.xpNext = Math.round(player.xpNext * 1.32);
-        player.skillPoints += 2; // +2 очка сфер за каждый уровень, чтобы приятно открывать и качать Q/W/E/R
+        player.xpNext = xpForLevel(player.level); // каждый следующий уровень в ~1.5 раза дороже
+        player.skillPoints += 1; // одно очко навыка за уровень
         recalcPlayerStats();
         player.hp = player.maxHp;
         player.mp = player.maxMp;
 
         SoundFX.play('levelup');
         spawnParticleRing(player.x, player.y, 80, '#fbbf24', 34);
-        spawnFloatingText(player.x, player.y - 38, `🎉 УРОВЕНЬ ${player.level}! (+2 очка сфер)`, '#fbbf24');
-        showToast(`Достигнут ${player.level} уровень! Получено +2 очка прокачки сфер!`, 'gold');
+        spawnFloatingText(player.x, player.y - 38, `🎉 УРОВЕНЬ ${player.level}! (+1 очко навыка)`, '#fbbf24');
+        const opened = Object.entries(SKILL_UNLOCK).filter(([k, L]) => L === player.level && (k !== 'd' || player.heroType === 'knight' || player.heroType === 'elizabeth'));
+        showToast(`Достигнут ${player.level} уровень! +1 очко навыка.` + (opened.length ? ` Открыт навык: ${opened.map(([k]) => k.toUpperCase()).join(', ')}${player.level === 6 ? ' — УЛЬТИМЕЙТ' : ''}!` : ''), 'gold');
         updateInvokerBarUI();
     }
 }
@@ -2427,7 +2302,7 @@ function updateGame(dt) {
     // Регенерация в безопасных зонах (Святилище или Королевство Камелот)
     const safeZ = playerZone();
     const inSanctuary = safeZ === 'sanctuary' || safeZ === 'camelot';
-    Knight.update(dt); Eliza.update(dt);
+    Knight.update(dt); Eliza.update(dt); Frank.update(dt); Medea.update(dt);
     player.hp = Math.min(player.maxHp, player.hp + (player.hpRegen + (inSanctuary ? 5 : 0)) * dt);
     player.mp = Math.min(player.maxMp, player.mp + (player.mpRegen + (inSanctuary ? 6 : 0)) * dt);
 
@@ -4197,10 +4072,10 @@ const MENU_SCREENS = { menu: 'scrMenu', class_select: 'scrClasses', char_select:
 // Персонажи выбранного класса (см. js/characters.js): заполняется на экране «Класс»
 let HERO_MENU = CHARACTERS.filter(h => h.cls === 'warrior');
 const DIFF_MENU = [
-    { key: 'easy', name: 'Искатель приключений', icon: '🧭', glow: '52,211,153', desc: 'Для тех, кто пришёл за историей и исследованием. Монстры слабее, лагеря проходятся легко.' },
-    { key: 'normal', name: 'Рыцарь', icon: '⚔️', glow: '212,162,76', desc: 'Задуманный баланс. Элита лагерей и Граф Дракула потребуют внимания и тактики.' },
-    { key: 'hard', name: 'Кошмар', icon: '🔥', glow: '249,115,22', desc: 'Враги и боссы заметно сильнее, но щедрее на золото и опыт. Ошибки дорого стоят.' },
-    { key: 'insane', name: 'Адская Бездна', icon: '💀', glow: '239,68,68', desc: 'Дракула и Владыка Ада вдвое опаснее. Только для тех, кто знает каждое заклинание наизусть.' }
+    { key: 'easy', name: 'Искатель приключений', icon: '🧭', glow: '52,211,153', desc: 'Самый мягкий путь — но и он не прогулка: враги бьют больно, а пачки в опасных землях не прощают спешки.' },
+    { key: 'normal', name: 'Рыцарь', icon: '⚔️', glow: '212,162,76', desc: 'Хардкор. Враги вдвое крепче и злее, замечают издалека и бьют чаще. Каждый лагерь — испытание.' },
+    { key: 'hard', name: 'Кошмар', icon: '🔥', glow: '249,115,22', desc: 'Жестокое выживание: почти втрое больше урона, агрессивный ИИ, одна ошибка — смерть.' },
+    { key: 'insane', name: 'Адская Бездна', icon: '💀', glow: '239,68,68', desc: 'Вчетверо смертоноснее. Враги бросаются через полкарты и бьют без пауз. Права на ошибку нет.' }
 ];
 let heroIdx = 0;
 
@@ -4279,6 +4154,7 @@ function renderHeroSlider() {
         track.dataset.built = '1';
     }
     layoutHeroCards();
+    if (typeof Portraits !== 'undefined' && Engine3D.ok) Portraits.mountHeroCards();
 }
 function layoutHeroCards() {
     const n = HERO_MENU.length;
@@ -4673,7 +4549,7 @@ function adminGive(what) {
         if (leg) addItemToInventory(leg, 1);
         updateHudPotions();
         showToast('Выданы зелья, материалы, печати и легендарное оружие', 'gold');
-    } else if (what === 'diamonds') { addDiamonds(16000); showToast('+16000 алмазов', 'gold');
+    } else if (what === 'points') { grantTestPower();
     } else if (what === 'level') {
         for (let i = 0; i < 5; i++) gainXp(Math.max(1, player.xpNext - player.xp));
     } else if (what === 'reveal') {
@@ -4802,7 +4678,9 @@ function updateHudUI() {
     document.getElementById('hudOrbBuffs').textContent = heroStatLine();
 
     if (player.heroType !== 'invoker') {
-        const cdP = player.heroType === 'archer' ? 'cdArcher' : (player.heroType === 'knight' ? 'cdKnight' : (player.heroType === 'elizabeth' ? 'cdEliza' : 'cdSaber'));
+        const cdP = player.heroType === 'archer' ? 'cdArcher' : (player.heroType === 'knight' ? 'cdKnight' : (player.heroType === 'elizabeth' ? 'cdEliza' : (player.heroType === 'frankenstein' ? 'cdFrank' : (player.heroType === 'medea' ? 'cdMedea' : 'cdSaber'))));
+        if (player.heroType === 'frankenstein') Frank.refreshBar();
+        if (player.heroType === 'medea') Medea.refreshBar();
         if (player.heroType === 'elizabeth') { updateCooldownBadge('cdElizaD', player.saberCooldowns.d || 0); Eliza.refreshBar(); }
         if (player.heroType === 'knight') { updateCooldownBadge('cdKnightD', player.saberCooldowns.d || 0); Knight.refreshBar(); }
         updateCooldownBadge(cdP + 'Q', player.saberCooldowns.q || 0);
@@ -4852,10 +4730,10 @@ function renderSpellbookModal() {
     document.getElementById('spellbookFilterTabs').classList.toggle('hidden', isSaber);
 
     if (isSaber) {
-        document.getElementById('spellbookTitle').textContent = player.heroType === 'elizabeth' ? '🌑 Кодекс Падшей Богини: Магия Пустоты' : player.heroType === 'knight' ? '🩸 Кодекс Павшего Рыцаря: Магия Крови' : isArcherBook
+        document.getElementById('spellbookTitle').textContent = player.heroType === 'medea' ? '📜 Кодекс Ведьмы Предательства: Магия Эпохи Богов' : player.heroType === 'frankenstein' ? '⚡ Кодекс Берсерка: Булава и Гром' : player.heroType === 'elizabeth' ? '🌑 Кодекс Падшей Богини: Магия Пустоты' : player.heroType === 'knight' ? '🩸 Кодекс Павшего Рыцаря: Магия Крови' : isArcherBook
             ? '🏹 Кодекс Следопыта: Способности Арчер (кастомки Warcraft 3)'
             : '⚔️ Кодекс Короля Рыцарей: Способности Сейбер (Fate / Warcraft 3)';
-        document.getElementById('spellbookSubtitle').textContent = player.heroType === 'elizabeth' ? 'Каждое попадание навыком даёт стак «Скверны» (до 10, +3% к силе навыков за стак). Проклятые враги получают на 25% больше урона и лечат Элизабет.' : player.heroType === 'knight' ? 'Маны нет: каждый навык платит процентом ТЕКУЩЕГО здоровья и никогда не убивает. Чем сильнее ранен — тем быстрее регенерация. Меч — трофей с убитого мечника, он ломается; без него рыцарь рвёт врагов когтями.' : isArcherBook
+        document.getElementById('spellbookSubtitle').textContent = player.heroType === 'medea' ? 'Хрупкая, но смертоносная: мало здоровья, много маны и урона, сверхбыстрые касты. Воины Драконьих Зубов отвлекают рядовых врагов, Rule Breaker ломает чужую магию.' : player.heroType === 'frankenstein' ? 'Безумие берсерка: навыки быстро наполняют шкалу (Q и W +10%, E +30%, R +80%), она медленно спадает. На 100% героиня теряет контроль и носится, отскакивая от препятствий.' : player.heroType === 'elizabeth' ? 'Каждое попадание навыком даёт стак «Скверны» (до 10, +3% к силе навыков за стак). Проклятые враги получают на 25% больше урона и лечат Элизабет.' : player.heroType === 'knight' ? 'Маны нет: каждый навык платит процентом ТЕКУЩЕГО здоровья и никогда не убивает. Чем сильнее ранен — тем быстрее регенерация. Меч — трофей с убитого мечника, он ломается; без него рыцарь рвёт врагов когтями.' : isArcherBook
             ? 'Стрелы летят по баллистической дуге. Издалека урон выше (до +30%), ближе 90px — ниже на 25%. Крит зависит от уровня и ультимейта.'
             : 'Все навыки Сейбер — ближний бой. Они усиливаются от очков мастерства и экипировки Камелота.';
 
@@ -5026,7 +4904,6 @@ function isAnyModalOpen() {
            !document.getElementById('modalHelp').classList.contains('hidden') ||
            !document.getElementById('modalSpellbook').classList.contains('hidden') ||
            !document.getElementById('modalWorldMap').classList.contains('hidden') ||
-           !document.getElementById('modalGacha').classList.contains('hidden') ||
            !document.getElementById('modalShadow').classList.contains('hidden');
 }
 
@@ -5037,12 +4914,11 @@ function closeAllModals() {
     document.getElementById('modalHelp').classList.add('hidden');
     document.getElementById('modalSpellbook').classList.add('hidden');
     document.getElementById('modalWorldMap').classList.add('hidden');
-    document.getElementById('modalGacha').classList.add('hidden');
     document.getElementById('modalShadow').classList.add('hidden');
 }
 
 function toggleModal(kind) {
-    const map = { char: 'modalChar', craft: 'modalCraft', help: 'modalHelp', spellbook: 'modalSpellbook', worldmap: 'modalWorldMap', gacha: 'modalGacha' };
+    const map = { char: 'modalChar', craft: 'modalCraft', help: 'modalHelp', spellbook: 'modalSpellbook', worldmap: 'modalWorldMap' };
     const el = document.getElementById(map[kind]);
     const wasHidden = el.classList.contains('hidden');
     closeAllModals();
@@ -5051,7 +4927,6 @@ function toggleModal(kind) {
         if (kind === 'char') renderCharacterModal();
         if (kind === 'craft') renderCraftModal();
         if (kind === 'worldmap') renderWorldMap();
-        if (kind === 'gacha') { gachaTab(gachaCurTab); document.getElementById('gachaReveal').classList.add('hidden'); }
         if (kind === 'spellbook') renderSpellbookModal();
     }
 }
@@ -5066,10 +4941,10 @@ function renderCharacterModal() {
     document.getElementById('charExortLvl').textContent = getEffOrbLevel('e');
     document.getElementById('charInvokeLvl').textContent = player.orbLevels.r;
 
-    document.getElementById('modalBtnQ').disabled = player.skillPoints <= 0 || player.orbLevels.q >= 7;
-    document.getElementById('modalBtnW').disabled = player.skillPoints <= 0 || player.orbLevels.w >= 7;
-    document.getElementById('modalBtnE').disabled = player.skillPoints <= 0 || player.orbLevels.e >= 7;
-    document.getElementById('modalBtnR').disabled = player.skillPoints <= 0 || player.orbLevels.r >= 4;
+    document.getElementById('modalBtnQ').disabled = player.skillPoints <= 0 || !canLearnSkill('q');
+    document.getElementById('modalBtnW').disabled = player.skillPoints <= 0 || !canLearnSkill('w');
+    document.getElementById('modalBtnE').disabled = player.skillPoints <= 0 || !canLearnSkill('e');
+    document.getElementById('modalBtnR').disabled = player.skillPoints <= 0 || !canLearnSkill('r');
 
     document.getElementById('calcHandDmg').textContent = player.heroType === 'invoker' ? '— (нет автоатак)' : player.handDmg;
     document.getElementById('calcSpellAmp').textContent = `+${player.spellAmp}%`;
@@ -5364,11 +5239,11 @@ function acceptElderQuest(stage) {
 function completeForestQuest() {
     removeItemFromInventory('herb', 3);
     player.gold += 120;
-    player.skillPoints += 3;
+    player.skillPoints += 1;
     gainXp(150);
     player.questStage = 3;
     SoundFX.play('levelup');
-    showToast('Получено +3 очка сфер! Новая цель: Цитадель Бездны.', 'gold');
+    showToast('Получено +1 очко навыка! Новая цель: Цитадель Бездны.', 'gold');
     updateInvokerBarUI();
     closeAllModals();
 }
@@ -5538,7 +5413,7 @@ function findEnemyAtPoint(wx, wy, tolerance = 28) {
 }
 
 const isLootInteractable = g => g.kind === 'herb_node' || (g.kind === 'chest' && !g.opened) || (g.kind === 'camp_chest' && !g.sealed && !g.opened && !g.hidden);
-const lootLabel = g => g.kind === 'chest' ? 'Открыть тайник Арканы' : (g.kind === 'camp_chest' ? `Открыть: ${CAMP_TIERS[g.tier].name}` : 'Собрать Звездный Лотус');
+const lootLabel = g => g.kind === 'chest' ? 'Открыть тайник Арканы' : (g.kind === 'camp_chest' ? `Открыть: ${chestTitle(g.camp)}` : 'Собрать Звездный Лотус');
 
 function findInteractableAtPoint(wx, wy, tolerance = 32) {
     for (const npc of npcs) {
@@ -5996,8 +5871,11 @@ function regionAt(tx, ty) {
 const DARK_REGIONS = new Set(['shadow_realm', 'abyss', 'shadowlands', 'forsaken_hills', 'dreadlands', 'grimvault', 'boneswoods', 'hell']);
 const darkGround = (x, y) => !!(darkMask && darkMask[y * MAP_W + x]);
 // Сила врагов по регионам: чем дальше от стартовых земель, тем опаснее
-const REGION_POWER = { serpent_coast: 1.0, sanctuary: 1.0, aethelgard_plains: 1.1, camelot: 1.1, forest: 1.25, crimson_marsh: 1.45, clawhold: 1.6,
-    dreadlands: 1.75, boneswoods: 1.9, grimvault: 2.1, sanguinia_heights: 2.2, forsaken_hills: 2.3, shadowlands: 2.4, castle: 1, abyss: 1, hell: 1 };
+// Стартовые берега и долины — разминка; дальше сила растёт круто, подступы к замку Дракулы и сам замок смертельно опасны
+const REGION_POWER = { serpent_coast: 0.85, sanctuary: 0.85, camelot: 0.9, aethelgard_plains: 1.0, forest: 1.5, crimson_marsh: 1.9, clawhold: 2.1,
+    dreadlands: 2.4, boneswoods: 2.7, abyss: 3.0, grimvault: 3.0, forsaken_hills: 3.2, shadowlands: 3.5, sanguinia_heights: 3.9, castle: 4.3, shadow_realm: 4.6, hell: 5.0 };
+// Уровень врагов региона: 1–2 у точки спавна, ~16 на подступах к замку, 18+ в замке, 22+ в Аду
+const regionLevel = reg => Math.max(1, Math.round(((REGION_POWER[reg] || 1) - 0.85) * 5) + 1);
 
 function generateWorld() {
     MAP_W = 128; MAP_H = 64;
@@ -6293,6 +6171,8 @@ const HERO_DEFS = {
                hello: '🏰 Сейбер прибыла в Королевство Камелот!' },
     archer:  { title: 'Арчер • Страж Клинков', short: 'Арчер', home: { x: 14, y: 18.5 }, equip: { weapon: 'hunter_bow', armor: 'ranger_leather', ring: null },
                hello: '🏹 Арчер явился в Руины Святилища. Trace on.' },
+    medea: { title: 'Медея • Ведьма Предательства', short: 'Медея', home: { x: 14, y: 16.5 }, equip: { weapon: null, armor: null, ring: null } },
+    frankenstein: { title: 'Франкенштейн • Берсерк Грозы', short: 'Франкенштейн', home: { x: 57.5, y: 16 }, equip: { weapon: null, armor: null, ring: null } },
     elizabeth: { title: 'Элизабет Альтер • Падшая Богиня', short: 'Элизабет', home: { x: 14, y: 16 }, equip: { weapon: null, armor: null, ring: null },
                hello: '🌑 Элизабет Альтер расправила крылья. Пустота слушает её песнь.' },
     knight:  { title: 'Павший Рыцарь • Магия Крови', short: 'Рыцарь', home: { x: 57.5, y: 17 }, equip: { weapon: null, armor: null, ring: null },
@@ -6315,6 +6195,8 @@ function heroDisplayName() {
 function heroStatLine() {
     if (player.heroType === 'invoker') return `Мощь: +${player.spellAmp}% | Скор: ${player.moveSpeed} | Сниж.КД: ${player.cdrPct}%`;
     if (player.heroType === 'archer') return `Атака: ${player.handDmg} | Крит: ${player.critChance}% | Дальность: ${player.attackRange}`;
+    if (player.heroType === 'medea') return `Мощь: +${player.spellAmp}% | Воинов: ${(player.medeaWarriors || []).length} | Скор: ${player.moveSpeed}`;
+    if (player.heroType === 'frankenstein') return `Урон: ${player.handDmg} | Безумие: ${Math.round(player.madness || 0)}% | Броня: ${player.armor}`;
     if (player.heroType === 'elizabeth') return `Мощь: +${player.spellAmp}% | Скверна: ${player.elizaStacks || 0}/10 | Скор: ${player.moveSpeed}`;
     if (player.heroType === 'knight') return `Атака: ${player.handDmg} | Реген: ${player.hpRegen}/с | ${player.knightSword ? 'Меч ' + player.knightSword.dur + '/' + player.knightSword.max : 'Когти'}`;
     return `Атака: ${player.handDmg} | Броня: ${player.armor} | Скор: ${player.moveSpeed}`;
@@ -6373,6 +6255,10 @@ function recalcPlayerStats() {
         }
     } else if (player.heroType === 'knight') {
         Knight.stats(L, q, w, e, r, eq);
+    } else if (player.heroType === 'frankenstein') {
+        Frank.stats(L, q, w, e, r, eq);
+    } else if (player.heroType === 'medea') {
+        Medea.stats(L, q, w, e, r, eq);
     } else if (player.heroType === 'elizabeth') {
         Eliza.stats(L, q, w, e, r, eq);
     } else {
@@ -6430,6 +6316,10 @@ function levelUpOrb(orbKey) {
     if (player.skillPoints <= 0) { showToast('Нет свободных очков навыков!', 'error'); return; }
     const maxLvl = orbKey === 'r' ? 4 : 7;
     if (player.orbLevels[orbKey] >= maxLvl) { showToast('Достигнут максимальный уровень!', 'info'); return; }
+    if (!canLearnSkill(orbKey)) {
+        const need = skillReqLevel(orbKey, (player.orbLevels[orbKey] || 0) + 1);
+        showToast(`${orbKey === 'r' ? 'Ультимейт' : 'Навык ' + orbKey.toUpperCase()}: ${player.orbLevels[orbKey] ? 'следующий ранг' : 'изучение'} доступно с ${need} уровня`, 'error'); return;
+    }
     player.orbLevels[orbKey]++;
     player.skillPoints--;
     SoundFX.play('levelup');
@@ -6469,7 +6359,7 @@ function performMageBasicAttack() {
         return;
     }
     if (player.basicAttackCd > 0) return;
-    if (player.heroType === 'knight') Knight.attack(); else if (player.heroType === 'elizabeth') Eliza.attack(); else if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
+    if (player.heroType === 'knight') Knight.attack(); else if (player.heroType === 'frankenstein') Frank.attack(); else if (player.heroType === 'medea') Medea.attack(); else if (player.heroType === 'elizabeth') Eliza.attack(); else if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
 }
 
 // Цепочка автоатак: 1 → 2 → 3 → 4 → снова 1 (сбрасывается, если пауза между ударами дольше 1.3 с)
@@ -6684,14 +6574,20 @@ function updateArcherState(dt) {
 }
 
 function castHeroSkill(key) {
+    if (!adminMode) {
+        if (key === 'd' && (player.heroType === 'knight' || player.heroType === 'elizabeth') && player.level < SKILL_UNLOCK.d) { showToast(`Навык D откроется на ${SKILL_UNLOCK.d} уровне`, 'error'); return; }
+        if (key !== 'd' && (player.orbLevels[key] || 0) <= 0) { showToast(player.level < SKILL_UNLOCK[key] ? `Навык ${key.toUpperCase()} откроется на ${SKILL_UNLOCK[key]} уровне${key === 'r' ? ' (ультимейт)' : ''}` : `Навык ${key.toUpperCase()} не изучен — вложите очко навыка`, 'error'); return; }
+    }
     if (player.heroType === 'saber') castSaberSkillImpl(key);
     else if (player.heroType === 'archer') castArcherSkill(key);
     else if (player.heroType === 'knight') Knight.cast(key);
     else if (player.heroType === 'elizabeth') Eliza.cast(key);
+    else if (player.heroType === 'frankenstein') Frank.cast(key);
+    else if (player.heroType === 'medea') Medea.cast(key);
 }
 function castSaberSkill(key) { castHeroSkill(key); }
 // Набор навыков текущего героя (для Кодекса, панели и прокачки)
-function heroSkillSet() { return player.heroType === 'archer' ? ARCHER_SKILLS : (player.heroType === 'knight' ? KNIGHT_SKILLS : (player.heroType === 'elizabeth' ? ELIZA_SKILLS : SABER_SKILLS)); } // совместимость со старыми кнопками панели
+function heroSkillSet() { return player.heroType === 'archer' ? ARCHER_SKILLS : (player.heroType === 'knight' ? KNIGHT_SKILLS : (player.heroType === 'elizabeth' ? ELIZA_SKILLS : (player.heroType === 'frankenstein' ? FRANK_SKILLS : (player.heroType === 'medea' ? MEDEA_SKILLS : SABER_SKILLS)))); } // совместимость со старыми кнопками панели
 
 function beginSkill(skill, key, deferCd) {
     if (player.controlLock) return 0;
@@ -6948,14 +6844,20 @@ function castArcherSkill(key) {
         SoundFX.play('sunstrike'); SoundFX.play('thunder');
         triggerScreenShake(10);
         player.ubwSky = 3.2;
-        const count = 22 + lvl * 6;
-        const each = Math.round(player.handDmg * 0.7 + (30 + lvl * 18) * ampMult);
+        // Меньше клинков — каждый читается и бьёт тяжелее: 6 / 7 / 9 / 13 по рангам ульты
+        const count = ubwBladeCount(lvl);
+        const each = Math.round(player.handDmg * 1.7 + (70 + lvl * 45) * ampMult);
         const R = ARCHER_STANCE.ubwRadius;
         playerFx.push({ type: 'ubw_circle', x: player.x, y: player.y, radius: R, life: 3.2, maxLife: 3.2 });
+        // Сначала клинки падают на врагов в круге (самые опасные — первыми), остальные ровным кольцом
+        const foes = enemies.filter(en => en.deadTimer <= 0 && Math.hypot(en.x - player.x, en.y - player.y) < R).sort((a, b) => b.maxHp - a.maxHp);
         for (let i = 0; i < count; i++) {
-            const a = Math.random() * Math.PI * 2, r = 40 + Math.sqrt(Math.random()) * (R - 40);
-            const delay = 0.35 + (i / count) * 1.6 + Math.random() * 0.15;
-            playerFx.push({ type: 'ubw_fall', x: player.x + Math.cos(a) * r, y: player.y + Math.sin(a) * r, delay, maxDelay: delay, dmg: each, seed: Math.floor(Math.random() * 1000), tilt: (Math.random() - 0.5) * 0.5 });
+            let x, y;
+            const f = foes[i % Math.max(1, foes.length)];
+            if (f && i < foes.length * 2) { x = f.x + (Math.random() - 0.5) * 24; y = f.y + (Math.random() - 0.5) * 24; }
+            else { const a = (i / count) * Math.PI * 2 + Math.random() * 0.4, r = R * (0.35 + 0.5 * Math.random()); x = player.x + Math.cos(a) * r; y = player.y + Math.sin(a) * r; }
+            const delay = 0.45 + i * (1.7 / count) + Math.random() * 0.08;
+            playerFx.push({ type: 'ubw_fall', x, y, delay, maxDelay: delay, dmg: each, seed: Math.floor(Math.random() * 1000), tilt: (Math.random() - 0.5) * 0.35 });
         }
         spawnParticleRing(player.x, player.y, R, '#fca5a5', 60);
         spawnFloatingText(player.x, player.y - 40, '⚔️ UNLIMITED BLADE WORKS', '#fecaca');
@@ -7053,11 +6955,11 @@ function createEnemy(type, x, y, opts) {
     return Object.assign({
         uid: Math.random(), type, name: tpl.name, icon: tpl.icon, tpl,
         x, y, spawnX: x, spawnY: y,
-        hp, maxHp: hp, dmg: Math.round(tpl.dmg * diff.dmgMult), speed: tpl.speed,
+        hp, maxHp: hp, dmg: Math.round(tpl.dmg * diff.dmgMult), speed: Math.round(tpl.speed * (diff.speed || 1)),
         armor: tpl.armor || 0, mres: tpl.mres || 0,
         xp: Math.round(tpl.xp * diff.rewardMult),
         goldRange: [Math.round(tpl.gold[0] * diff.rewardMult), Math.round(tpl.gold[1] * diff.rewardMult)],
-        radius: tpl.radius, aggroRange: tpl.aggroRange, attackRange: tpl.attackRange,
+        radius: tpl.radius, aggroRange: Math.round(tpl.aggroRange * (diff.aggro || 1)), attackRange: tpl.attackRange, level: 1,
         ranged: !!tpl.ranged, isBoss: !!tpl.isBoss, color: tpl.color, drops: tpl.drops || [],
         attackCd: 0, specialCd: 3.5, freezeTimer: 0, tornadoLiftTimer: 0, disarmTimer: 0, stunTimer: 0,
         slowTimer: 0, slowMult: 1, coldSnapTimer: 0, coldSnapCd: 0, coldSnapBonusDmg: 0,
@@ -7097,6 +6999,8 @@ function populateWorldEntities() {
     const lord = E('hell_lord', HELL.boss.x, HELL.boss.y);
     const g3 = legacyToNew(109.5, 52.5), g3p = nearestFreeTile(g3.x, g3.y, [T_HELL, T_HBRIDGE]);
     lord.guardian = E('infernal_gatekeeper', g3p.x / TS, g3p.y / TS);
+    // Уровни боссов и стражей — по их земле, с запасом сверху
+    enemies.forEach(e => { if (e.level <= 1) { const r = regionAt(Math.floor(e.x / TS), Math.floor(e.y / TS)); if (REGION_POWER[r]) e.level = regionLevel(r) + (e.isBoss ? 4 : (e.tpl.miniBoss ? 3 : 0)); } });
 }
 
 // ============================================================================
@@ -7159,9 +7063,11 @@ function spawnCamps() {
                 spots.push([t, center.x / TS - 0.5 + Math.cos(a) * r, center.y / TS - 0.5 + Math.sin(a) * r]);
             });
         }
+        const reg = regionAt(Math.floor(center.x / TS), Math.floor(center.y / TS)); camp.region = reg;
         spots.forEach(([t, x, y]) => {
             const p = nearestFreeTile(x, y, WALKABLE_TILES);
             const en = createEnemy(t, p.x, p.y, { camp });
+            powerUp(en, REGION_POWER[reg] || 1); en.level = regionLevel(reg);
             en.campOff = { x: p.x - center.x, y: p.y - center.y };
             camp.members.push(en);
             enemies.push(en);
@@ -7203,7 +7109,7 @@ const RARE_DEFS = [
 
 function powerUp(en, k) {
     en.maxHp = en.hp = Math.round(en.maxHp * k);
-    en.dmg = Math.round(en.dmg * (0.6 + 0.4 * k));
+    en.dmg = Math.round(en.dmg * (0.4 + 0.6 * k));
     en.xp = Math.round(en.xp * k);
     en.goldRange = en.goldRange.map(g => Math.round(g * k));
 }
@@ -7223,14 +7129,17 @@ function spawnSiteCamp(site) {
     if (site.tier === 'common') { const big = def.units.reduce((a, u) => u[1] > a[1] ? u : a); big[1] = Math.max(1, big[1] - 1); }
     if (site.tier === 'precious') def.units[0][1] += 1;
     const camp = { def, id: def.id, name: def.name, tier: def.tier, x: center.x, y: center.y, ax: center.x, ay: center.y, members: [], state: 'active', resetTimer: 0, patrolIdx: 1, region: site.region };
-    const list = []; def.units.forEach(([t, n]) => { for (let i = 0; i < n; i++) list.push(t); });
     const pw = REGION_POWER[site.region] || 1;
+    // Опасные регионы — плотные пачки: +1 боец за каждые 0.8 силы сверх 1.4
+    if (pw > 1.4) def.units[def.units.length - 1][1] += Math.floor((pw - 1.4) / 0.8) + 1;
+    const list = []; def.units.forEach(([t, n]) => { for (let i = 0; i < n; i++) list.push(t); });
     list.forEach((t, i) => {
         const a = (i / list.length) * Math.PI * 2 + 0.4, r = 2.2 + (list.length > 4 ? 0.6 : 0);
         const p = nearestFreeTile(center.x / TS - 0.5 + Math.cos(a) * r, center.y / TS - 0.5 + Math.sin(a) * r, WALKABLE_TILES);
         const en = createEnemy(t, p.x, p.y, { camp });
         powerUp(en, pw);
-        if (i === 0) makeElite(en, site.tier === 'precious');
+        en.level = regionLevel(site.region);
+        if (i === 0) { makeElite(en, site.tier === 'precious'); en.level += site.tier === 'precious' ? 3 : 2; }
         en.campOff = { x: p.x - center.x, y: p.y - center.y };
         camp.members.push(en); enemies.push(en);
     });
@@ -7251,6 +7160,7 @@ function spawnRares() {
         if (!pos) return;
         const en = createEnemy(r.type, pos.x, pos.y, { rare: r, homeX: pos.x, homeY: pos.y, wanderT: 0 });
         powerUp(en, (REGION_POWER[r.region] || 1) * 3.5);
+        en.level = regionLevel(r.region) + 5;
         en.dmg = Math.round(en.dmg * 1.3);
         en.radius = Math.round(en.radius * 1.3);
         en.name = `★ ${r.name}`;
@@ -7363,7 +7273,6 @@ function updateExploration(dt) {
             const label = { waystatue: '🗿 Статуя Странника', shrine: '⛩️ Святилище', tablet: '🔮 Загадка рун', cache: '💰 Тайник' }[p.kind];
             showToast(`Найдено: ${label} — ${p.name}`, 'gold');
             gainXp(p.kind === 'cache' ? 60 : 30);
-            addDiamonds(p.kind === 'waystatue' ? 10 : 5, p.wx, p.wy);
             if (p.kind === 'waystatue') { player.lastWaypoint = p.id; SoundFX.play('levelup'); spawnParticleRing(p.wx, p.wy, 60, '#67e8f9', 30); }
         }
     }
@@ -7543,23 +7452,65 @@ function onCampCleared(c) {
     spawnParticleBurst(ch.x, ch.y - 10, T.color, 26);
     playerFx.push({ type: 'chest_pillar', x: ch.x, y: ch.y, color: T.glow, life: 1.6, maxLife: 1.6 });
     SoundFX.play('coin');
-    zoneBanner = { title: 'ЛАГЕРЬ ЗАЧИЩЕН', sub: `${c.name} • появился ${T.short} сундук`, life: 3, maxLife: 3, color: T.color };
+    zoneBanner = { title: 'ЛАГЕРЬ ЗАЧИЩЕН', sub: `${c.name} • ${chestTitle(c)}`, life: 3, maxLife: 3, color: `rgb(${chestBiome(ch).glow})` };
 }
 
+// ---------- Сундуки биомов ----------
+// У каждого края свой сундук: облик (3D) и местная добыча. Качество добычи = опасность зоны + тип сундука.
+const BIOME_CHESTS = {
+    oak:      { name: 'Дубовый сундук',          wood: 0x6a4424, trim: 0x5a5e66, glow: '226,214,190', extra: ['iron_ore', 'herb'] },
+    sea:      { name: 'Морской сундук',          wood: 0x23434a, trim: 0xc8a050, glow: '94,234,212',  extra: ['sea_pearl', 'slime_gel'] },
+    root:     { name: 'Сундук-корневище',        wood: 0x3e3a1c, trim: 0x4a7a2a, glow: '134,239,172', extra: ['herb', 'wolf_pelt'] },
+    bog:      { name: 'Топяной ларь',            wood: 0x2a2e1c, trim: 0x5a6a3a, glow: '163,230,53',  extra: ['blood_lily', 'slime_gel'] },
+    bone:     { name: 'Костяной ларь',           wood: 0xcfc6b0, trim: 0x4a3f36, glow: '214,211,209', extra: ['bone_dust', 'grave_moss'] },
+    void:     { name: 'Сундук Пустоты',          wood: 0x15121e, trim: 0x8a4aff, glow: '167,139,250', extra: ['soul_crystal', 'wraith_essence'] },
+    blood:    { name: 'Кровавая шкатулка Сангвинии', wood: 0x2a0608, trim: 0xd4a040, glow: '248,113,113', extra: ['vampire_fang', 'blood_lily'] },
+    infernal: { name: 'Адский ковчег',           wood: 0x1a0c08, trim: 0xff6a10, glow: '251,146,60',  extra: ['hell_ember', 'demon_horn'] }
+};
+const REGION_CHEST = { serpent_coast: 'sea', sanctuary: 'oak', camelot: 'oak', aethelgard_plains: 'oak', forest: 'root', clawhold: 'root',
+    crimson_marsh: 'bog', dreadlands: 'bone', boneswoods: 'bone', forsaken_hills: 'bone', grimvault: 'void', shadowlands: 'void', abyss: 'void',
+    shadow_realm: 'void', sanguinia_heights: 'blood', castle: 'blood', hell: 'infernal' };
+function chestRegion(ch) {
+    if (!ch.region) ch.region = (ch.camp && ch.camp.region) || regionAt(Math.floor(ch.x / TS), Math.floor(ch.y / TS));
+    return ch.region;
+}
+function chestBiome(ch) { return BIOME_CHESTS[REGION_CHEST[chestRegion(ch)]] || BIOME_CHESTS.oak; }
+// Опасность зоны 0..4 (стартовые берега → Ад)
+function zoneTier(reg) { const p = REGION_POWER[reg] || 1; return p < 1.05 ? 0 : p < 2 ? 1 : p < 2.8 ? 2 : p < 3.6 ? 3 : 4; }
+// Качество 0..6 → шанс экипировки, веса редкостей и звёзды сундука
+const CHEST_QUALITY = [
+    { gear: 0.08, w: { common: 1 } },
+    { gear: 0.15, w: { common: 0.7, rare: 0.3 } },
+    { gear: 0.3,  w: { common: 0.3, rare: 0.6, epic: 0.1 } },
+    { gear: 0.45, w: { rare: 0.55, epic: 0.4, legendary: 0.05 } },
+    { gear: 0.6,  w: { rare: 0.3, epic: 0.55, legendary: 0.15 } },
+    { gear: 0.8,  w: { epic: 0.6, legendary: 0.4 } },
+    { gear: 1.0,  w: { epic: 0.35, legendary: 0.65 }, second: 0.4 }
+];
+function chestQuality(c) { return Math.min(6, zoneTier(chestRegion(c.chest || c)) + ({ common: 0, rich: 1, precious: 2 }[c.tier] || 0)); }
+function chestStars(q) { return Math.min(5, 1 + Math.floor(q * 0.7)); }
+function chestTitle(c) { const B = chestBiome(c.chest || c); return `${B.name} ${'★'.repeat(chestStars(chestQuality(c)))}`; }
+function rollGear(q) {
+    const W = CHEST_QUALITY[q].w, keys = Object.keys(W);
+    let r = Math.random(), rar = keys[keys.length - 1];
+    for (const k of keys) { if (r < W[k]) { rar = k; break; } r -= W[k]; }
+    const fits = d => d && ['weapon', 'armor', 'ring'].includes(d.type) && !(d.cls && d.cls !== player.heroType);
+    let pool = Object.values(ITEMS_DB).filter(d => fits(d) && d.rarity === rar);
+    if (!pool.length) pool = Object.values(ITEMS_DB).filter(d => fits(d) && d.rarity === 'rare');
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)].id : null;
+}
 function rollChestLoot(c) {
-    const T = CAMP_TIERS[c.tier], items = {};
-    const add = (id, n = 1) => { items[id] = (items[id] || 0) + n; };
-    const pool = CAMP_LOOT[c.tier].concat(c.def.extra || []);
-    for (let i = 0; i < T.rolls; i++) add(pool[Math.floor(Math.random() * pool.length)], 1 + (Math.random() < 0.35 ? 1 : 0));
-    if (c.def.extra && c.def.extra.length) add(c.def.extra[0], 1);
-    if (Math.random() < T.gearChance) {
-        // Экипировка: оружие — только для класса героя
-        const gear = T.gear.filter(id => { const d = ITEMS_DB[id]; return d && !(d.cls && d.cls !== player.heroType); });
-        if (gear.length) add(gear[Math.floor(Math.random() * gear.length)], 1);
-    }
-    const gold = Math.round((T.gold[0] + Math.random() * (T.gold[1] - T.gold[0])) * diffCfg().rewardMult);
-    const diamonds = { common: 5, rich: 15, precious: 40 }[c.tier] || 5;
-    return { gold, diamonds, items: Object.entries(items).map(([id, count]) => ({ id, count })) };
+    const items = {}, ch = c.chest || c, B = chestBiome(ch), q = chestQuality(c), Q = CHEST_QUALITY[q];
+    const add = (id, n = 1) => { if (id && ITEMS_DB[id]) items[id] = (items[id] || 0) + n; };
+    // Материалы: пул по качеству + местные реагенты биома
+    const pool = CAMP_LOOT[q <= 1 ? 'common' : (q <= 3 ? 'rich' : 'precious')].concat(B.extra, c.def.extra || []);
+    for (let i = 0, n = 2 + Math.floor(q / 2); i < n; i++) add(pool[Math.floor(Math.random() * pool.length)], 1 + (Math.random() < 0.25 + q * 0.05 ? 1 : 0));
+    add(B.extra[Math.floor(Math.random() * B.extra.length)], 1);
+    // Экипировка: редкость строго зависит от зоны и типа сундука (легендарки — только в опасных землях)
+    if (Math.random() < Q.gear) add(rollGear(q), 1);
+    if (Q.second && Math.random() < Q.second) add(rollGear(q), 1);
+    const gold = Math.round((25 + 40 * Math.pow(q, 1.5)) * (0.8 + Math.random() * 0.5) * diffCfg().rewardMult);
+    return { gold, quality: q, items: Object.entries(items).map(([id, count]) => ({ id, count })) };
 }
 
 function openCampChest(ch) {
@@ -7570,18 +7521,17 @@ function openCampChest(ch) {
     if (ch.cacheId) player.cachesOpened[ch.cacheId] = true;
     const loot = rollChestLoot(c);
     player.gold += loot.gold;
-    addDiamonds(loot.diamonds);
     loot.items.forEach(it => {
         if (!addItemToInventory(it.id, it.count)) {
             for (let k = 0; k < it.count; k++) groundLoot.push({ uid: Math.random(), x: ch.x + (Math.random() - 0.5) * 40, y: ch.y + 20 + Math.random() * 10, kind: 'item', itemId: it.id, count: 1 });
         }
     });
     chestCine = { t: 0, dur: 2.6, x: ch.x, y: ch.y, tier: c.tier };
-    playerFx.push({ type: 'chest_pillar', x: ch.x, y: ch.y, color: T.glow, life: 2.8, maxLife: 2.8, big: true });
+    playerFx.push({ type: 'chest_pillar', x: ch.x, y: ch.y, color: chestBiome(ch).glow, life: 2.8, maxLife: 2.8, big: true });
     spawnParticleBurst(ch.x, ch.y - 12, T.color, 40);
     spawnParticleRing(ch.x, ch.y, 90, T.color, 40);
     triggerScreenShake(3);
-    SoundFX.fanfare(T.stars);
+    SoundFX.fanfare(chestStars(loot.quality));
     showChestReward(c, loot);
     updateHudPotions();
 }
@@ -7589,9 +7539,9 @@ function openCampChest(ch) {
 // Плашка «Вы получили сундук» в духе Genshin Impact
 let chestRewardTimer = null;
 function showChestReward(c, loot) {
-    const T = CAMP_TIERS[c.tier];
+    const B = chestBiome(c.chest || c), T = { color: `rgb(${B.glow})`, glow: B.glow, name: B.name, stars: chestStars(loot.quality || 0) };
     const el = document.getElementById('chestReward');
-    const cards = [{ icon: '🪙', name: 'Золото', count: loot.gold, rarity: 'rare' }, { icon: '💎', name: 'Алмазы', count: loot.diamonds, rarity: 'epic' }]
+    const cards = [{ icon: '🪙', name: 'Золото', count: loot.gold, rarity: 'common' }]
         .concat(loot.items.map(it => ({ icon: ITEMS_DB[it.id].icon, name: ITEMS_DB[it.id].name, count: it.count, rarity: ITEMS_DB[it.id].rarity })));
     el.style.setProperty('--chest-color', T.color);
     el.style.setProperty('--chest-glow', T.glow);
@@ -7602,7 +7552,7 @@ function showChestReward(c, loot) {
             <div class="chest-kicker">Вы получили сундук!</div>
             <div class="chest-title">${T.name}</div>
             <div class="chest-stars">${'★'.repeat(T.stars)}</div>
-            <div class="chest-sub">${c.name}</div>
+            <div class="chest-sub">${c.name} • ${['мирные земли', 'дикие края', 'опасные земли', 'смертельные земли', 'проклятые земли'][zoneTier(chestRegion(c.chest || c))]}</div>
             <div class="chest-cards">${cards.map((cd, i) => `
                 <div class="chest-card chest-r-${cd.rarity}" style="animation-delay:${0.55 + i * 0.12}s">
                     <div class="chest-card-icon">${cd.icon}</div>
@@ -7694,16 +7644,6 @@ function killEnemy(en) {
     if (en.camp) en.deadTimer = 1e9; // бойцы лагеря возвращаются только все вместе (resetCamp)
     en.state = 'chase';
     if (en.type === 'saber_shadow') { en.deadTimer = 1e9; onShadowDefeated(); }
-    // Алмазы — валюта молитвы: щедро с боссов и элиты, изредка с обычных врагов
-    if (!en.summoned) {
-        let dia = 0;
-        if (en.tpl.miniBoss) dia = 60;
-        else if (en.isBoss) dia = 160;
-        else if (en.rare) dia = 40;
-        else if (en.elite) dia = en.elite === 'leader' ? 20 : 8;
-        else if (Math.random() < 0.12) dia = 1 + Math.floor(Math.random() * 3);
-        addDiamonds(dia, en.x, en.y);
-    }
     const goldGain = Math.floor(en.goldRange[0] + Math.random() * (en.goldRange[1] - en.goldRange[0] + 1));
     player.gold += goldGain;
     gainXp(en.xp);
@@ -7772,7 +7712,7 @@ function damagePlayer(rawDmg, kind = 'phys') {
     let mult = armorMult(arm);
     if (player.ultCast) mult *= SABER_ULT.castDamageTaken;
     if (player.heroType === 'knight' && Knight.inLake()) mult *= 0.75;
-    mult *= Eliza.damageMult();   // Элизабет в полёте ульты получает вдвое меньше урона   // в озере крови рыцарь получает меньше урона
+    mult *= Eliza.damageMult() * Frank.damageMult();   // Элизабет в полёте ульты получает вдвое меньше урона   // в озере крови рыцарь получает меньше урона
     let mitigated = Math.max(1, Math.round(rawDmg * mult));
     if (player.heroType === 'knight') { mitigated = Knight.absorb(mitigated); if (mitigated <= 0) { player.invulnTime = 0.3; spawnFloatingText(player.x, player.y - 24, 'щит', '#fca5a5'); return; } }
     player.hp -= mitigated;
@@ -7791,7 +7731,7 @@ function damagePlayer(rawDmg, kind = 'phys') {
 
     if (player.hp <= 0) {
         player.ultCast = null;
-        player.knightRend = null; player.bloodLake = null; player.elizaUlt = null; player.elizaChannel = null; player.elizaRunes = null; player.bloodShield = 0; player.knightBleed = 0; player.controlLock = false;
+        player.knightRend = null; player.bloodLake = null; player.elizaUlt = null; player.elizaChannel = null; player.elizaRunes = null; Frank.reset(); Medea.reset(); player.bloodShield = 0; player.knightBleed = 0; player.controlLock = false;
         player.excaliburChargeTime = 0;
         player.avalonBuffTimer = 0; player.saberHasteTimer = 0; player.alacrityTimer = 0; player.ghostWalkTimer = 0; player.lightningShieldTimer = 0;
         recalcPlayerStats();
@@ -8086,6 +8026,7 @@ function updateEnemies25(dt) {
         const dist = Math.hypot(player.x - en.x, player.y - en.y);
         if (en.isBoss && dist < 640 && (en.engaged || dist < en.aggroRange + 60)) activeBoss = en;
         if (dist > 1500 && !en.engaged) continue; // далёкие враги «спят»
+        if (player.heroType === 'medea' && Medea.taunt(en, dt)) continue;   // отвлеклись на Воинов Драконьих Зубов
 
         // Контроль: на боссов действует втрое короче
         const ccRate = en.isBoss ? 3 : 1;
@@ -8130,13 +8071,13 @@ function updateEnemies25(dt) {
                 tryMoveEntity(en, dirX * spd * dt, dirY * spd * dt);
             } else if (en.attackCd <= 0 && en.disarmTimer <= 0) {
                 if (en.ranged) {
-                    en.attackCd = 2.0;
+                    en.attackCd = diffCfg().atkCd * (2.0);
                     enemyShoot(en, Math.atan2(player.y - en.y, player.x - en.x), en.tpl.projSpeed || 260, en.dmg, en.tpl.projColor || '#c084fc', en.tpl.dmgKind || 'magic', 7, 2.0);
                 } else if (en.tpl.slam) {
-                    en.attackCd = 2.6;
+                    en.attackCd = diffCfg().atkCd * (2.6);
                     addHazard(player.x, player.y, 96, 0.85, Math.round(en.dmg * 1.15), '#f97316', 'phys');
                 } else {
-                    en.attackCd = en.tpl.attackTime || (en.isBoss ? 1.35 : 1.15);
+                    en.attackCd = diffCfg().atkCd * (en.tpl.attackTime || (en.isBoss ? 1.35 : 1.15));
                     const before = player.hp;
                     damagePlayer(en.dmg, 'phys');
                     if (en.tpl.lifesteal && player.hp < before) en.hp = Math.min(en.maxHp, en.hp + (before - player.hp) * en.tpl.lifesteal);
@@ -8361,7 +8302,7 @@ function preUpdate25(dt) {
         if (zt.t >= zt.dur) zoneTransition = null;
     }
     updateSaberUlt(dt);
-    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend || player.elizaUlt || Cinema.active);
+    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend || player.elizaUlt || Frank.locked() || Medea.locked() || Cinema.active);
 
     if (player.heroType === 'invoker' && player.attackTarget) {
         // Инвокер не умеет атаковать с руки: ПКМ по врагу лишь разворачивает мага к цели
@@ -8503,7 +8444,9 @@ function postUpdate25(dt) {
     if (zone !== lastZoneName) {
         if (lastZoneName !== null && !(zoneBanner && zoneBanner.life > 2.5)) {
             const zi = ZONE_INFO[zone];
-            zoneBanner = { title: zi.title, sub: zi.sub, life: 3.5, maxLife: 3.5, color: zone === 'hell' ? '#fdba74' : (zone === 'castle' ? '#fca5a5' : '#fde68a') };
+            const rl = REGION_POWER[zone] ? regionLevel(zone) : 0, danger = rl && rl > player.level + 2;
+            zoneBanner = { title: zi.title, sub: zi.sub + (rl ? ` • враги ур. ${rl}–${rl + 3}` : ''), life: 3.5, maxLife: 3.5, color: danger ? '#f87171' : (zone === 'hell' ? '#fdba74' : (zone === 'castle' ? '#fca5a5' : '#fde68a')) };
+            if (danger) showToast(`☠ Опасная земля: враги ${rl}+ уровня, а у вас ${player.level}. Без подготовки здесь не выжить.`, 'error');
         }
         lastZoneName = zone;
         if (zone === 'castle' || zone === 'hell') {
@@ -8625,6 +8568,10 @@ function updateInvokerBarUI() {
     Knight.buildBar(); show('knightTopPill', h === 'knight'); show('knightActionBar', h === 'knight');
     if (h === 'knight') Knight.refreshBar();
     Eliza.buildBar(); show('elizaTopPill', h === 'elizabeth'); show('elizaActionBar', h === 'elizabeth');
+    Frank.buildBar(); show('frankTopPill', h === 'frankenstein'); show('frankActionBar', h === 'frankenstein');
+    Medea.buildBar(); show('medeaTopPill', h === 'medea'); show('medeaActionBar', h === 'medea');
+    if (h === 'medea') Medea.refreshBar();
+    if (h === 'frankenstein') Frank.refreshBar();
     if (h === 'elizabeth') Eliza.refreshBar();
     document.getElementById('btnGrimoireLabel').textContent = h === 'invoker' ? 'Гримуар 27 (B)' : 'Кодекс (B)';
 
@@ -8633,11 +8580,14 @@ function updateInvokerBarUI() {
     document.getElementById('hudSkillPoints').textContent = player.skillPoints;
 
     if (h !== 'invoker') {
-        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : 'Saber'));
+        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : (h === 'frankenstein' ? 'Frank' : (h === 'medea' ? 'Medea' : 'Saber'))));
         [['Q', 'q', 7, 'active-q'], ['W', 'w', 7, 'active-w'], ['E', 'e', 7, 'active-e'], ['R', 'r', 4, 'active-r']].forEach(([K, k, max, cls]) => {
             const btn = document.getElementById(`btn${P}Lvl${K}`);
-            if (btn) btn.classList.toggle('hidden', !(hasPts && player.orbLevels[k] < max));
+            if (btn) btn.classList.toggle('hidden', !(hasPts && player.orbLevels[k] < max && canLearnSkill(k)));
             renderLevelPips(`pips${P}${K}`, player.orbLevels[k], max, cls);
+            // Закрытый навык: серая кнопка с замком и уровнем открытия
+            const slot = document.getElementById(`cd${P}${K}`)?.parentElement;
+            if (slot) { const locked = !adminMode && !(player.orbLevels[k] > 0); slot.classList.toggle('skill-locked', locked); slot.dataset.lock = locked ? `🔒 ${SKILL_UNLOCK[k]}` : ''; }
         });
         if (h === 'archer') {
             const blades = player.archerStance === 'blades';
@@ -8657,10 +8607,7 @@ function updateInvokerBarUI() {
 
     document.getElementById('lockW').classList.toggle('hidden', player.orbLevels.w > 0);
     document.getElementById('lockE').classList.toggle('hidden', player.orbLevels.e > 0);
-    document.getElementById('btnLvlQ').classList.toggle('hidden', !(hasPts && player.orbLevels.q < 7));
-    document.getElementById('btnLvlW').classList.toggle('hidden', !(hasPts && player.orbLevels.w < 7));
-    document.getElementById('btnLvlE').classList.toggle('hidden', !(hasPts && player.orbLevels.e < 7));
-    document.getElementById('btnLvlR').classList.toggle('hidden', !(hasPts && player.orbLevels.r < 4));
+    ['Q', 'W', 'E', 'R'].forEach(K => document.getElementById('btnLvl' + K).classList.toggle('hidden', !(hasPts && canLearnSkill(K.toLowerCase()))));
     renderLevelPips('pipsQ', player.orbLevels.q, 7, 'active-q');
     renderLevelPips('pipsW', player.orbLevels.w, 7, 'active-w');
     renderLevelPips('pipsE', player.orbLevels.e, 7, 'active-e');
@@ -8697,13 +8644,13 @@ function startNewGameFromMenu() {
     const startChar = charById(player.charId);
     const def = heroDef();
     Object.assign(player, {
-        level: 1, xp: 0, xpNext: 100, gold: 100, skillPoints: 3,
-        orbLevels: { q: 1, w: 1, e: 1, r: 1 },
-        activeOrbs: ['q', 'q', 'q'], invokedSpells: ['qqq', 'eee'],
+        level: 1, xp: 0, xpNext: xpForLevel(1), gold: 60, skillPoints: 0,
+        orbLevels: { q: 1, w: 0, e: 0, r: 0 },   // на старте — только один базовый навык
+        activeOrbs: ['q', 'q', 'q'], invokedSpells: ['qqq', 'qqq'],
         spellCooldowns: {}, saberCooldowns: { q: 0, w: 0, e: 0, r: 0 },
         invokeCd: 0, basicAttackCd: 0,
         poiFound: {}, cachesOpened: {}, puzzlesSolved: {}, explored: '', lastWaypoint: null, stamina: 100, exhausted: false, shrineBuff: null,
-        diamonds: 1600, gacha: null, refine: {}, saberAlter: false, shadowDuel: null,
+        refine: {}, saberAlter: false, shadowDuel: null,
         archerStance: 'bow', ubwCharges: 0, comboStep: 0, comboTimer: 0, knightSword: null, knightBleed: 0, bloodShield: 0, bloodShieldMax: 0, bloodShieldT: 0, bloodLake: null, knightRend: null, knightAnim: null, bladeComboStep: 0, bladeSwing: 0, ubwSky: 0,
         moveTargetX: null, moveTargetY: null, attackTarget: null, interactTargetGoal: null,
         questStage: 0, questKills: 0, bossKilled: false, draculaKilled: false, hellLordKilled: false,
@@ -8745,7 +8692,7 @@ function saveGame(manual = false) {
             poiFound: player.poiFound || {}, cachesOpened: player.cachesOpened || {}, puzzlesSolved: player.puzzlesSolved || {},
             explored: exploredString(), lastWaypoint: player.lastWaypoint || null,
             knightSword: player.knightSword || null,
-            diamonds: player.diamonds || 0, gacha: gachaState(), refine: player.refine || {}, saberAlter: !!player.saberAlter,
+            refine: player.refine || {}, saberAlter: !!player.saberAlter,
             worldTimeHours
         };
         localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -8753,6 +8700,22 @@ function saveGame(manual = false) {
     } catch (e) {}
 }
 
+// Защита от накрутки (в т.ч. через импорт сохранения): ранги навыков не выше разрешённых уровнем героя,
+// свободных очков не больше, чем можно было честно получить за уровни и задания
+function sanitizeProgress() {
+    if (adminMode) return;
+    player.level = Math.max(1, Math.min(60, Math.floor(player.level || 1)));
+    player.xpNext = xpForLevel(player.level); player.xp = Math.max(0, Math.min(player.xp || 0, player.xpNext - 1));
+    const ol = player.orbLevels = Object.assign({ q: 1, w: 0, e: 0, r: 0 }, player.orbLevels || {});
+    let spent = 0;
+    ['q', 'w', 'e', 'r'].forEach(k => {
+        let r = Math.max(0, Math.floor(ol[k] || 0));
+        while (r > 0 && player.level < skillReqLevel(k, r)) r--;
+        ol[k] = k === 'q' ? Math.max(1, r) : r; spent += ol[k];
+    });
+    const earned = (player.level - 1) + 1 + 5;   // за уровни + стартовый Q + максимум за задания
+    player.skillPoints = Math.max(0, Math.min(Math.floor(player.skillPoints || 0), earned - spent));
+}
 function loadGame() {
     try {
         const raw = localStorage.getItem(SAVE_KEY);
@@ -8769,6 +8732,7 @@ function loadGame() {
             player.x = h.x * TS; player.y = h.y * TS;
         }
         if (!HERO_DEFS[player.heroType]) player.heroType = 'invoker';
+        sanitizeProgress();
         player.shadowDuel = null;
         if (player.saberAlter) saberAlterSpriteCanvas = buildSaberAlterSprite();
         if (ver < 4) { player.poiFound = {}; player.cachesOpened = {}; player.puzzlesSolved = {}; player.explored = ''; player.lastWaypoint = null; }
@@ -9078,15 +9042,17 @@ function buildArcherSprite() {
 
 function heroSpriteCanvas() {
     if (player.heroType === 'knight') return saberAlterSpriteCanvas || (saberAlterSpriteCanvas = buildSaberAlterSprite());
-    if (player.heroType === 'elizabeth') return invokerSpriteCanvas;
+    if (player.heroType === 'elizabeth' || player.heroType === 'frankenstein' || player.heroType === 'medea') return invokerSpriteCanvas;
     if (player.heroType === 'saber') return player.saberAlter && saberAlterSpriteCanvas ? saberAlterSpriteCanvas : saberSpriteCanvas;
     if (player.heroType === 'archer') return archerSpriteCanvas;
     return player.orbLevels?.r >= 4 ? goldenInvokerSpriteCanvas : invokerSpriteCanvas;
 }
 
 function updateHeroPortraitHUD() {
+    // Живой 3D-портрет (Portraits); плоская картинка — только если WebGL недоступен
+    if (typeof Portraits !== 'undefined' && Engine3D.ok && !Portraits.failed) { Portraits.mountHud(); if (!Portraits.failed) return; }
     const pCanvas = document.getElementById('portraitCanvas');
-    if (!pCanvas) return;
+    if (!pCanvas || pCanvas.dataset.pt) return;
     const pCtx = pCanvas.getContext('2d');
     pCtx.clearRect(0, 0, 64, 64);
     const cols = { knight: ['#7f1d1d', '#0a0204'], saber: ['#1e40af', '#090d16'], archer: ['#166534', '#07130b'], invoker: player.orbLevels?.r >= 4 ? ['#b45309', '#1c1917'] : ['#3b0764', '#090a0f'] }[player.heroType] || ['#3b0764', '#090a0f'];
@@ -10736,10 +10702,10 @@ const DIFF_ART = {
     insane: [' /\\   /\\ ', '/  \\_/  \\', '| (@) (@)|', ' \\  ^^  / ', '  |vVVv|  ', '  \\____/  ']
 };
 const DIFF_THEME = {
-    easy:   { cls: 'd-easy', tag: 'МЯГКИЙ ПУТЬ', note: 'Сбалансированные враги, щадящие боссы. Для исследования и истории.' },
-    normal: { cls: 'd-normal', tag: 'КАНОН', note: 'Задуманный баланс: элита лагерей и Граф Дракула требуют тактики.' },
-    hard:   { cls: 'd-hard', tag: 'БАГРЯНЫЙ ОБЕТ', note: 'Враги и боссы заметно сильнее, но щедрее на золото и опыт.' },
-    insane: { cls: 'd-insane', tag: 'ЗАЗУБРЕННАЯ БЕЗДНА', note: 'Дракула и Владыка Ада вдвое опаснее. Ни одной лишней ошибки.' }
+    easy:   { cls: 'd-easy', tag: 'ТРУДНЫЙ ПУТЬ', note: 'Враги крепче и злее прежнего «Рыцаря». Для знакомства с миром.' },
+    normal: { cls: 'd-normal', tag: 'ХАРДКОР', note: 'Двойной урон и здоровье врагов, агрессивный ИИ. Готовьтесь к каждому лагерю.' },
+    hard:   { cls: 'd-hard', tag: 'БАГРЯНЫЙ ОБЕТ', note: 'Жестокое испытание на выживание: почти втрое больше урона.' },
+    insane: { cls: 'd-insane', tag: 'ЗАЗУБРЕННАЯ БЕЗДНА', note: 'Вчетверо смертоноснее. Ни одной лишней ошибки.' }
 };
 const asciiBar = (v, max, w = 12) => { const n = Math.max(0, Math.min(w, Math.round(v / max * w))); return '[' + '#'.repeat(n) + '-'.repeat(w - n) + ']'; };
 
@@ -10792,6 +10758,7 @@ window.onload = function () {
     initGfx();
     Controls.refreshHints();
     SoulsHUD.init();
+    if (typeof Portraits !== 'undefined' && Engine3D.ok) Portraits.mountHud();
     try { if (localStorage.getItem('eldoria_admin') === '1') toggleAdminMode(); } catch (e) {}
     setGameState('menu');
 

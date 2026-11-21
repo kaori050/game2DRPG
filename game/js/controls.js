@@ -14,7 +14,7 @@ const Controls = {
         ['primary', 'Основное действие (атака к курсору / цель)', 'combat'], ['attack', 'Атака к курсору', 'combat'], ['attack_move', 'Атака с ходу (A-клик)', 'combat'],
         ['interact', 'Взаимодействие', 'combat'], ['pot_hp', 'Зелье здоровья', 'combat'], ['pot_mp', 'Зелье маны', 'combat'],
         ['inventory', 'Котомка / снаряжение', 'ui'], ['spellbook', 'Гримуар', 'ui'], ['craft', 'Алтарь (крафт)', 'ui'], ['worldmap', 'Карта мира', 'ui'],
-        ['gacha', 'Звёздная Молитва', 'ui'], ['menu', 'Закрыть окна / меню', 'ui'],
+        ['menu', 'Закрыть окна / меню', 'ui'],
         ['admin_teleport', 'Админ: телепорт к курсору', 'admin'], ['admin_panel', 'Админ: свернуть панель', 'admin']
     ],
     GROUPS: { move: 'Передвижение', skill: 'Навыки', combat: 'Бой и предметы', ui: 'Интерфейс', admin: 'Режим администратора' },
@@ -23,12 +23,12 @@ const Controls = {
             binds: { move_up: 'ArrowUp', move_down: 'ArrowDown', move_left: 'ArrowLeft', move_right: 'ArrowRight', sprint: 'ShiftLeft', command: 'Mouse2', stop: 'KeyS',
                 skill1: 'KeyQ', skill2: 'KeyW', skill3: 'KeyE', skill4: 'KeyR', skill5: 'KeyD', skill6: 'KeyF',
                 primary: 'Mouse0', attack: 'Space', attack_move: 'KeyA', interact: 'KeyG', pot_hp: 'Digit1', pot_mp: 'Digit2',
-                inventory: 'KeyC', spellbook: 'KeyB', craft: 'KeyK', worldmap: 'KeyM', gacha: 'KeyP', menu: 'Escape', admin_teleport: 'KeyT', admin_panel: 'Backquote' } },
+                inventory: 'KeyC', spellbook: 'KeyB', craft: 'KeyK', worldmap: 'KeyM', menu: 'Escape', admin_teleport: 'KeyT', admin_panel: 'Backquote' } },
         wasd: { name: 'WASD + ZXCV', desc: 'W A S D — свободное движение, навыки Z X C V (+ Q, E), прицел — курсор мыши.', aim: 'mouse',
             binds: { move_up: 'KeyW', move_down: 'KeyS', move_left: 'KeyA', move_right: 'KeyD', sprint: 'ShiftLeft', command: 'Mouse2', stop: 'KeyH',
                 skill1: 'KeyZ', skill2: 'KeyX', skill3: 'KeyC', skill4: 'KeyV', skill5: 'KeyQ', skill6: 'KeyE',
                 primary: 'Mouse0', attack: 'Space', attack_move: '', interact: 'KeyF', pot_hp: 'Digit1', pot_mp: 'Digit2',
-                inventory: 'KeyI', spellbook: 'KeyB', craft: 'KeyK', worldmap: 'KeyM', gacha: 'KeyP', menu: 'Escape', admin_teleport: 'KeyT', admin_panel: 'Backquote' } }
+                inventory: 'KeyI', spellbook: 'KeyB', craft: 'KeyK', worldmap: 'KeyM', menu: 'Escape', admin_teleport: 'KeyT', admin_panel: 'Backquote' } }
     },
     preset: 'dota', aim: 'click', binds: {}, byCode: {}, capture: null, mouse: null, aimHold: 0,
 
@@ -155,7 +155,6 @@ const Controls = {
         if (a === 'inventory') { toggleModal('char'); return true; }
         if (a === 'craft') { toggleModal('craft'); return true; }
         if (a === 'worldmap') { toggleModal('worldmap'); return true; }
-        if (a === 'gacha') { toggleModal('gacha'); return true; }
         if (a === 'admin_teleport') { if (adminMode) adminTeleportCursor(); return true; }
         if (a === 'admin_panel') { if (adminMode) toggleAdminPanelCollapse(); return true; }
         if (isAnyModalOpen()) return false;
