@@ -406,7 +406,7 @@ const Frank3D = {
         }
     },
     update(dt) {
-        if (!this.pools && player.heroType !== 'frankenstein' && player.heroType !== 'medea' && player.heroType !== 'gilgamesh' && player.heroType !== 'atalanta' && player.heroType !== 'astolfo') return;
+        if (!this.pools && player.heroType !== 'frankenstein' && player.heroType !== 'medea' && player.heroType !== 'gilgamesh' && player.heroType !== 'atalanta' && player.heroType !== 'astolfo' && player.heroType !== 'jeanne' && player.heroType !== 'jack' && player.heroType !== 'semiramis') return;
         this.init();
         const t = Engine3D.t, hp = this.pos(player.x, player.y);
         for (const k in this.pools) this.pools[k].n = 0;

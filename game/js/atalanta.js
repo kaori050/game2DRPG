@@ -214,7 +214,15 @@ const Ata = {
         if (!adminMode && player.level < ATA_SWITCH.level) { showToast(`Смена формы откроется на ${ATA_SWITCH.level} уровне`, 'error'); return; }
         const c = player.saberCooldowns.d || 0;
         if (c > 0) { showToast(`Смена формы перезаряжается (${c.toFixed(1)} сек.)`, 'error'); return; }
-        if (player.controlLock || player.ataLeap || player.ataDash) return;
+        if (!this._morphGo && (player.controlLock || player.ataLeap || player.ataDash)) return;
+        // Лучница → Альтер: сначала родная анимация превращения (Morph) лучницы, потом смена модели
+        if (player.ataForm !== 'beast' && !this._morphGo) {
+            if (this._morphing) return;
+            this._morphing = true; player.knightAnim = { kind: 'morph', t: 0.5 };
+            if (typeof Ata3D !== 'undefined') Ata3D.skiaStart();
+            this.later(0.45, () => { this._morphing = false; this._morphGo = true; this.switchForm(); this._morphGo = false; });
+            return;
+        }
         const hr = player.hp / Math.max(1, player.maxHp), mr = player.mp / Math.max(1, player.maxMp);
         player.ataForm = player.ataForm === 'beast' ? 'bow' : 'beast';
         player.ataWrath = 0; player.ataFury = 0; player.comboStep = 0;
@@ -302,7 +310,7 @@ const Ata = {
         }
     },
     damageMult() { return player.heroType === 'atalanta' && player.ataWrath > 0 ? 1.2 : 1; },
-    locked() { return player.heroType === 'atalanta' && !!(player.ataSkia || player.ataLeap || player.ataDash); },
+    locked() { return player.heroType === 'atalanta' && !!(player.ataSkia || player.ataLeap || player.ataDash || this._morphing); },
     reset() { player.ataQueue = null; player.ataDash = null; player.ataLeap = null; player.ataRain = null; player.ataSkia = null; player.ataWrath = 0; player.ataFury = 0; player.ataHaste = 0; },
 
     // ---------- панель навыков: одна панель, содержимое меняется вместе с формой ----------

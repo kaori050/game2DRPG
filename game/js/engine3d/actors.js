@@ -265,7 +265,7 @@ const Actors3D = {
         const o = Math.sin(j.t * 70) * Math.exp(-j.t * 16) * 0.07 * j.k + Math.exp(-j.t * 10) * 0.05 * j.k;
         a.base.position.x += j.dx * o; a.base.position.z += j.dz * o;
     },
-    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; if (ht === 'elizabeth') return 0xe879f9; if (ht === 'frankenstein') return 0xfde047; if (ht === 'medea') return 0xa78bfa; if (ht === 'gilgamesh') return 0xfbbf24; if (ht === 'astolfo') return 0xf472b6; if (ht === 'atalanta') return player.ataForm === 'beast' ? 0xc026d3 : 0xbef264; return ht === 'saber' ? (saberRed() ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
+    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; if (ht === 'elizabeth') return 0xe879f9; if (ht === 'frankenstein') return 0xfde047; if (ht === 'medea') return 0xa78bfa; if (ht === 'gilgamesh') return 0xfbbf24; if (ht === 'astolfo') return 0xf472b6; if (ht === 'jeanne') return 0xfde68a; if (ht === 'jack') return 0xe11d48; if (ht === 'semiramis') return 0xa855f7; if (ht === 'atalanta') return player.ataForm === 'beast' ? 0xc026d3 : 0xbef264; return ht === 'saber' ? (saberRed() ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
     animate(a, dt, x, z, opts) {
         const t = Engine3D.t;
         if (a.lx === null) { a.lx = x; a.lz = z; }
@@ -429,18 +429,23 @@ const Actors3D = {
             const aura = Models3D.glow(0xffd070, 1.8); aura.position.y = 0.7; aura.visible = false; this.player.base.add(aura); this.player.aura = aura;
             this.playerKey = key;
         }
+        if (this.pendingGesture && this.player) { this.attack(this.player, this.pendingGesture[0], this.pendingGesture[1]); this.pendingGesture = null; }   // жест, заказанный до пересборки модели
         G3.cape.t.value = Engine3D.t;
         if (this.player && player.heroType === 'knight') { const pulse = 1.4 + Math.sin(Engine3D.t * 3.2) * 0.9 + Math.sin(Engine3D.t * 11) * 0.2; for (const m of this.player.mats) if (m.emissiveMap && !this.player.tint) m.emissiveIntensity = pulse; }
         const P = this.player;
         if (this.pendingTrans) { P.trans = P.transD = this.pendingTrans; this.pendingTrans = 0; }
         // Начало атаки героя → стиль и длительность удара по классу и стойке
         const slash = player.slashAnimTime || 0, cast = player.castAnimTime || 0, blades = player.archerStance === 'blades';
-        if (slash > 0 && (P.lastSlash || 0) <= 0) {
+        if (slash > 0 && ((P.lastSlash || 0) <= 0 || ((ht === 'astolfo' || ht === 'semiramis') && P.lastCombo !== player.comboStep))) {   // у Астольфо каждый шаг комбо — своя анимация, даже вплотную к предыдущему
+            P.lastCombo = player.comboStep;
             let style = 'slash', dur = 0.42;
             if (ht === 'saber' && player.ultCast && player.ultCast.swing) { style = 'heavy'; dur = 0.6; }
             else if (ht === 'saber') { const k = (player.comboStep || 1) - 1; style = ['thrust', 'cross', 'spin', 'overhead'][k]; dur = [0.34, 0.4, 0.52, 0.62][k]; }
             else if (ht === 'archer') { const k = (player.bladeComboStep || 1) - 1; style = ['slash', 'slashL', 'twin', 'twinSpin'][k]; dur = [0.32, 0.32, 0.42, 0.56][k]; }
-            else if (ht === 'astolfo') { const k = (player.comboStep || 1) - 1; style = ['slash', 'cross'][k] || 'slash'; dur = [0.3, 0.34][k] || 0.3; }
+            else if (ht === 'semiramis') { const C = SEMI_COMBO[((player.comboStep || 1) - 1) % 4]; style = C.style; dur = C.dur; }
+            else if (ht === 'jack') { const k = (player.comboStep || 1) - 1; style = ['slash', 'cross'][k] || 'slash'; dur = [0.26, 0.3][k] || 0.26; }
+            else if (ht === 'jeanne') { const k = (player.comboStep || 1) - 1; style = ['slash', 'cross'][k] || 'slash'; dur = [0.38, 0.42][k] || 0.38; }
+            else if (ht === 'astolfo') { const C = ASTO_COMBO[((player.comboStep || 1) - 1) % 4]; style = C.style; dur = C.dur; }
             else if (ht === 'atalanta') { const k = (player.comboStep || 1) - 1; style = ['slash', 'cross'][k] || 'slash'; dur = [0.3, 0.34][k] || 0.3; }
             else if (ht === 'frankenstein') { const k = (player.comboStep || 1) - 1; style = ['slash', 'cross'][k] || 'slash'; dur = [0.55, 0.62][k] || 0.55; }
             else if (ht === 'knight') { const k = (player.comboStep || 1) - 1; if (player.knightSword) { style = ['thrust', 'cross', 'spin', 'overhead'][k]; dur = [0.36, 0.42, 0.54, 0.64][k]; } else { style = ['clawR', 'clawL', 'clawX', 'clawRend'][k]; dur = [0.26, 0.26, 0.34, 0.48][k]; } }
@@ -461,19 +466,19 @@ const Actors3D = {
         if (player.knightAnim && player.knightAnim !== P.kAnim) { P.kAnim = player.knightAnim; this.attack(P, player.knightAnim.kind, player.knightAnim.t); }
         const cine = typeof Cinema !== 'undefined' ? Cinema.heroPose() : null;
         // Масса героя: рыцарь в доспехах тяжелее всех, маги легче
-        P.weight = { knight: 1.35, saber: player.charId === 'mordred' ? 1.2 : 1.1, archer: 0.9, elizabeth: 0.75, frankenstein: 1.45, medea: 0.7, gilgamesh: 0.95, astolfo: 0.75, atalanta: player.ataForm === 'beast' ? 0.85 : 0.7 }[ht] || 0.8;
-        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: cine ? cine.hold : (charging ? 'raise' : (player.knightRend ? 'rend' : (player.astoUlt && player.astoUlt.charging && !player.astoUlt.done) ? 'ride' : (player.gilUlt ? (player.gilUlt.fired ? 'ultcast' : 'eaSpin') : player.elizaUlt || player.frankUlt ? 'ultcast' : (player.elizaChannel ? 'channel' : null)))), alt: player.charId === 'mordred' && (player.avalonBuffTimer || 0) > 0, bigBlade: ht === 'saber' && (player.avalonBuffTimer || 0) > 0 ? 0.9 : (charging ? 0.35 : 0),
+        P.weight = { knight: 1.35, saber: player.charId === 'mordred' ? 1.2 : 1.1, archer: 0.9, elizabeth: 0.75, frankenstein: 1.45, medea: 0.7, gilgamesh: 0.95, astolfo: 0.75, jeanne: 1.15, jack: 0.6, semiramis: 0.7, atalanta: player.ataForm === 'beast' ? 0.85 : 0.7 }[ht] || 0.8;
+        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: cine ? cine.hold : (charging ? 'raise' : (player.knightRend ? 'rend' : (ht === 'astolfo' && Asto.mounted()) ? 'ride' : (ht === 'astolfo' && player.astoVanishing) ? 'vanish' : (ht === 'frankenstein' && player.frankFrenzy) ? 'frenzy' : (player.jeanUlt && !player.jeanUlt.done) ? 'pucelle' : (player.gilUlt ? (player.gilUlt.fired ? 'ultcast' : 'eaSpin') : player.elizaUlt || player.frankUlt ? 'ultcast' : (player.elizaChannel ? 'channel' : null)))), alt: (player.charId === 'mordred' && (player.avalonBuffTimer || 0) > 0) || (ht === 'jack' && (Jack.inMist() || !!player.jackUlt)),   // Мордред без шлема / Джек с парящими ножами bigBlade: ht === 'saber' && (player.avalonBuffTimer || 0) > 0 ? 0.9 : (charging ? 0.35 : 0),
             vis: P.rig.kind === 'mdx' && P.rig.mdx.modelName === 'archer' ? (player.archerStance === 'blades' ? { 1: true, 2: false } : { 1: false, 2: true })
                 : (P.rig.kind === 'mdx' && P.rig.mdx.modelName === 'frankenstein' && player.frankMace ? { [P.rig.mdx.maceGeoset || 0]: false } : null) });
         // Ульта рыцаря: левитация и судороги, пока он разрывает себя
-        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : player.ataLeap ? Math.sin(Math.min(1, player.ataLeap.t / player.ataLeap.dur) * Math.PI) * 1.4 : player.elizaUlt ? this.spring(P, 'cineY', 0.9 + Math.sin(Engine3D.t * 3) * 0.08, dt, 4) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : (P.bobY || 0));
+        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : (ht === 'astolfo' && Asto.alt() > 0) ? Asto.alt() : (ht === 'jeanne' && Jeanne.alt() > 0) ? Jeanne.alt() : player.ataLeap ? Math.sin(Math.min(1, player.ataLeap.t / player.ataLeap.dur) * Math.PI) * 1.4 : player.elizaUlt ? this.spring(P, 'cineY', 0.9 + Math.sin(Engine3D.t * 3) * 0.08, dt, 4) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : (P.bobY || 0));
         // Переход формы/стойки: импульс масштаба, оружие «проявляется»
         let wScale = 1;
         if (P.trans > 0) {
             P.trans = Math.max(0, P.trans - dt); const k = 1 - P.trans / P.transD;
             P.root.scale.setScalar(1.08 * (1 + 0.14 * Math.sin(k * Math.PI) * (1 - k)));
             wScale = Math.max(0.01, this.ease.back(Math.min(1, k * 1.4)));
-        } else P.root.scale.setScalar(1.08);
+        } else P.root.scale.setScalar(1.08 * this.spring(P, 'mountS', ht === 'astolfo' && (Asto.mounted() || (player.astoUlt && player.astoUlt.phase === 'mount')) ? 1.3 : 1, dt, 5));   // верхом на Гиппогрифе — крупнее и заметнее
         if (P.rig.offhand) P.rig.offhand.scale.setScalar(wScale);
         if (P.rig.weapon) P.rig.weapon.scale.setScalar(wScale * (ht === 'saber' && charging ? 1.25 + Math.sin(Engine3D.t * 10) * 0.04 : 1));
         P.aura.visible = (player.avalonBuffTimer || 0) > 0 || charging;

@@ -1,27 +1,37 @@
 // ============================================================================
 // АСТОЛЬФО (класс «Райдер»): Рыцарь Карла Великого, наездник Гиппогрифа
 // ============================================================================
-// Самый быстрый герой: копьё и рапира вблизи, рывки, контроль и срыв вражеских баффов.
-// Умеренная живучесть — играет скоростью и позиционированием, а не лобовым разменом.
-// Q Ловушка Аргалии — стремительный выпад к курсору: урон по линии, снимает с врагов защиту и усиления.
-// W Рог Отчаяния (La Black Luna) — звуковая волна конусом: урон, оглушение, отбрасывание, срыв замахов.
-// E Книга Исчезновения — рывок к курсору, фантомный след, короткая невидимость и ускорение.
-// R Гиппогриф — призыв Гиппогрифа и таранный прорыв по линии с ударом при приземлении.
+// Самый быстрый герой: копьё вблизи, рывки, контроль и срыв вражеских баффов. Умеренная живучесть —
+// играет скоростью и позиционированием. Гиппогриф — настоящий скакун из модели: Астольфо садится на него
+// верхом (родные анимации посадки и полёта модели), взлетает над полем, летит над препятствиями и пикирует.
+// Атака — комбо из четырёх ударов: рубящий → выпад → удар с разворота → летящий выпад (отбрасывает).
+// Q Ловушка Аргалии — молниеносный выпад к курсору: урон по линии, ломает защиту и баффы, сбивает касты, отбрасывает.
+// W Рог Отчаяния (La Black Luna) — пауза, вдох — и звуковая волна конусом: урон, оглушение, отбрасывание.
+// E Книга Исчезновения — Гиппогриф подхватывает Астольфо: короткий бросок по воздуху над препятствиями,
+//   неуязвимость в полёте, затем невидимость и ускорение.
+// R Гиппогриф — посадка верхом, взлёт, полёт к цели над полем (порывы крыльев сбивают врагов) и пике.
 const ASTO_SKILLS = {
     q: { key: 'q', name: 'Trap of Argalia', ruName: 'Ловушка Аргалии', icon: '🗡️', manaCost: 22, baseCd: 4,
-         desc: 'Стремительный выпад копьём к курсору с ярким следом. Бьёт всех на линии и ломает их защиту: снимает неуязвимость (кроме смены фазы босса), броню и сопротивление магии, отменяет ускорения на 4 секунды. Отличное начало комбинации.',
-         stats: l => `Урон ${45 + 22 * l} + атака • линия 190 • снятие защиты 4с • перезарядка 4с` },
+         desc: 'Короткая пауза — и молниеносный выпад копьём к курсору с ярким следом. Бьёт всех на линии, слегка отбрасывает и ломает их защиту: снимает неуязвимость (кроме смены фазы босса), броню, сопротивление магии и ускорения на 4 секунды, сбивает замахи и касты.',
+         stats: l => `Урон ${45 + 22 * l} + атака • линия 200 • снятие защиты 4с • перезарядка 4с` },
     w: { key: 'w', name: 'La Black Luna', ruName: 'Рог Отчаяния', icon: '📯', manaCost: 55, baseCd: 12,
-         desc: 'Астольфо трубит в рог, и звуковая волна сметает всё перед ним: урон, оглушение и отбрасывание, замахи и касты врагов срываются. Зона поражения видна на земле.',
-         stats: l => `Урон ${40 + 20 * l} + атака • конус 270 / 80° • оглушение ${(0.8 + 0.1 * l).toFixed(1)}с • перезарядка ${Math.max(7, 12 - 0.5 * l).toFixed(1)}с` },
+         desc: 'Астольфо пригибается за огромным кольцевым рогом La Black Luna и трубит. Главная волна бьёт конусом вперёд (урон, оглушение, отбрасывание), а отголосок рёва сбивает с ног всех вплотную вокруг. Замахи и касты врагов срываются. Обе зоны видны на земле ещё до звука.',
+         stats: l => `Конус 300 / 115°: ${40 + 20 * l} + атака, оглушение ${(0.8 + 0.1 * l).toFixed(1)}с • вокруг 150: половина урона и оглушения • перезарядка ${Math.max(7, 12 - 0.5 * l).toFixed(1)}с` },
     e: { key: 'e', name: 'Book of Vanishing', ruName: 'Книга Исчезновения', icon: '📖', manaCost: 30, baseCd: 7,
-         desc: 'Мгновенный рывок к курсору под магической завесой. После рывка Астольфо на мгновение исчезает из виду врагов (они теряют цель) и ускоряется. Зайти за спину, уйти из зоны босса, не застрять в толпе.',
-         stats: l => `Рывок ${240 + 12 * l} • невидимость 0.9с • ускорение +30% на 2.5с • перезарядка ${Math.max(4, 7 - 0.4 * l).toFixed(1)}с` },
+         desc: 'Луна Брейк Мануал: страницы книги разлетаются, Астольфо полностью исчезает и появляется у курсора — сквозь деревья, скалы и врагов, без застревания — с эффектным разворотом. В переносе неуязвим, после появления на миг скрыт от врагов и ускорен.',
+         stats: l => `Бросок ${250 + 12 * l} по воздуху • неуязвимость в полёте • невидимость 0.8с • ускорение +30% на 2.5с • перезарядка ${Math.max(4, 7 - 0.4 * l).toFixed(1)}с` },
     r: { key: 'r', name: 'Hippogriff', ruName: 'Гиппогриф', icon: '🦅', manaCost: 170, baseCd: 90,
-         desc: 'Ультимейт. Астольфо призывает Гиппогрифа и верхом таранит по линии к курсору: всё на пути получает тяжёлый урон, отлетает в стороны и оглушается, а в конце прорыва — пикирующий удар по области. Во время тарана Астольфо неуязвим. Траектория и место удара видны заранее.',
-         stats: l => `Таран ${520} × 140: ${180 + 90 * l} + атака, оглушение 1с • удар в конце ${220 + 110 * l} в радиусе 170 • перезарядка ${90 - 5 * l}с` }
+         desc: 'Ультимейт. Астольфо запрыгивает верхом на Гиппогрифа, взмывает в воздух и летит к цели над полем боя: порывы крыльев сбивают врагов под ним. В конце — пике и сокрушительный таран в зоне удара. Посадка — 1.3 секунды (Астольфо прыгает, под ним появляется Гиппогриф), в полёте он держит копьё Аргалии и неуязвим. Путь и место удара видны заранее.',
+         stats: l => `Полёт до ${ASTO_ULT.range} • порывы крыльев ${90 + 45 * l} • пике ${300 + 150 * l} + атака в радиусе 190, оглушение 1.2с • перезарядка ${90 - 5 * l}с` }
 };
-const ASTO_ULT = { len: 520, width: 140, wind: 0.6, charge: 0.55 };
+const ASTO_ULT = { range: 560, mount: 1.3, fly: 1.1, dive: 0.3, land: 0.4, alt: 2.6, width: 130 };
+// Комбо атаки: анимация, урон, рывок вперёд, ширина и отбрасывание
+const ASTO_COMBO = [
+    { style: 'slash', dur: 0.3, mult: 1, step: 10, len: 95, w: 90, kb: 0 },
+    { style: 'cross', dur: 0.32, mult: 1.1, step: 22, len: 110, w: 60, kb: 0 },
+    { style: 'spin', dur: 0.4, mult: 1.25, step: 8, len: 100, w: 130, kb: 0 },
+    { style: 'dash', dur: 0.38, mult: 1.6, step: 55, len: 125, w: 70, kb: 45 }
+];
 
 const Asto = {
     stats(L, q, w, e, r, eq) {
@@ -34,8 +44,8 @@ const Asto = {
         player.armor = Math.round(3 + L * 0.4 + eq.armor);
         player.moveSpeed = 240 * (player.astoHaste > 0 ? 1.3 : 1) | 0;
         player.cdrPct = Math.min(40, Math.round(eq.cdr));
-        player.attackInterval = 0.5;
-        player.attackRange = 90;
+        player.attackInterval = 0.42;
+        player.attackRange = 95;
         player.critChance = 10 + eq.crit; player.critMult = 1.7;
     },
     pow() { return 1 + (player.spellAmp || 0) / 100; },
@@ -49,7 +59,6 @@ const Asto = {
     cd(key, base) { player.saberCooldowns[key] = +(base * (1 - (player.cdrPct || 0) / 100)).toFixed(1); },
     later(t, fn) { (player.astoQueue = player.astoQueue || []).push({ t, fn }); },
     crit(dmg) { const c = Math.random() * 100 < (player.critChance || 0); return { dmg: Math.round(dmg * (c ? player.critMult : 1)), crit: c }; },
-    // Враги в прямоугольнике от точки (ox, oy) вдоль угла ang
     inLine(ox, oy, ang, len, w, fn) {
         const ca = Math.cos(ang), sa = Math.sin(ang);
         enemies.forEach(en => {
@@ -59,7 +68,11 @@ const Asto = {
             fn(en, al, -rx * sa + ry * ca);
         });
     },
-    // Ловушка Аргалии: снимает защиту и усиления врага на время
+    // Дальняя свободная точка на линии полёта (над препятствиями можно, приземляться — только на землю)
+    landing(ox, oy, ang, dist) {
+        for (let s = dist; s >= 20; s -= 12) { const x = ox + Math.cos(ang) * s, y = oy + Math.sin(ang) * s; if (!isTileBlocked(Math.floor(x / TS), Math.floor(y / TS))) return { x, y, d: s }; }
+        return { x: ox, y: oy, d: 0 };
+    },
     sunder(en, sec) {
         if (en.state !== 'roar') en.invuln = 0;   // неуязвимость смены фазы босса — механика боя, её не трогаем
         if (!en.astoBreak) en.astoBreak = { armor: en.armor, mres: en.mres };
@@ -68,7 +81,6 @@ const Asto = {
         if (en.tpl && en.speed > en.tpl.speed * (diffCfg().speed || 1)) en.speed = Math.round(en.tpl.speed * (diffCfg().speed || 1));
         if (typeof Asto3D !== 'undefined') Asto3D.shatter(en);
     },
-    // Рог: сбивает замахи и касты так же, как цепи Энкиду
     interrupt(en) {
         en.disarmTimer = Math.max(en.disarmTimer || 0, en.isBoss ? 0.6 : 1.1);
         en.attackCd = Math.max(en.attackCd || 0, 0.7);
@@ -76,17 +88,25 @@ const Asto = {
         en.leapT = 0;
         if (en.state === 'drain' || en.state === 'charge') { en.state = 'chase'; en.stateT = 0; spawnFloatingText(en.x, en.y - 44, 'ПРЕРВАНО!', '#f9a8d4'); }
     },
+    // Комбо из четырёх ударов с шагом вперёд; четвёртый — летящий выпад с отбрасыванием
     attack() {
-        const step = player.comboStep = ((player.comboTimer > 0 ? player.comboStep || 0 : 0) % 2) + 1; player.comboTimer = 1.4;
-        player.basicAttackCd = player.attackInterval;
-        player.slashAnimTime = 0.28;
+        const k = player.comboStep = ((player.comboTimer > 0 ? player.comboStep || 0 : 0) % 4) + 1; player.comboTimer = 1.1;
+        const C = ASTO_COMBO[k - 1];
+        player.basicAttackCd = player.attackInterval * (k === 4 ? 1.45 : 1);
+        player.slashAnimTime = C.dur;
         let ax = mouseWorldX, ay = mouseWorldY; const tgt = player.attackTarget;
         if (tgt && tgt.deadTimer <= 0) { ax = tgt.x; ay = tgt.y; }
         const ang = Math.atan2(ay - player.y, ax - player.x); player.facingAngle = ang;
-        this.later(0.12, () => {
+        const ca = Math.cos(ang), sa = Math.sin(ang), hitAt = C.dur * 0.45;
+        player.astoStep = { t: 0, dur: hitAt, vx: ca * C.step / hitAt, vy: sa * C.step / hitAt };   // шаг вперёд под удар
+        this.later(hitAt, () => {
             let hit = 0;
-            this.inLine(player.x, player.y, ang, 95, 80, en => { const c = this.crit(player.handDmg * (step === 2 ? 1.2 : 1)); damageEnemy(en, c.dmg, false, Math.cos(ang) * 5, Math.sin(ang) * 5, '#f9a8d4', { crit: c.crit }); hit++; });
-            if (hit && typeof Feel !== 'undefined') Feel.impact(Math.cos(ang), Math.sin(ang), 0.45, false);
+            this.inLine(player.x - ca * 15, player.y - sa * 15, ang, C.len, C.w, en => {
+                const c = this.crit(player.handDmg * C.mult); damageEnemy(en, c.dmg, false, ca * 5, sa * 5, '#f9a8d4', { crit: c.crit }); hit++;
+                if (C.kb && !en.isBoss) tryMoveEntity(en, ca * C.kb, sa * C.kb);
+            });
+            if (typeof Asto3D !== 'undefined') Asto3D.slashFx(ang, k);
+            if (hit && typeof Feel !== 'undefined') Feel.impact(ca, sa, k === 4 ? 0.9 : 0.35 + k * 0.1, false);
         });
         SoundFX.play('whoosh');
     },
@@ -96,114 +116,162 @@ const Asto = {
         const ang = Math.atan2(mouseWorldY - player.y, mouseWorldX - player.x); player.facingAngle = ang;
         const cx = Math.cos(ang), cy = Math.sin(ang);
         if (key === 'q') {
-            const ox = player.x, oy = player.y, dmg = (45 + 22 * lvl) * P + H * 0.7;
-            player.astoDash = { t: 0, dur: 0.14, vx: cx * 110 / 0.14, vy: cy * 110 / 0.14 };   // выпад: короткий рывок вперёд
-            this.later(0.1, () => {
-                this.inLine(ox, oy, ang, 190, 60, en => { const c = this.crit(dmg); damageEnemy(en, c.dmg, false, cx * 8, cy * 8, '#f472b6', { crit: c.crit }); this.sunder(en, 4); });
-                if (typeof Feel !== 'undefined') Feel.impact(cx, cy, 0.8, false);
+            // Пауза-прицел 0.12с → молниеносный выпад на 120 вперёд → удар по линии
+            const dmg = (45 + 22 * lvl) * P + H * 0.7;
+            player.knightAnim = { kind: 'thrust', t: 0.42 };
+            this.later(0.12, () => {
+                const ox = player.x, oy = player.y;
+                player.astoDash = { t: 0, dur: 0.12, vx: cx * 120 / 0.12, vy: cy * 120 / 0.12 };
+                if (typeof Asto3D !== 'undefined') Asto3D.thrust(ox, oy, ang, 200);
+                this.later(0.08, () => {
+                    this.inLine(ox, oy, ang, 200, 64, en => {
+                        const c = this.crit(dmg); damageEnemy(en, c.dmg, false, cx * 8, cy * 8, '#f472b6', { crit: c.crit });
+                        this.sunder(en, 4); this.interrupt(en);
+                        if (!en.isBoss) tryMoveEntity(en, cx * 28, cy * 28);
+                    });
+                    if (typeof Feel !== 'undefined') Feel.impact(cx, cy, 0.9, false);
+                });
             });
-            if (typeof Asto3D !== 'undefined') Asto3D.thrust(ox, oy, ang, 190);
-            player.knightAnim = { kind: 'thrust', t: 0.32 };
             this.cd('q', ASTO_SKILLS.q.baseCd); SoundFX.play('bolt');
         } else if (key === 'w') {
-            const R = 270, half = 0.7, dmg = (40 + 20 * lvl) * P + H * 0.5, st = 0.8 + 0.1 * lvl;
-            player.astoHorn = { t: 0, ang, R, half };
-            this.later(0.15, () => {
+            // Подносит рог (0.28с, зона уже видна) → звуковая волна
+            const R = 300, half = 1.0, ring = 150, dmg = (40 + 20 * lvl) * P + H * 0.5, st = 0.8 + 0.1 * lvl;
+            player.astoHorn = { t: 0, ang, R, half, blown: false };
+            player.knightAnim = { kind: 'horn', t: 0.95 };
+            player.astoRoot = 0.6;   // не сдвинуть, пока трубит
+            if (typeof Asto3D !== 'undefined') { Asto3D.hornTell(ang, R, half, 0.42); Asto3D.hornTell(ang, ring / 1, Math.PI, 0.42, 0x6b2150); }
+            this.later(0.42, () => {
+                player.astoHorn && (player.astoHorn.blown = true);
                 enemies.forEach(en => {
                     if (en.deadTimer > 0) return;
                     const dx = en.x - player.x, dy = en.y - player.y, d = Math.hypot(dx, dy);
                     if (d > R + en.radius) return;
                     let da = Math.atan2(dy, dx) - ang; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
-                    if (Math.abs(da) > half && d > en.radius + 20) return;
-                    damageEnemy(en, Math.round(dmg), true, 0, 0, '#f0abfc');
-                    en.stunTimer = Math.max(en.stunTimer || 0, st);
+                    const front = Math.abs(da) <= half || d <= en.radius + 20;
+                    if (!front && d > ring + en.radius) return;
+                    const k = front ? 1 : 0.5;   // отголосок вокруг — половина силы
+                    damageEnemy(en, Math.round(dmg * k), true, 0, 0, '#f0abfc');
+                    en.stunTimer = Math.max(en.stunTimer || 0, st * k);
                     this.interrupt(en);
-                    if (!en.isBoss && d > 1) tryMoveEntity(en, dx / d * 70, dy / d * 70);
+                    if (!en.isBoss && d > 1) tryMoveEntity(en, dx / d * 80, dy / d * 80);
                 });
-                if (typeof Asto3D !== 'undefined') Asto3D.horn(ang, R, half);
-                if (typeof Feel !== 'undefined') Feel.shake(cx, cy, 0.2, 18, 7);
+                if (typeof Asto3D !== 'undefined') { Asto3D.horn(ang, R, half); Asto3D.hornRing(ring); }
+                if (typeof Feel !== 'undefined') Feel.shake(cx, cy, 0.25, 18, 7);
+                SoundFX.play('thunder');
             });
-            player.knightAnim = { kind: 'horn', t: 0.55 };
-            this.cd('w', Math.max(7, ASTO_SKILLS.w.baseCd - 0.5 * lvl)); SoundFX.play('thunder');
+            this.cd('w', Math.max(7, ASTO_SKILLS.w.baseCd - 0.5 * lvl));
         } else if (key === 'e') {
-            const range = 240 + 12 * lvl, d = Math.min(range, Math.max(80, Math.hypot(mouseWorldX - player.x, mouseWorldY - player.y)));
+            // Бросок верхом: Гиппогриф уносит по воздуху над препятствиями к свободной точке
+            const range = 250 + 12 * lvl, want = Math.min(range, Math.max(90, Math.hypot(mouseWorldX - player.x, mouseWorldY - player.y)));
+            const L = this.landing(player.x, player.y, ang, want);
+            if (L.d < 30) { player.mp += ASTO_SKILLS.e.manaCost; showToast('Некуда приземлиться', 'error'); return; }
             if (typeof Asto3D !== 'undefined') Asto3D.vanish(player.x, player.y);
-            player.astoDash = { t: 0, dur: 0.16, vx: cx * d / 0.16, vy: cy * d / 0.16, ghost: true };
-            player.invulnTime = Math.max(player.invulnTime, 0.3);
-            player.astoVanish = 0.9; player.astoHaste = 2.5; recalcPlayerStats();
-            enemies.forEach(en => { if (en.aggro > 0) en.aggro = 0; if (player.attackTarget === en) player.attackTarget = null; });
-            player.moveTargetX = null; player.moveTargetY = null;
-            player.knightAnim = { kind: 'dash', t: 0.3 };
+            player.astoGlide = { t: 0, dur: 0.4, ox: player.x, oy: player.y, tx: L.x, ty: L.y, ang };
+            player.astoVanishing = true;
+            player.invulnTime = Math.max(player.invulnTime, 0.6);
+            player.moveTargetX = null; player.moveTargetY = null; player.attackTarget = null;
+            player.knightAnim = null;
             this.cd('e', Math.max(4, ASTO_SKILLS.e.baseCd - 0.4 * lvl)); SoundFX.play('tornado');
         } else if (key === 'r') {
-            player.astoUlt = { t: 0, ang, len: ASTO_ULT.len, W: ASTO_ULT.width, dmg: (180 + 90 * lvl) * P + H, slam: (220 + 110 * lvl) * P + H, hit: new Set(), ox: player.x, oy: player.y, charging: false, done: false };
+            const want = Math.min(ASTO_ULT.range, Math.max(160, Math.hypot(mouseWorldX - player.x, mouseWorldY - player.y)));
+            const L = this.landing(player.x, player.y, ang, want);
+            player.astoUlt = { t: 0, phase: 'mount', ang, ox: player.x, oy: player.y, tx: L.x, ty: L.y, dist: L.d, gust: (90 + 45 * lvl) * P, slam: (300 + 150 * lvl) * P + H * 1.2, hit: new Set(), alt: 0 };
             player.moveTargetX = null; player.moveTargetY = null; player.attackTarget = null;
-            player.knightAnim = { kind: 'summon', t: ASTO_ULT.wind };
+            player.knightAnim = { kind: 'mount', t: ASTO_ULT.mount };
             this.cd('r', ASTO_SKILLS.r.baseCd - 5 * lvl);
             SoundFX.play('invoke');
-            zoneBanner = { title: 'ГИППОГРИФ', sub: 'Полёт Неукротимого Зверя', life: 2.2, maxLife: 2.2, color: '#f9a8d4' };
+            zoneBanner = { title: 'ГИППОГРИФ', sub: 'Неукротимый Полёт', life: 2.4, maxLife: 2.4, color: '#f9a8d4' };
             if (typeof Asto3D !== 'undefined') Asto3D.summon();
         }
         updateInvokerBarUI();
     },
+    // Высота над землёй (тайлы) для 3D: бросок и полёт верхом
+    alt() {
+        const U = player.astoUlt; return U ? U.alt : 0;
+    },
+    // Поза на скакуне: пока летим — родная анимация полёта верхом
+    mounted() { const U = player.astoUlt; return !!(U && U.phase !== 'mount' && U.phase !== 'land'); },
     update(dt) {
         if (player.heroType !== 'astolfo') return;
         if (player.knightAnim) { player.knightAnim.t -= dt; if (player.knightAnim.t <= 0) player.knightAnim = null; }
         const Q = player.astoQueue;
         if (Q) for (let i = Q.length - 1; i >= 0; i--) { Q[i].t -= dt; if (Q[i].t <= 0) { const f = Q[i].fn; Q.splice(i, 1); f(); } }
         if (player.astoVanish > 0) player.astoVanish = Math.max(0, player.astoVanish - dt);
+        if (player.astoRoot > 0) player.astoRoot = Math.max(0, player.astoRoot - dt);
         if (player.astoHaste > 0) { player.astoHaste -= dt; if (player.astoHaste <= 0) { player.astoHaste = 0; recalcPlayerStats(); } }
-        if (player.astoHorn) { player.astoHorn.t += dt; if (player.astoHorn.t > 0.4) player.astoHorn = null; }
+        if (player.astoHorn) { player.astoHorn.t += dt; if (player.astoHorn.t > 0.7) player.astoHorn = null; }
+        const S = player.astoStep;
+        if (S) { S.t += dt; tryMoveEntity(player, S.vx * dt, S.vy * dt); if (S.t >= S.dur) player.astoStep = null; }
         const D = player.astoDash;
-        if (D) { D.t += dt; tryMoveEntity(player, D.vx * dt, D.vy * dt); if (D.ghost && typeof Asto3D !== 'undefined') Asto3D.ghost(); if (D.t >= D.dur) player.astoDash = null; }
-        // Снятая защита возвращается
-        for (const en of enemies) { const b = en.astoBreak; if (!b) continue; b.t -= dt; if (b.t <= 0 || en.deadTimer > 0) { en.armor = b.armor; en.mres = b.mres; en.astoBreak = null; } }
-        // Гиппогриф: призыв → таран по линии → пикирующий удар
+        if (D) { D.t += dt; tryMoveEntity(player, D.vx * dt, D.vy * dt); if (D.t >= D.dur) player.astoDash = null; }
+        // Бросок верхом: по воздуху (сквозь препятствия) к точке приземления
+        const G = player.astoGlide;
+        if (G) {
+            G.t += dt; const k = Math.min(1, G.t / G.dur), e = k * k * (3 - 2 * k);
+            player.x = G.ox + (G.tx - G.ox) * e; player.y = G.oy + (G.ty - G.oy) * e; player.facingAngle = G.ang;
+            if (typeof Asto3D !== 'undefined') Asto3D.ghost();
+            if (k >= 1) {
+                player.astoGlide = null; player.astoVanishing = false;
+                player.knightAnim = { kind: 'reappear', t: 0.32 };
+                player.astoVanish = 0.8; player.astoHaste = 2.5; recalcPlayerStats();
+                enemies.forEach(en => { if (en.aggro > 0) en.aggro = 0; });
+                if (typeof Asto3D !== 'undefined') Asto3D.touchdown(player.x, player.y, false);
+            }
+        }
+        // Гиппогриф: посадка → взлёт и полёт → пике → приземление
         const U = player.astoUlt;
         if (U) {
-            U.t += dt;
-            const ca = Math.cos(U.ang), sa = Math.sin(U.ang);
-            if (U.t < ASTO_ULT.wind) {   // пока Гиппогриф раскрывает крылья, можно чуть довернуть курс
-                const want = Math.atan2(mouseWorldY - player.y, mouseWorldX - player.x);
+            U.t += dt; player.facingAngle = U.ang;
+            const ca = Math.cos(U.ang), sa = Math.sin(U.ang), M = ASTO_ULT;
+            if (U.phase === 'mount') {
+                // Пока Астольфо садится верхом, курс можно довернуть
+                const want = Math.atan2(mouseWorldY - U.oy, mouseWorldX - U.ox);
                 let d = want - U.ang; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2;
-                U.ang += Math.max(-dt * 1.5, Math.min(dt * 1.5, d));
-            } else if (!U.done) {
-                if (!U.charging) { U.charging = true; U.ox = player.x; U.oy = player.y; player.knightAnim = { kind: 'ride', t: ASTO_ULT.charge }; SoundFX.play('tornado'); if (typeof Asto3D !== 'undefined') Asto3D.charge(U); }
+                U.ang += Math.max(-dt * 1.4, Math.min(dt * 1.4, d));
+                const dd = Math.min(M.range, Math.max(160, Math.hypot(mouseWorldX - U.ox, mouseWorldY - U.oy))), L = this.landing(U.ox, U.oy, U.ang, dd);
+                U.tx = L.x; U.ty = L.y; U.dist = L.d;
+                if (U.t >= M.mount) { U.phase = 'fly'; U.t0 = U.t; player.knightAnim = null; SoundFX.play('tornado'); if (typeof Asto3D !== 'undefined') Asto3D.takeoff(); }
+            }
+            if (U.phase === 'fly' || U.phase === 'dive') {
                 player.invulnTime = Math.max(player.invulnTime, 0.15);
-                const sp = U.len / ASTO_ULT.charge;
-                tryMoveEntity(player, ca * sp * dt, sa * sp * dt);
-                // Таран: каждого врага на пути — один раз, отбрасываем в сторону от линии
-                this.inLine(U.ox, U.oy, U.ang, Math.hypot(player.x - U.ox, player.y - U.oy) + 40, U.W, (en, al, side) => {
+                const ft = U.t - U.t0, total = M.fly + M.dive, k = Math.min(1, ft / total);
+                // Путь: плавный разгон; высота — быстрый взлёт, парение, резкое пике в конце
+                const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+                player.x = U.ox + (U.tx - U.ox) * e; player.y = U.oy + (U.ty - U.oy) * e;
+                const up = Math.min(1, ft / 0.35), down = ft > M.fly ? Math.min(1, (ft - M.fly) / M.dive) : 0;
+                U.alt = M.alt * (1 - (1 - up) * (1 - up)) * (1 - down * down) + Math.sin(ft * 9) * 0.06 * (1 - down);
+                if (ft > M.fly && U.phase === 'fly') { U.phase = 'dive'; if (typeof Asto3D !== 'undefined') Asto3D.diveStart(); }
+                // Порывы крыльев: враги под траекторией сбиты в стороны (один раз каждый)
+                if (U.phase === 'fly') this.inLine(U.ox, U.oy, U.ang, Math.hypot(player.x - U.ox, player.y - U.oy) + 30, M.width, (en, al, side) => {
                     if (U.hit.has(en.uid)) return; U.hit.add(en.uid);
-                    damageEnemy(en, Math.round(U.dmg), false, ca * 6, sa * 6, '#f472b6');
-                    en.stunTimer = Math.max(en.stunTimer || 0, 1);
-                    if (!en.isBoss) { const s = side >= 0 ? 1 : -1; tryMoveEntity(en, -sa * s * 80 + ca * 30, ca * s * 80 + sa * 30); }
-                    if (typeof Asto3D !== 'undefined') Asto3D.trample(en.x, en.y);
+                    damageEnemy(en, Math.round(U.gust), true, 0, 0, '#fbcfe8');
+                    if (!en.isBoss) { const s = side >= 0 ? 1 : -1; tryMoveEntity(en, -sa * s * 70, ca * s * 70); }
+                    en.slowTimer = Math.max(en.slowTimer || 0, 1.5); en.slowMult = Math.min(en.slowMult || 1, 0.6);
+                    if (typeof Asto3D !== 'undefined') Asto3D.gust(en.x, en.y);
                 });
-                if (typeof Feel !== 'undefined' && Math.random() < 0.4) Feel.shake(ca, sa, 0.12, 14, 6);
-                if (U.t >= ASTO_ULT.wind + ASTO_ULT.charge) {
-                    U.done = true;
+                if (k >= 1) {
+                    U.phase = 'land'; U.t0 = U.t; U.alt = 0;
                     enemies.forEach(en => {
                         if (en.deadTimer > 0) return;
                         const dx = en.x - player.x, dy = en.y - player.y, d = Math.hypot(dx, dy);
-                        if (d > 170 + en.radius) return;
-                        damageEnemy(en, Math.round(U.slam), true, 0, 0, '#f0abfc');
-                        en.stunTimer = Math.max(en.stunTimer || 0, 0.8);
-                        if (!en.isBoss && d > 1) tryMoveEntity(en, dx / d * 60, dy / d * 60);
+                        if (d > 190 + en.radius) return;
+                        damageEnemy(en, Math.round(U.slam * (1 - 0.3 * d / 190)), false, 0, 0, '#f472b6');
+                        en.stunTimer = Math.max(en.stunTimer || 0, 1.2);
+                        if (!en.isBoss && d > 1) tryMoveEntity(en, dx / d * 90, dy / d * 90);
                     });
-                    player.knightAnim = { kind: 'land', t: 0.35 };
+                    player.knightAnim = { kind: 'land', t: M.land };
                     spawnFloatingText(player.x, player.y - 60, '🦅 HIPPOGRIFF', '#f9a8d4');
                     if (typeof Feel !== 'undefined') Feel.impact(ca, sa, 1.5, true);
                     if (typeof Asto3D !== 'undefined') Asto3D.slam(player.x, player.y);
                     SoundFX.play('meteor');
                 }
             }
-            if (U.done && U.t >= ASTO_ULT.wind + ASTO_ULT.charge + 0.35) player.astoUlt = null;
+            if (U.phase === 'land' && U.t - U.t0 >= M.land) player.astoUlt = null;
         }
     },
     damageMult() { return 1; },
-    locked() { return player.heroType === 'astolfo' && !!(player.astoUlt || player.astoDash); },
-    reset() { player.astoQueue = null; player.astoDash = null; player.astoUlt = null; player.astoHorn = null; player.astoVanish = 0; player.astoHaste = 0; },
+    locked() { return player.heroType === 'astolfo' && !!(player.astoUlt || player.astoDash || player.astoGlide || player.astoRoot > 0); },
+    reset() { player.astoQueue = null; player.astoDash = null; player.astoStep = null; player.astoGlide = null; player.astoUlt = null; player.astoHorn = null; player.astoVanish = 0; player.astoHaste = 0; player.astoRoot = 0; player.astoVanishing = false; },
 
     // ---------- панель навыков ----------
     buildBar() {
@@ -240,94 +308,128 @@ const Asto = {
     },
     refreshBar() {
         const el = document.getElementById('astoHint');
-        if (el) el.textContent = player.astoUlt ? 'Гиппогриф в небе!' : player.astoVanish > 0 ? 'Исчез из виду…' : player.astoHaste > 0 ? `Ускорение: ${player.astoHaste.toFixed(1)}с` : 'Рыцарь Карла Великого';
+        if (el) el.textContent = player.astoUlt ? (player.astoUlt.phase === 'mount' ? 'Верхом на Гиппогрифа…' : 'Гиппогриф в небе!') : player.astoGlide ? 'Полёт!' : player.astoVanish > 0 ? 'Исчез из виду…' : player.astoHaste > 0 ? `Ускорение: ${player.astoHaste.toFixed(1)}с` : 'Рыцарь Карла Великого';
         const cnt = id => ((player.inventory.find(i => i.id === id) || {}).count || 0);
         const a = document.getElementById('hudAstoHp'), b = document.getElementById('hudAstoMp'); if (a) a.textContent = 'x' + cnt('hp_pot'); if (b) b.textContent = 'x' + cnt('mp_pot');
     }
 };
 
 // ============================================================================
-// 3D-ЭФФЕКТЫ АСТОЛЬФО: след выпада, звуковые кольца рога, фантомы, крылья и вихрь Гиппогрифа
+// 3D-ЭФФЕКТЫ АСТОЛЬФО: дуги комбо, след выпада, рог, вихрь крыльев Гиппогрифа, пике
 // ============================================================================
 const Asto3D = {
     T: 48,
     PINK: [0xf9a8d4, 0xf472b6, 0xfde68a, 0xffffff],
+    FEATHER: [0xffffff, 0xf5f5f4, 0xfbcfe8, 0xfde68a],
     fx: [], scene: null,
     pos(x, y) { const X = x / this.T, Z = y / this.T; return { x: X, y: World3D.hAt(X, Z), z: Z }; },
     ensure() {
         if (this.scene) return true;
         if (typeof Engine3D === 'undefined' || !Engine3D.scene) return false;
         this.scene = Engine3D.scene;
-        this.planeGeo = new THREE.PlaneGeometry(1, 1); this.planeGeo.rotateX(-Math.PI / 2); this.planeGeo.translate(0, 0, -0.5);   // полоса от начала вдоль -Z → вращаем по курсу
+        this.planeGeo = new THREE.PlaneGeometry(1, 1); this.planeGeo.rotateX(-Math.PI / 2); this.planeGeo.translate(0, 0, -0.5);
         this.arcGeo = new THREE.RingGeometry(0.9, 1, 32, 1, -0.7, 1.4); this.arcGeo.rotateX(-Math.PI / 2);
+        this.slashGeo = new THREE.RingGeometry(0.78, 1, 30, 1, -1.1, 2.2); this.slashGeo.rotateX(-Math.PI / 2);
         return true;
     },
     mat(c, op = 1) { return new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }); },
-    add(m, life, upd) { this.scene.add(m); this.fx.push({ m, t: 0, life, upd }); },
-    // Выпад: светящаяся розово-золотая полоса по линии удара
-    thrust(x, y, ang, len) {
+    add(m, life, upd, geo) { this.scene.add(m); this.fx.push({ m, t: 0, life, upd, geo }); },
+    // Дуги комбо: у каждого удара свой наклон и размах; четвёртый — длинный розово-золотой выпад
+    slashFx(ang, k) {
+        if (!this.ensure()) return;
+        const h = AnimFX.heroPos();
+        if (k === 2 || k === 4) { const p = this.pos(player.x - Math.cos(ang) * 15, player.y - Math.sin(ang) * 15); this.thrust(player.x - Math.cos(ang) * 15, player.y - Math.sin(ang) * 15, ang, k === 4 ? 125 : 110, k === 4 ? 1.3 : 0.8); return; }
+        const tilt = k === 1 ? 0.45 : -0.15, r = k === 3 ? 1.35 : 1.1;
+        [[0xf472b6, 0.85, r], [0xfde68a, 0.6, r * 0.9], [0xffffff, 0.5, r * 0.8]].forEach(([c, op, rr], i) => {
+            const m = new THREE.Mesh(this.slashGeo, this.mat(c, op)); m.position.set(h.x, h.y + 0.8 + i * 0.03, h.z);
+            m.rotation.set(tilt, -ang, k === 3 ? 0.25 : 0); m.scale.setScalar(rr);
+            this.add(m, 0.24, (o, kk) => { o.m.material.opacity = op * (1 - kk); o.m.scale.setScalar(rr * (1 + kk * 0.2)); o.m.rotation.y = -ang + (kk - 0.5) * (k === 3 ? 1.4 : 0.6); });
+        });
+        AnimFX.emit({ x: h.x + Math.cos(ang) * r, y: h.y + 0.8, z: h.z + Math.sin(ang) * r, n: 8, color: this.PINK, speed: 1.8, life: 0.3, size: 0.045, grav: 2 });
+    },
+    // Выпад: светящаяся полоса по линии удара
+    thrust(x, y, ang, len, w = 1) {
         if (!this.ensure()) return;
         const p = this.pos(x, y), L = len / this.T, yaw = Math.atan2(-Math.cos(ang), -Math.sin(ang));
-        [[0xf472b6, 0.42, 0.8], [0xffffff, 0.14, 0.9]].forEach(([c, w, op]) => {
-            const m = new THREE.Mesh(this.planeGeo, this.mat(c, op)); m.position.set(p.x, p.y + 0.85, p.z); m.rotation.y = yaw; m.scale.set(w, 1, 0.01);
-            this.add(m, 0.3, (o, k) => { o.m.scale.set(w * (1 - k * 0.6), 1, L * Math.min(1, k * 5)); o.m.material.opacity = op * (1 - k); });
+        [[0xf472b6, 0.42 * w, 0.85], [0xfde68a, 0.22 * w, 0.7], [0xffffff, 0.1 * w, 0.95]].forEach(([c, ww, op]) => {
+            const m = new THREE.Mesh(this.planeGeo, this.mat(c, op)); m.position.set(p.x, p.y + 0.85, p.z); m.rotation.y = yaw; m.scale.set(ww, 1, 0.01);
+            this.add(m, 0.32, (o, k) => { o.m.scale.set(ww * (1 - k * 0.6), 1, L * Math.min(1, k * 6)); o.m.material.opacity = op * (1 - k); });
         });
         const tip = this.pos(x + Math.cos(ang) * len, y + Math.sin(ang) * len);
         AnimFX.emit({ x: tip.x, y: tip.y + 0.85, z: tip.z, n: 14, color: this.PINK, speed: 2.4, life: 0.35, size: 0.05, grav: 2, dir: [Math.cos(ang), 0.2, Math.sin(ang)], spread: 0.6 });
     },
     shatter(en) { const p = this.pos(en.x, en.y); AnimFX.emit({ x: p.x, y: p.y + 1, z: p.z, n: 14, color: [0xffffff, 0xf9a8d4, 0xfde68a], speed: 2.2, up: 1.4, life: 0.5, size: 0.06, sizeEnd: 0.01, grav: 6 }); AnimFX.shock(p.x, p.y + 1, p.z, 0xf472b6, 0.5, 0.1, 0.3); },
-    // Рог: расходящиеся звуковые дуги и пыль
+    sector(ang, r, half, col, op, life, fadeIn) {
+        const h = AnimFX.heroPos(), sg = new THREE.CircleGeometry(1, 28, -half, half * 2); sg.rotateX(-Math.PI / 2);
+        const m = new THREE.Mesh(sg, this.mat(col, op)); m.position.set(h.x, h.y + 0.06, h.z); m.rotation.y = -ang; m.scale.setScalar(r);
+        this.add(m, life, (o, k) => { o.m.material.opacity = fadeIn ? op * Math.min(1, k * 2) * (0.7 + Math.sin(o.t * 30) * 0.3) : op * (1 - k); }, sg);
+    },
+    // Рог: сначала зона на земле (пока Астольфо набирает воздух), затем звуковые дуги и пыль
     horn(ang, R, half) {
         if (!this.ensure()) return;
-        const h = AnimFX.heroPos(), r = R / this.T, yaw = -ang;
-        // Зона поражения на земле: сектор конуса с ярким краем
-        const sg = new THREE.CircleGeometry(1, 28, -half, half * 2); sg.rotateX(-Math.PI / 2);
-        const sec = new THREE.Mesh(sg, this.mat(0xbe185d, 0.55)); sec.position.set(h.x, h.y + 0.06, h.z); sec.rotation.y = yaw; sec.scale.setScalar(r);
-        this.add(sec, 0.5, (o, k) => { o.m.material.opacity = 0.55 * (1 - k); if (k >= 1) o.m.geometry.dispose(); });
+        const h = AnimFX.heroPos(), r = R / this.T;
+        this.sector(ang, r, half, 0xbe185d, 0.55, 0.5, false);
         for (let i = 0; i < 4; i++) {
-            const m = new THREE.Mesh(this.arcGeo, this.mat(i % 2 ? 0xf0abfc : 0xf472b6, 0.85)); m.position.set(h.x, h.y + 0.5 + i * 0.12, h.z); m.rotation.y = yaw;
+            const m = new THREE.Mesh(this.arcGeo, this.mat(i % 2 ? 0xf0abfc : 0xf472b6, 0.85)); m.position.set(h.x, h.y + 0.5 + i * 0.12, h.z); m.rotation.y = -ang;
             const d = i * 0.06;
             this.add(m, 0.45 + d, (o, k) => { const kk = Math.max(0, (o.t - d) / 0.45); o.m.scale.setScalar(0.3 + r * Math.min(1, kk)); o.m.material.opacity = kk <= 0 ? 0 : 0.85 * (1 - kk); });
         }
         for (let i = 0; i < 14; i++) { const a = ang + (Math.random() - 0.5) * half * 2, d = Math.random() * r; AnimFX.emit({ x: h.x + Math.cos(a) * d, y: h.y + 0.1, z: h.z + Math.sin(a) * d, n: 2, color: 0x7a6a5a, speed: 1.2, up: 0.6, life: 0.7, size: 0.18, sizeEnd: 0.35, grav: -0.2, drag: 3 }); }
-        AnimFX.kick(0.4); Sfx3D.play('impact', 0.7);
+        AnimFX.kick(0.45); Sfx3D.play('impact', 0.7);
     },
-    vanish(x, y) { const p = this.pos(x, y); AnimFX.emit({ x: p.x, y: p.y + 0.9, z: p.z, n: 34, color: [0xf9a8d4, 0xe9d5ff, 0xffffff], speed: 1.6, up: 0.6, life: 0.6, size: 0.07, sizeEnd: 0.01, grav: -0.5 }); AnimFX.shock(p.x, p.y + 0.05, p.z, 0xf0abfc, 0.2, 1.3, 0.35, 0.8); },
-    ghost() { const h = AnimFX.heroPos(); AnimFX.emit({ x: h.x, y: h.y + 0.2 + Math.random() * 1.1, z: h.z, n: 4, color: [0xf9a8d4, 0xe9d5ff, 0xfde68a], speed: 0.25, life: 0.5, size: 0.08, sizeEnd: 0.01, grav: 0, drag: 2 }); },
-    summon() { const h = AnimFX.heroPos(); AnimFX.shock(h.x, h.y + 0.06, h.z, 0xf9a8d4, 0.3, 2.2, 0.6, 0.9); AnimFX.emit({ x: h.x, y: h.y + 1, z: h.z, n: 50, color: [0xfde68a, 0xf9a8d4, 0xffffff, 0xa8a29e], speed: 3, up: 2, life: 0.8, size: 0.06, grav: 1 }); AnimFX.flash(h.x, h.z, 0xf9a8d4, 6, 0.6, 2); },
-    charge(U) { AnimFX.kick(0.6); },
-    trample(x, y) { const p = this.pos(x, y); AnimFX.impact(p.x, p.z, 0xf472b6, 0.9, { dust: 0x5a4a3a }); },
+    hornTell(ang, R, half, t = 0.28, col = 0x9d174d) { if (this.ensure()) this.sector(ang, R / this.T, half, col, 0.35, t, true); },
+    hornRing(R) { const h = AnimFX.heroPos(); AnimFX.shock(h.x, h.y + 0.06, h.z, 0xf9a8d4, 0.2, R / this.T, 0.4, 0.9); AnimFX.shock(h.x, h.y + 1.2, h.z, 0xfde68a, 0.3, R / this.T * 1.3, 0.5, 0.6); },
+    pages(p, n) { AnimFX.emit({ x: p.x, y: p.y + 1, z: p.z, n, color: [0xfffbeb, 0xfef3c7, 0xfde68a], speed: 2.2, up: 1.5, life: 1.1, size: 0.09, sizeEnd: 0.07, grav: 0.4, drag: 2.5 }); },
+    vanish(x, y) { const p = this.pos(x, y); this.pages(p, 20); AnimFX.emit({ x: p.x, y: p.y + 0.9, z: p.z, n: 34, color: [0xf9a8d4, 0xe9d5ff, 0xffffff], speed: 1.6, up: 0.6, life: 0.6, size: 0.07, sizeEnd: 0.01, grav: -0.5 }); AnimFX.shock(p.x, p.y + 0.05, p.z, 0xf0abfc, 0.2, 1.3, 0.35, 0.8); this.feathers(p, 12, 1.5); },
+    ghost() { const h = AnimFX.heroPos(), a = this.alt(); AnimFX.emit({ x: h.x, y: h.y + a + 0.2 + Math.random() * 1.1, z: h.z, n: 4, color: [0xf9a8d4, 0xe9d5ff, 0xfde68a], speed: 0.25, life: 0.5, size: 0.08, sizeEnd: 0.01, grav: 0, drag: 2 }); },
+    alt() { return typeof Asto !== 'undefined' ? Asto.alt() : 0; },
+    feathers(p, n, sp, y = 0.8) { AnimFX.emit({ x: p.x, y: p.y + y, z: p.z, n, color: this.FEATHER, speed: sp, up: 1, life: 1.2, size: 0.07, sizeEnd: 0.05, grav: 0.6, drag: 2 }); },
+    touchdown(x, y, big) { const p = this.pos(x, y); if (!big) this.pages(p, 14); AnimFX.shock(p.x, p.y + 0.05, p.z, 0xf9a8d4, 0.2, big ? 2.4 : 1.3, 0.35, 0.8); this.feathers(p, big ? 30 : 14, big ? 3 : 1.8); AnimFX.emit({ x: p.x, y: p.y + 0.1, z: p.z, n: 10, color: 0x7a6a5a, speed: 1.6, up: 0.6, life: 0.8, size: 0.22, sizeEnd: 0.45, grav: -0.2, drag: 3 }); },
+    // Посадка: золотой круг призыва и кружащиеся перья, Гиппогриф появляется из анимации модели
+    summon() { const h = AnimFX.heroPos(); AnimFX.shock(h.x, h.y + 0.06, h.z, 0xf9a8d4, 0.3, 2.4, 0.7, 0.9); AnimFX.shock(h.x, h.y + 0.08, h.z, 0xfde68a, 2.4, 0.4, 0.8, 0.7); AnimFX.emit({ x: h.x, y: h.y + 1, z: h.z, n: 40, color: this.FEATHER, speed: 2.4, up: 2.5, life: 1.2, size: 0.07, grav: 0.5, drag: 1.5 }); AnimFX.flash(h.x, h.z, 0xf9a8d4, 5, 0.8, 2); },
+    // Взлёт: мощный взмах — кольцо пыли, перья, тряска
+    takeoff() { const h = AnimFX.heroPos(); AnimFX.shock(h.x, h.y + 0.05, h.z, 0xe7e5e4, 0.4, 3.2, 0.6, 0.8); AnimFX.emit({ x: h.x, y: h.y + 0.1, z: h.z, n: 30, color: 0x7a6a5a, speed: 3, up: 0.8, life: 1, size: 0.3, sizeEnd: 0.6, grav: -0.2, drag: 3 }); this.feathers(h, 30, 3.5, 1.2); AnimFX.kick(0.7); },
+    gust(x, y) { const p = this.pos(x, y); AnimFX.impact(p.x, p.z, 0xf9a8d4, 0.8, { dust: 0x5a4a3a }); this.feathers(p, 6, 2); },
+    diveStart() { AnimFX.kick(0.35); Sfx3D.play('whoosh', 1); },
     slam(x, y) {
-        const p = this.pos(x, y), r = 170 / this.T;
-        AnimFX.impact(p.x, p.z, 0xf9a8d4, 2.2, { dust: 0x5a4a3a });
-        AnimFX.shock(p.x, p.y + 0.06, p.z, 0xfde68a, 0.2, r, 0.5, 1); AnimFX.shock(p.x, p.y + 0.08, p.z, 0xf472b6, 0.1, r * 0.7, 0.45, 0.8);
-        AnimFX.emit({ x: p.x, y: p.y + 0.6, z: p.z, n: 40, color: [0xffffff, 0xf5f5f4, 0xf9a8d4], speed: 4, up: 3, life: 1, size: 0.07, grav: 3 });   // перья
-        AnimFX.flash(p.x, p.z, 0xf9a8d4, 9, 0.5, 2.2); AnimFX.kick(1.3);
+        const p = this.pos(x, y), r = 190 / this.T;
+        AnimFX.impact(p.x, p.z, 0xf9a8d4, 2.4, { dust: 0x5a4a3a });
+        AnimFX.shock(p.x, p.y + 0.06, p.z, 0xfde68a, 0.2, r, 0.55, 1); AnimFX.shock(p.x, p.y + 0.08, p.z, 0xf472b6, 0.1, r * 0.7, 0.45, 0.9); AnimFX.shock(p.x, p.y + 0.1, p.z, 0xffffff, 0.1, r * 0.45, 0.3, 0.8);
+        this.feathers(p, 60, 4.5, 0.6);
+        AnimFX.emit({ x: p.x, y: p.y + 0.2, z: p.z, n: 24, color: 0x6a5a4a, speed: 3, up: 1.5, life: 1.1, size: 0.3, sizeEnd: 0.7, grav: -0.2, drag: 3 });
+        AnimFX.flash(p.x, p.z, 0xf9a8d4, 9, 0.5, 2.2); AnimFX.kick(1.4);
     },
     update(dt) {
         if (!this.scene) { if (player.heroType !== 'astolfo' || !this.ensure()) return; }
-        for (let i = this.fx.length - 1; i >= 0; i--) { const o = this.fx[i]; o.t += dt; const k = Math.min(1, o.t / o.life); if (o.upd) o.upd(o, k); if (k >= 1) { this.scene.remove(o.m); o.m.material.dispose(); this.fx.splice(i, 1); } }
+        for (let i = this.fx.length - 1; i >= 0; i--) { const o = this.fx[i]; o.t += dt; const k = Math.min(1, o.t / o.life); if (o.upd) o.upd(o, k); if (k >= 1) { this.scene.remove(o.m); o.m.material.dispose(); if (o.geo) o.geo.dispose(); this.fx.splice(i, 1); } }
         if (player.heroType !== 'astolfo') return;
-        const U = player.astoUlt, h = AnimFX.heroPos();
-        if (U && U.charging && !U.done) {
-            // Вихрь от крыльев: перья и пыль вдоль прорыва
-            for (let i = 0; i < 3; i++) { const s = (Math.random() - 0.5) * 3; AnimFX.emit({ x: h.x - Math.sin(U.ang) * s, y: h.y + 0.3 + Math.random() * 1.6, z: h.z + Math.cos(U.ang) * s, n: 1, color: [0xffffff, 0xf9a8d4, 0xfde68a], speed: 1.5, up: 1, life: 0.6, size: 0.06, grav: 1.5, drag: 1 }); }
-            AnimFX.emit({ x: h.x, y: h.y + 0.1, z: h.z, n: 3, color: 0x7a6a5a, speed: 1.5, up: 0.5, life: 0.8, size: 0.25, sizeEnd: 0.5, grav: -0.2, drag: 3 });
+        const U = player.astoUlt, h = AnimFX.heroPos(), a = this.alt();
+        if (U) {
+            if (U.phase === 'mount' && Math.random() < 0.6) { const an = Math.random() * Math.PI * 2, rr = 1.5 + Math.random() * 1.5; AnimFX.emit({ x: h.x + Math.cos(an) * rr, y: h.y + 0.3 + Math.random() * 1.5, z: h.z + Math.sin(an) * rr, n: 1, color: this.FEATHER, speed: 0.2, life: 0.6, size: 0.06, grav: 0, pull: { x: h.x, y: h.y + 1, z: h.z, k: 7 } }); }
+            if (U.phase === 'fly' || U.phase === 'dive') {
+                // Вихрь крыльев: перья и пыль под летящим скакуном, тень-след на земле
+                const s = (Math.random() - 0.5) * 3;
+                AnimFX.emit({ x: h.x - Math.sin(U.ang) * s, y: h.y + a + 0.5 + Math.random(), z: h.z + Math.cos(U.ang) * s, n: 2, color: this.FEATHER, speed: 1.4, up: 0.3, life: 0.9, size: 0.06, grav: 0.8, drag: 1.5 });
+                if (Math.random() < 0.5) AnimFX.emit({ x: h.x, y: h.y + 0.1, z: h.z, n: 2, color: 0x7a6a5a, speed: 1.6, up: 0.4, life: 0.8, size: 0.25, sizeEnd: 0.5, grav: -0.2, drag: 3 });
+                if (Math.random() < 0.15) AnimFX.shock(h.x, h.y + 0.05, h.z, 0xd6d3d1, 0.3, 1.6, 0.4, 0.4);
+                Engine3D.extraZoomTarget = 6; Engine3D.camLift = a * 0.5;   // камера отъезжает и поднимается за полётом
+            }
         }
+        if (player.astoGlide) Engine3D.extraZoomTarget = 2;
         if (player.astoVanish > 0 && Math.random() < 0.5) AnimFX.emit({ x: h.x + (Math.random() - 0.5) * 0.6, y: h.y + 0.3 + Math.random(), z: h.z + (Math.random() - 0.5) * 0.6, n: 1, color: [0xe9d5ff, 0xf9a8d4], speed: 0.2, up: 0.4, life: 0.5, size: 0.06, grav: 0 });
-        // Полупрозрачный Астольфо, пока он невидим для врагов
+        // Полупрозрачный Астольфо, пока он невидим для врагов; в переносе Книги — исчезает совсем
         const A = typeof Actors3D !== 'undefined' && Actors3D.player;
+        if (A) A.root.visible = !player.astoVanishing;
         if (A) { const inv = player.astoVanish > 0, want = inv ? 0.35 : 1; if (A.astoOp !== want) { A.astoOp = want; A.mats.forEach(m => { if (m.userData.t0 === undefined) m.userData.t0 = m.transparent; m.transparent = inv ? true : m.userData.t0; m.opacity = want; m.needsUpdate = true; }); } }
     },
     fxRunes() {
         if (player.heroType !== 'astolfo') return;
         const U = player.astoUlt;
-        if (U && !U.done) {
-            const h = AnimFX.heroPos(), a = Math.atan2(Math.cos(U.ang), Math.sin(U.ang));
-            const ox = U.charging ? U.ox : player.x, oy = U.charging ? U.oy : player.y, o = this.pos(ox, oy);
-            FX3D.runeAt(U, 0xf472b6, o.x, o.z, 0, Math.min(1, U.t / ASTO_ULT.wind), { rect: true, ang: a, w: U.W / this.T, len: U.len / this.T, crack: 0.5 });
-            const e = this.pos(ox + Math.cos(U.ang) * U.len, oy + Math.sin(U.ang) * U.len);
-            FX3D.runeAt(U, 0xfde68a, e.x, e.z, 170 / this.T, Math.min(1, U.t / ASTO_ULT.wind), { tag: 'end', spin: 2 });
+        if (U && U.phase !== 'land') {
+            const o = this.pos(U.ox, U.oy), a = Math.atan2(Math.cos(U.ang), Math.sin(U.ang)), prog = U.phase === 'mount' ? U.t / ASTO_ULT.mount : 1;
+            FX3D.runeAt(U, 0xf472b6, o.x, o.z, 0, prog, { rect: true, ang: a, w: ASTO_ULT.width / this.T, len: U.dist / this.T, crack: 0.4 });
+            const e = this.pos(U.tx, U.ty);
+            FX3D.runeAt(U, 0xfde68a, e.x, e.z, 190 / this.T, prog, { tag: 'end', spin: 2, crack: U.phase === 'dive' ? 1 : 0.3 });
         }
     }
 };

@@ -7,7 +7,7 @@ const MDX3D = {
     texCache: {},
     // Действие игры → имя анимации в модели (у каждой модели свои имена)
     ANIMS: {
-        mordred: { idle: 'Stand', walk: 'walk', thrust: 'attack 1', slash: 'attack 1', cross: 'attack 2', slashB: 'attack 2', spin: 'spell one', overhead: 'spell', heavy: 'spell', cast: 'spell', raise: 'spell channel', kneel: 'spell channel', rise: 'spell ready', plunge: 'attack 2', stance: 'spell ready', death: 'death' },
+        mordred: { idle: 'Stand', walk: 'walk', thrust: 'attack 1', slash: 'attack 1', cross: 'attack 2', slashB: 'attack 2', spin: 'spell one', overhead: 'spell', heavy: 'spell slam', cast: 'spell', raise: 'spell channel', kneel: 'spell channel', rise: 'spell ready', plunge: 'spell slam', stance: 'spell ready', death: 'death' },
         saber: { idle: 'Stand', walk: 'Walk', thrust: 'Attack - 1', slash: 'Attack - 1', cross: 'Attack - 2', slashB: 'Attack - 2', spin: 'Spell One', overhead: 'Spell Two', heavy: 'Spell Four', cast: 'Spell Three', raise: 'Stand Ready', kneel: 'Stand Ready', rise: 'Stand Ready', plunge: 'Spell Two', stance: 'Stand Ready', death: 'Death' },
         saber_alter: { idle: 'Stand', walk: 'Walk', thrust: 'Attack 1', slash: 'Attack 1', cross: 'Attack 2', slashB: 'Attack 2', spin: 'Attack 3', overhead: 'Attack 4', heavy: 'Spell Four', cast: 'Spell One', raise: 'Spell Three', kneel: 'Stand', rise: 'Morph', plunge: 'Spell Slam', stance: 'Stand', death: 'Death' },
         elizabeth: { idle: 'stand', walk: 'walk', castR: 'attack - 1', castL: 'attack - 2', cast: 'attack - 3', castBig: 'attack - 3', slash: 'attack - 1', thrust: 'attack - 1', cross: 'attack - 2', spin: 'attack - 3', overhead: 'spell - 1',
@@ -16,23 +16,35 @@ const MDX3D = {
             overhead: 'Spell - 5', heavy: 'Spell - 5', volley: 'Spell - 5', sow: 'Spell - 3', appear: 'Birth', blink: 'Spell - 2', storm: 'Spell - 4', rulebreaker: 'Attack - 1', ultcast: 'Spell - 4',
             channel: 'Spell - 6', raise: 'Spell - 6', kneel: 'Stand Defend', rise: 'Stand - 2', plunge: 'Spell - 3', stance: 'Stand Defend', pray: 'Spell - 6', craft: 'Spell - 1', death: 'Death' },
         frankenstein: { idle: 'Stand 1', walk: 'Walk 1', slash: 'Attack 1', cross: 'Attack 2', thrust: 'Attack 1', slashB: 'Attack 2', spin: 'Attack 2', overhead: 'Spell 1', heavy: 'Spell 1',
-            slam: 'Spell 1', slam2: 'Spell 2', throw: 'Throw 1', pull: 'Recall', ultcast: 'Spell 4', cast: 'Spell 2', castR: 'Attack 1', castL: 'Attack 2', castBig: 'Spell 1',
+            slam: 'Spell 1', slam2: 'Spell 2', throw: 'Throw 2', frenzy: 'Dance', triple: 'Spell 3 Start', pull: 'Recall', ultcast: 'Spell 4', cast: 'Spell 2', castR: 'Attack 1', castL: 'Attack 2', castBig: 'Spell 1',
             raise: 'Spell 4', kneel: 'Stand 2', rise: 'Stand 3', plunge: 'Spell 1', stance: 'Stand 3', pray: 'Stand 2', craft: 'Attack 1', death: 'Death' },
+        semiramis: { idle: 'Stand', walk: 'Walk', stance: 'Stand - 2', slash: 'Attack', slashB: 'Spell - 3', cross: 'Spell - 3', thrust: 'Attack', spin: 'Spell - 2', overhead: 'Spell - 4', heavy: 'Spell - 4',
+            strike: 'Attack', doves: 'Spell - 1', chains: 'Spell - 2', garden: 'Spell - 4', cast: 'Spell - 1', castR: 'Spell - 1', castL: 'Spell - 2', castBig: 'Spell - 4',
+            raise: 'Spell - 4', kneel: 'Stand - 2', rise: 'Stand - 2', plunge: 'Attack', pray: 'Spell - 1', craft: 'Attack', death: 'Death' },
+        jack: { idle: 'Stand', walk: 'Walk', stance: 'Stand ready', slash: 'Attack 1', slashB: 'Attack 2', cross: 'Attack 2', thrust: 'Attack 1', spin: 'Spell 4', overhead: 'Spell Slam', heavy: 'Spell Slam',
+            mist: 'Spell 2', anatomy: 'Spell 3', step: 'Spell 1', ripper: 'Spell Slam Alterante', cast: 'Spell 2', castR: 'Attack 1', castL: 'Attack 2', castBig: 'Spell 3',
+            raise: 'Spell 2', kneel: 'Stand ready', rise: 'Stand ready', plunge: 'Spell Slam', pray: 'Stand Alternate', craft: 'Attack 1', death: 'Death' },
+        jeanne: { idle: 'Stand', walk: 'Walk', stance: 'Stand Ready', slash: 'Attack', slashB: 'Attack 2', cross: 'Attack 2', thrust: 'Spell One', spin: 'Attack Slam', overhead: 'Attack Slam', heavy: 'Attack Slam',
+            cleave: 'Attack Slam', aegis: 'Spell Two', charge: 'Spell One', pucelle: 'Spell Four', cast: 'Spell Two', castR: 'Attack', castL: 'Attack 2', castBig: 'Spell Four',
+            raise: 'Spell Two', kneel: 'Stand Ready', rise: 'Stand Ready', plunge: 'Spell Three', pray: 'Spell Four', craft: 'Attack', death: 'Death' },
         astolfo: { idle: 'stand', walk: 'walk fast', stance: 'stand ready', slash: 'attack 1', slashB: 'attack 2', cross: 'attack 2', thrust: 'attack 2', spin: 'attack slam', overhead: 'attack slam', heavy: 'attack slam',
-            horn: 'spell two', dash: 'spell', summon: 'spell channel one', ride: 'spell channel', land: 'spell three', cast: 'spell two', castR: 'attack 1', castL: 'attack 2', castBig: 'spell two',
+            horn: 'spell four', hornSmall: 'spell two', dash: 'spell', vanish: '0', reappear: 'spell one', mount: 'spell five', ride: 'spell channel', land: 'spell three', cast: 'spell two', castR: 'attack 1', castL: 'attack 2', castBig: 'spell two',
             raise: 'spell two', kneel: 'stand ready', rise: 'stand ready', plunge: 'attack slam', pray: 'stand 2', craft: 'attack 1', death: 'death' },
-        atalanta: { idle: 'stand', walk: 'walk', stance: 'walk fast', castR: 'attack 1', castL: 'attack slam', cast: 'attack 1', castBig: 'attack 2', hunt: 'spell three', dash: 'spell Thirteen', volley: 'spell Six', sky: 'spell Twelve',
+        atalanta: { idle: 'stand', walk: 'walk', stance: 'walk fast', castR: 'attack 1', castL: 'attack slam', cast: 'attack 1', castBig: 'attack 2', hunt: 'spell three', dash: 'spell Eight', volley: 'Spell One', sky: 'spell Twelve', morph: 'Morph', aim: 'spell Fourteen',
             slash: 'attack 1', thrust: 'attack 1', cross: 'attack 2', spin: 'spell Seven', overhead: 'spell Four', heavy: 'spell Four', raise: 'spell Four', kneel: 'stand', rise: 'stand', plunge: 'attack 2', pray: 'spell Nine', craft: 'attack 1', death: 'death' },
         atalanta_alter: { idle: 'Stand', walk: 'Walk', stance: 'Stand Ready', slash: 'attack', slashB: 'Attack 2', cross: 'Attack 2', thrust: 'attack', spin: 'Spell Two', rend: 'Spell Two', leap: 'Attack Slam', roar: 'Spell One', skia: 'Spell Three', ultcast: 'Spell One',
             overhead: 'Attack Slam', heavy: 'Attack Slam', cast: 'Spell One', castR: 'attack', castL: 'Attack 2', castBig: 'Spell One', raise: 'Spell One', kneel: 'Stand Ready', rise: 'Stand Ready', plunge: 'Attack Slam', pray: 'Stand Ready', craft: 'attack', death: 'Death' },
         gilgamesh: { idle: 'Stand', walk: 'Walk', stance: 'Stand Ready', slash: 'Attack 1', slashB: 'Attack 3', cross: 'Attack 2', thrust: 'Attack 2', spin: 'Attack 4', overhead: 'Attack 5', heavy: 'Attack 5',
-            cast: 'spell', castR: 'spell', castL: '4', castBig: 'spell', gate: 'spell', gateR: '4', chains: '4', treasury: 'Animation Earth_SS', lunge: '2', leap: '5',
+            cast: 'spell', castR: '1', castL: '4', castBig: 'spell', gate: 'spell', gateR: '4', chains: '4', treasury: 'Animation Earth_SS', lunge: '2', leap: '5',
             eaDraw: '6', eaSpin: '7', ultcast: '8', raise: 'spell', kneel: 'Stand Ready', rise: 'Stand Ready', plunge: 'Attack 5', pray: 'spell', craft: 'Attack 1', death: 'Death' },
-        archer: { idle: 'Stand', walk: 'Walk', bow: 'Spell Throw', bow2: 'Spell Throw', bowPower: 'Spell Throw', slash: 'Attack 1', slashL: 'Attack 2', twin: 'Attack Slam', twinSpin: 'Spell Slam', cast: 'Spell Two', throw: 'Spell Throw', raise: 'Spell Gold', kneel: 'Stand', rise: 'Stand', bowUp: 'Spell Gold', stance: 'Stand', death: 'Death' }
+        archer: { idle: 'Stand', walk: 'Walk', bow: 'Spell Throw', bow2: 'Spell Throw', bowPower: 'Spell Throw', slash: 'Attack 1', slashL: 'Attack 2', twin: 'Attack Slam', twinSpin: 'Spell Slam', cast: 'Spell Two', throw: 'Spell Throw', raise: 'Spell Gold', trace: 'Spell One', project: 'Spell Four', castR: 'Spell Six', kneel: 'Stand', rise: 'Stand', bowUp: 'Spell Gold', stance: 'Stand', death: 'Death' }
     },
     // Правки отдельных моделей: hide — геосеты, которые не создаются; missing — цвет частей со встроенными текстурами WC3
     TWEAK: {
         atalanta: { tint: 0xb4aca0, env: 0.4 },
+        jeanne: { tint: 0xa8a29c, env: 0.35 },
+        jack: { tint: 0xb0aab0, env: 0.35 },
+        semiramis: { hide: [6, 7, 8, 9], h: 200 },   // ауры и магические круги модели — квадраты без анимации UV, их рисует игра; рост — по стойке без аур
         astolfo: { hide: [0], h: 165, tint: 0xb8b0b4, env: 0.4 },   // в габаритах стойки — Гиппогриф, рост задаём вручную
         atalanta_alter: { hide: [0, 2, 3, 4, 5, 6, 7, 8], tint: 0xa89ca8, env: 0.4 },   // ореолы и «встроенные» текстуры WC3: эффекты рисуем сами
         gilgamesh: { hide: [19, 20], missing: 0xd4a020, tint: 0x9a8a78, env: 0.35 }   // флипбук золотой ряби рисуем своими порталами; «чужое» оружие — золотое

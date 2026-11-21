@@ -67,6 +67,7 @@ const FX3D = {
                 const gl = B.glow(c || 0xfde68a, 0.35); g.add(gl); break;
             }
             case 'ubw_blade': { const s = B.sword(0xffd0d0, 0x8a1a1a, 0.5, { emissive: 0xff6060, emissiveIntensity: 0.6 }); s.rotation.set(0, 0, 0); s.position.set(0, 0, 0); g.add(s); g.add(B.glow(0xff8080, 0.6)); break; }
+            case 'semi': { const m = new THREE.Mesh(G.crystal, G3.mat(0x3f6212, { emissive: 0x84cc16, emissiveIntensity: 1.2 })); m.scale.set(0.09, 0.45, 0.09); m.rotation.x = Math.PI / 2; g.add(m); g.add(B.glow(0xa3e635, 0.6)); break; }
             case 'ata': {
                 // Стрела Тавропола: древко, наконечник и звёздное свечение
                 g.add(new THREE.Mesh(G.arrow, G3.mat(0xe8dcb0))); g.add(new THREE.Mesh(G.arrowHead, G3.mat(0xf4f7ff, { emissive: 0xd9f99d, emissiveIntensity: 0.8 })));
@@ -275,7 +276,7 @@ const FX3D = {
         // ---------- снаряды ----------
         for (const p of projectiles) {
             if (!near(p.x, p.y)) continue;
-            const kind = p.kind === 'arrow' ? 'arrow' : (p.kind === 'ubw_blade' ? 'ubw_blade' : (p.kind === 'saber_wave' ? 'saber_wave' : (p.kind === 'gob' ? 'gob' : (p.kind === 'ata' ? 'ata' : 'orb'))));
+            const kind = p.kind === 'arrow' ? 'arrow' : (p.kind === 'ubw_blade' ? 'ubw_blade' : (p.kind === 'saber_wave' ? 'saber_wave' : (p.kind === 'gob' ? 'gob' : (p.kind === 'ata' ? 'ata' : (p.kind === 'semi' ? 'semi' : 'orb')))));
             const o = this.get(p, kind);
             const ang = Math.atan2(p.vx, p.vy);
             const gk = kind === 'gob' ? Math.min(1, (p.life0 - p.life) / 0.2) : 0;   // Фантазм вылетает из портала в воздухе и снижается к линии огня
@@ -284,12 +285,12 @@ const FX3D = {
             if (kind === 'arrow') { o.rotation.set(0, ang, 0); const vz = (p.vz !== undefined ? -p.vz : 0); o.rotation.x = vz / 800; }
             else if (kind === 'ubw_blade') { o.rotation.set(t * 18, ang, 0); }
             else if (kind === 'saber_wave') { o.rotation.set(0, ang + Math.PI / 2, 0); }
-            else if (kind === 'ata') { o.rotation.set(0, ang, 0); }
+            else if (kind === 'ata' || kind === 'semi') { o.rotation.set(0, ang, 0); }
             else if (kind === 'gob') { o.rotation.set(gk < 1 ? (p.h0 / T * 1.2 - 0.85) * 0.5 * (1 - gk) : 0, ang, 0); }
             else { const s = 0.9 + Math.sin(t * 20 + (p.x % 7)) * 0.1; o.scale.setScalar(Math.max(0.6, (p.radius || 7) / 9) * s); if (!p.fromPlayer || p.element === 'e') this.lights.push({ x: p.x / T, z: p.y / T, h: 0.9, c: col3(p.color) }); }
             // Шлейф за снарядом и искры при попадании
             const dir = new THREE.Vector3(p.vx, 0, p.vy).normalize(), pc = col3(p.color);
-            const tc = kind === 'arrow' ? 0xffe8a0 : (kind === 'ubw_blade' ? 0xff3040 : (kind === 'gob' ? 0xffd04a : (kind === 'ata' ? 0xecfccb : pc)));
+            const tc = kind === 'arrow' ? 0xffe8a0 : (kind === 'ubw_blade' ? 0xff3040 : (kind === 'gob' ? 0xffd04a : (kind === 'ata' ? 0xecfccb : (kind === 'semi' ? 0xa3e635 : pc))));
             const head = o.position.clone(), tail = head.clone().addScaledVector(dir, -0.25);
             AnimFX.trail(p, tail.clone().add(new THREE.Vector3(0, -0.035, 0)), head.clone().add(new THREE.Vector3(0, 0.035, 0)), tc, { always: true, life: kind === 'orb' ? 0.22 : 0.14, len: 16, core: 0.4 });
             if (kind === 'orb' && Math.random() < 0.5) AnimFX.emit({ x: head.x, y: head.y, z: head.z, n: 1, color: [pc, 0xffffff], speed: 0.3, life: 0.35, size: 0.08, grav: 0, drag: 2 });
@@ -502,6 +503,9 @@ const FX3D = {
         if (typeof Gil3D !== 'undefined') Gil3D.fxRunes();
         if (typeof Ata3D !== 'undefined') Ata3D.fxRunes();
         if (typeof Asto3D !== 'undefined') Asto3D.fxRunes();
+        if (typeof Jeanne3D !== 'undefined') Jeanne3D.fxRunes();
+        if (typeof Jack3D !== 'undefined') Jack3D.fxRunes();
+        if (typeof Semi3D !== 'undefined') Semi3D.fxRunes();
         if (typeof Cinema !== 'undefined') Cinema.fxRunes();
         for (const [src, o] of this.live) {
             if (!this.seen.has(src)) { this.kill(src, o); continue; }

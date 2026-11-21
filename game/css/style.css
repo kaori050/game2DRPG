@@ -673,13 +673,33 @@ body[data-hero="medea"] .souls-frame .orn-invoker { display: inline; }
 .pt-frame[data-hero="gilgamesh"] { --pt-edge: #fde68a; --pt-edge2: #7a1010; }
 .pt-frame[data-hero="atalanta"] { --pt-edge: #d9f99d; --pt-edge2: #365314; }
 .pt-frame[data-hero="astolfo"] { --pt-edge: #f9a8d4; --pt-edge2: #831843; }
+.pt-frame[data-hero="jeanne"] { --pt-edge: #fef3c7; --pt-edge2: #854d0e; }
+.pt-frame[data-hero="jack"] { --pt-edge: #cbd5e1; --pt-edge2: #7f1d1d; }
+.pt-frame[data-hero="semiramis"] { --pt-edge: #d8b4fe; --pt-edge2: #3f6212; }
+/* ---------- Семирамида: царский багрянец, золото, яд ---------- */
+body[data-hero="semiramis"] { --accent: #a855f7; --accent-dk: #3f6212; --accent-glow: rgba(168,85,247,.34); --accent-txt: #f3e8ff; }
+#semiActionBar { border-color: rgba(168,85,247,.5); box-shadow: 0 0 18px rgba(132,204,22,.12); }
+#semiTopPill { border: 1px solid rgba(168,85,247,.45); }
+body[data-hero="semiramis"] .souls-frame .orn-invoker { display: inline; }
+/* ---------- Джек-Потрошитель: туманная сталь и кровь ---------- */
+body[data-hero="jack"] { --accent: #e11d48; --accent-dk: #334155; --accent-glow: rgba(225,29,72,.32); --accent-txt: #f1f5f9; }
+#jackActionBar { border-color: rgba(148,163,184,.5); box-shadow: 0 0 18px rgba(127,29,29,.18); }
+#jackTopPill { border: 1px solid rgba(148,163,184,.45); }
+body[data-hero="jack"] .souls-frame .orn-knight { display: inline; }
+/* ---------- Жанна д'Арк: святое золото и серебристо-белый ---------- */
+body[data-hero="jeanne"] { --accent: #fcd34d; --accent-dk: #854d0e; --accent-glow: rgba(253,230,138,.38); --accent-txt: #fffbeb; }
+#jeanActionBar { border-color: rgba(253,230,138,.55); box-shadow: 0 0 18px rgba(253,230,138,.14); }
+#jeanTopPill { border: 1px solid rgba(253,230,138,.45); }
+body[data-hero="jeanne"] .souls-frame .orn-saber { display: inline; }
+body[data-hero="jeanne"] .souls-frame .sf-thorns, body[data-hero="jeanne"] .souls-frame .sf-crest { fill: url(#gold_hp); }
 /* ---------- Астольфо: розово-малиновое и рыцарское золото ---------- */
 body[data-hero="astolfo"] { --accent: #f472b6; --accent-dk: #831843; --accent-glow: rgba(244,114,182,.34); --accent-txt: #fce7f3; }
 #astoActionBar { border-color: rgba(244,114,182,.5); box-shadow: 0 0 16px rgba(244,114,182,.12); }
 #astoTopPill { border: 1px solid rgba(244,114,182,.42); }
 body[data-hero="astolfo"] .souls-frame .orn-saber { display: inline; }
 /* Пять классов: в один ряд на широком экране */
-@media (min-width: 1280px) { .class-grid { --class-cols: 5; gap: 14px; padding: 10px 4% 0; } .class-grid .class-card { padding: 22px 12px; } }
+@media (min-width: 1280px) { .class-grid { --class-cols: 8; gap: 8px; padding: 10px 1.5% 0; } .class-grid .class-card { padding: 18px 7px; } .class-grid .class-desc { font-size: 11px; } .class-grid .class-name { font-size: clamp(16px, 1.5vw, 24px); } .class-grid .class-icon img { width: 52px; height: 52px; } }
+@media (min-width: 761px) and (max-width: 1279px) { .class-grid { --class-cols: 4; overflow-y: auto; } }
 body.ata-beast-form .pt-frame[data-hero="atalanta"] { --pt-edge: #e879f9; --pt-edge2: #3b0764; }
 /* ---------- Аталанта: звёздная зелень и золото / тёмный багрянец Альтер ---------- */
 body[data-hero="atalanta"] { --accent: #a3e635; --accent-dk: #365314; --accent-glow: rgba(163,230,53,.32); --accent-txt: #ecfccb; }

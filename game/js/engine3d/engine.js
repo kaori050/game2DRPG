@@ -136,9 +136,13 @@ const Engine3D = {
         this.zoom += (this.zoomTarget - this.zoom) * Math.min(1, dt * 6);
         const tgt = this.camTarget;
         // Пружинное следование с отставанием на рывках + тряска по оси удара + покачивание в такт шагам
-        Feel.follow(tgt, px, pz); tgt.y = 0.6 + World3D.hAt(tgt.x, tgt.z);
+        Feel.follow(tgt, px, pz);
+        // Временный отъезд и подъём камеры (полёт верхом и т. п.): цель выставляется каждый кадр, без неё — плавный возврат
+        const ez = this.extraZoomTarget || 0, el = this.camLift || 0; this.extraZoomTarget = 0; this.camLift = 0;
+        this.extraZoom = (this.extraZoom || 0) + (ez - (this.extraZoom || 0)) * Math.min(1, dt * 2.5); this.lift = (this.lift || 0) + (el - (this.lift || 0)) * Math.min(1, dt * 4);
+        tgt.y = 0.6 + World3D.hAt(tgt.x, tgt.z) + this.lift;
         const o = Feel.offset(Actors3D.player && Actors3D.player.step);
-        const pitch = 0.98 + (this.zoom - 19) * 0.006, d = this.zoom * (1 - (typeof AnimFX !== 'undefined' ? AnimFX.kickAmt : 0) * 0.05);
+        const pitch = 0.98 + (this.zoom - 19) * 0.006, d = (this.zoom + this.extraZoom) * (1 - (typeof AnimFX !== 'undefined' ? AnimFX.kickAmt : 0) * 0.05);
         this.camera.position.set(tgt.x + o.x, tgt.y + o.y + Math.sin(pitch) * d, tgt.z + o.z + Math.cos(pitch) * d);
         this.camera.lookAt(tgt.x + o.x, tgt.y + o.y * 0.6, tgt.z + o.z);
         if (typeof Cinema !== 'undefined') { Cinema.update(dt); Cinema.camera(this.camera, tgt); }
@@ -183,6 +187,9 @@ const Engine3D = {
         if (typeof Gil3D !== 'undefined') Gil3D.update(dt);
         if (typeof Ata3D !== 'undefined') Ata3D.update(dt);
         if (typeof Asto3D !== 'undefined') Asto3D.update(dt);
+        if (typeof Jeanne3D !== 'undefined') Jeanne3D.update(dt);
+        if (typeof Jack3D !== 'undefined') Jack3D.update(dt);
+        if (typeof Semi3D !== 'undefined') Semi3D.update(dt);
         Weather3D.update(dt, w, tgt);
         AnimFX.update(dt);
         // Ближайшие источники огня получают настоящие точечные огни
