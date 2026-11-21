@@ -6,7 +6,7 @@
     <title>Хроники Эльдории — 3D Action RPG (Warcraft 3 / Dark Fantasy)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=51">
+    <link rel="stylesheet" href="css/style.css?v=60">
 </head>
 <body class="relative select-none">
 
@@ -219,42 +219,10 @@
 
     <!-- Верхний левый HUD: Герой (Древняя каменная плита со мхом) -->
     <div class="ui-zoom fixed top-3 left-3 z-20 flex flex-col gap-2.5 pointer-events-none w-80 sm:w-88">
-        <div class="rpg-panel p-3.5 rounded-xl pointer-events-auto">
-            <!-- SVG Декор мха и корней по углам -->
-            <svg class="moss-vine-overlay w-full h-full" viewBox="0 0 320 140" preserveAspectRatio="none">
-                <path d="M0,0 Q35,4 58,14 Q30,10 14,28 Q8,45 3,65 L0,65 Z" fill="rgba(54, 83, 20, 0.55)"/>
-                <circle cx="12" cy="10" r="7" fill="#3f6212" opacity="0.75"/>
-                <circle cx="24" cy="7" r="5" fill="#4d7c0f" opacity="0.7"/>
-                <circle cx="7" cy="22" r="6" fill="#365314" opacity="0.75"/>
-                <path d="M320,0 Q285,5 268,16 Q295,12 310,32 L320,45 Z" fill="rgba(45, 75, 18, 0.5)"/>
-                <circle cx="308" cy="9" r="6" fill="#3f6212" opacity="0.7"/>
-            </svg>
-
-            <div class="flex items-center gap-3 mb-2.5 relative z-20">
-                <!-- Портрет Героя в кованой бронзово-мшистой раме -->
-                <div class="relative w-16 h-16 rounded-lg bg-stone-950 border-2 border-amber-700/90 flex items-center justify-center shadow-2xl shrink-0 overflow-hidden">
-                    <canvas id="portraitCanvas" width="64" height="64" class="w-full h-full"></canvas>
-                    <span id="hudLevel" class="absolute -bottom-0.5 -right-0.5 bg-stone-900 text-amber-300 text-[11px] font-rpg font-extrabold px-1.5 py-0.2 rounded-tl border border-amber-600 shadow">1</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-center">
-                        <h1 id="hudHeroName" class="font-rpg font-extrabold text-amber-400/95 text-sm tracking-wider truncate drop-shadow">Карл • Архимаг</h1>
-                        <div class="flex items-center gap-1 text-amber-300 text-xs font-bold bg-stone-950/95 px-2 py-0.5 rounded border border-amber-800/70 shadow-inner">
-                            <span>🪙</span>
-                            <span id="hudGold">90</span>
-                        </div>
-                    </div>
-                    <div id="hudBiome" class="text-[11px] text-stone-400 truncate font-medium">🏛️ Руины Святилища</div>
-                    <div id="hudOrbBuffs" class="text-[10px] text-emerald-400/90 font-semibold mt-0.5 truncate">Сферы: +Реген / +Скор / +Мощь</div>
-                </div>
-            </div>
-
-            <!-- Уведомление об очках прокачки сфер -->
-            <div id="skillPointsBanner" class="hidden mt-2.5 pt-2 border-t border-stone-700/80 flex items-center justify-between relative z-20">
-                <span class="text-[11px] font-bold text-amber-300 animate-pulse">✨ Очки Древних Сфер: <span id="hudSkillPoints">2</span></span>
-                <span class="text-[10px] text-lime-400/90">Нажмите [+УР] внизу</span>
-            </div>
-        </div>
+        <!-- Панель героя убрана: портрет, уровень и опыт — в нижнем HUD между шарами; золото и зона — у мини-карты.
+             Скрытые узлы оставлены для совместимости со старым кодом обновления HUD -->
+        <div class="hidden" aria-hidden="true"><span id="hudHeroName"></span><span id="hudOrbBuffs"></span>
+            <div id="skillPointsBanner" class="hidden"><span id="hudSkillPoints">0</span></div></div>
 
         <!-- Каменная скрижаль активного квеста -->
         <div class="rpg-panel p-3 rounded-xl pointer-events-auto border-l-4 border-l-lime-700">
@@ -277,7 +245,11 @@
                 <div class="absolute top-0 left-0 w-7 h-7 pointer-events-none" style="background: radial-gradient(circle at 20% 20%, rgba(77,124,15,0.75), transparent 70%);"></div>
                 <div class="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[10px] text-stone-300 font-mono border border-stone-700" id="hudCoords">14, 15</div>
             </div>
-            <div class="w-full flex items-center justify-between mt-1.5 px-1 text-xs relative z-20">
+            <div class="w-full flex items-center justify-between gap-2 mt-1.5 px-1 text-[11px] relative z-20" style="max-width:150px">
+                <span id="hudBiome" class="text-stone-400 truncate font-medium min-w-0">Руины Святилища</span>
+                <span class="flex items-center gap-1 text-amber-300 font-bold shrink-0" title="Золото"><span>🪙</span><span id="hudGold">90</span></span>
+            </div>
+            <div class="w-full flex items-center justify-between mt-1 px-1 text-xs relative z-20">
                 <span id="hudTimeIcon" class="text-stone-300 font-medium">🕯️ Сумерки</span>
                 <div class="flex items-center gap-2">
                     <span id="hudFps" class="font-mono text-[10px] text-lime-400 font-bold bg-stone-950 px-1.5 py-0.5 rounded border border-stone-800">60 FPS</span>
@@ -796,32 +768,39 @@
 
     <!-- Three.js (WebGL) — обычный скрипт с CDN: без сборщиков и без CORS при открытии файла двойным кликом -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
-    <script src="js/models/mordred.js?v=51"></script>
-    <script src="js/models/saber.js?v=51"></script>
-    <script src="js/models/saber_alter.js?v=51"></script>
-    <script src="js/models/archer.js?v=51"></script>
-    <script src="js/models/elizabeth.js?v=51"></script>
-    <script src="js/models/frankenstein.js?v=51"></script>
-    <script src="js/models/medea.js?v=51"></script>
-    <script src="js/engine3d/feel.js?v=51"></script>
-    <script src="js/engine3d/engine.js?v=51"></script>
-    <script src="js/engine3d/materials.js?v=51"></script>
-    <script src="js/engine3d/world.js?v=51"></script>
-    <script src="js/engine3d/models.js?v=51"></script>
-    <script src="js/engine3d/actors.js?v=51"></script>
-    <script src="js/engine3d/effects.js?v=51"></script>
-    <script src="js/engine3d/weather.js?v=51"></script>
-    <script src="js/engine3d/animfx.js?v=51"></script>
-    <script src="js/engine3d/mdx.js?v=51"></script>
-    <script src="js/controls.js?v=51"></script>
-    <script src="js/characters.js?v=51"></script>
-    <script src="js/knight.js?v=51"></script>
-    <script src="js/elizabeth.js?v=51"></script>
-    <script src="js/frankenstein.js?v=51"></script>
-    <script src="js/medea.js?v=51"></script>
-    <script src="js/engine3d/portraits.js?v=51"></script>
-    <script src="js/hud.js?v=51"></script>
-    <script src="js/cinematics.js?v=51"></script>
-    <script src="js/game.js?v=51"></script>
+    <script src="js/models/mordred.js?v=60"></script>
+    <script src="js/models/saber.js?v=60"></script>
+    <script src="js/models/saber_alter.js?v=60"></script>
+    <script src="js/models/archer.js?v=60"></script>
+    <script src="js/models/elizabeth.js?v=60"></script>
+    <script src="js/models/frankenstein.js?v=60"></script>
+    <script src="js/models/medea.js?v=60"></script>
+    <script src="js/models/gilgamesh.js?v=60"></script>
+    <script src="js/models/atalanta.js?v=60"></script>
+    <script src="js/models/atalanta_alter.js?v=60"></script>
+    <script src="js/models/astolfo.js?v=60"></script>
+    <script src="js/engine3d/feel.js?v=60"></script>
+    <script src="js/engine3d/engine.js?v=60"></script>
+    <script src="js/engine3d/materials.js?v=60"></script>
+    <script src="js/engine3d/world.js?v=60"></script>
+    <script src="js/engine3d/models.js?v=60"></script>
+    <script src="js/engine3d/actors.js?v=60"></script>
+    <script src="js/engine3d/effects.js?v=60"></script>
+    <script src="js/engine3d/weather.js?v=60"></script>
+    <script src="js/engine3d/animfx.js?v=60"></script>
+    <script src="js/engine3d/mdx.js?v=60"></script>
+    <script src="js/controls.js?v=60"></script>
+    <script src="js/characters.js?v=60"></script>
+    <script src="js/knight.js?v=60"></script>
+    <script src="js/elizabeth.js?v=60"></script>
+    <script src="js/frankenstein.js?v=60"></script>
+    <script src="js/medea.js?v=60"></script>
+    <script src="js/gilgamesh.js?v=60"></script>
+    <script src="js/atalanta.js?v=60"></script>
+    <script src="js/astolfo.js?v=60"></script>
+    <script src="js/engine3d/portraits.js?v=60"></script>
+    <script src="js/hud.js?v=60"></script>
+    <script src="js/cinematics.js?v=60"></script>
+    <script src="js/game.js?v=60"></script>
 </body>
 </html>

@@ -7,12 +7,19 @@ const SoulsHUD = {
     init() {
         const dock = document.getElementById('bottomDock'), vit = dock && dock.querySelector('.dock-vitals');
         if (!dock || !vit || this.ready) return;
+        // Блок в духе Warcraft 3 / Dota 2: [шар HP + выносливость] [живой 3D-портрет + уровень и опыт] [шар маны]
         vit.classList.add('souls-vitals');
-        vit.insertAdjacentHTML('afterbegin', this.orbHTML('hp', 'Здоровье'));
-        dock.insertAdjacentHTML('beforeend', `<div class="souls-right">${this.orbHTML('mp', 'Мана')}
+        const sta = vit.querySelector('.vital-sta'), xp = vit.querySelector('.vital-xp');
+        vit.insertAdjacentHTML('beforeend', `<div class="sv-col sv-hp">${this.orbHTML('hp', 'Здоровье')}</div>
+            <div class="sv-col sv-pt" id="svPortrait">
+                <div class="sv-lvl" id="ptXp"><span class="sv-lvl-badge">УР. <b id="hudLevel">1</b></span><span id="ptXpTxt" class="sv-xp-txt"></span></div>
+            </div>
+            <div class="souls-right">${this.orbHTML('mp', 'Мана')}
             <div class="souls-mad hidden" id="orb_mad" title="Безумие берсерка: навыки быстро наполняют шкалу, со временем она медленно спадает. На 100% герой теряет контроль">
                 <canvas width="240" height="240"></canvas><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="#050506" stroke-width="3.5"/><circle cx="20" cy="20" r="18" fill="none" stroke="url(#silv_mp)" stroke-width="1.8"/><path d="M21 7 L15 21 H20 L18 33 L26 17 H21 Z" fill="rgba(253,224,71,.16)"/></svg><b></b>
             </div></div>`);
+        if (sta) vit.querySelector('.sv-hp').appendChild(sta);
+        if (xp) document.getElementById('svPortrait').appendChild(xp);
         this.orbs.hp = this.makeOrb('hp');
         this.orbs.mp = this.makeOrb('mp');
         { const root = document.getElementById('orb_mad'), cv = root.querySelector('canvas'); this.orbs.mad = { id: 'mad', root, cv, g: cv.getContext('2d'), val: root.querySelector('b'), level: 0, vel: 0, slosh: 0, phase: 0, bubbles: [], pops: [], last: null }; }
@@ -88,6 +95,7 @@ const SoulsHUD = {
         if (typeof player !== 'undefined' && typeof gameState !== 'undefined' && gameState === 'playing') {
             const ht = player.heroType, theme = player.charId === 'mordred' ? 'mordred' : ht;
             if (document.body.dataset.hero !== theme) document.body.dataset.hero = theme;
+            { const bf = ht === 'atalanta' && player.ataForm === 'beast'; if (document.body.classList.contains('ata-beast-form') !== bf) document.body.classList.toggle('ata-beast-form', bf); }
             const hp = this.orbs.hp, mp = this.orbs.mp;
             this.step(hp, player.hp / Math.max(1, player.maxHp), dt, this.LIQ.blood);
             hp.val.textContent = Math.ceil(player.hp); hp.sub.textContent = '/ ' + player.maxHp;

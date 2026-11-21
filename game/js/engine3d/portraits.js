@@ -35,6 +35,7 @@ const Portraits = {
     // Ключ модели персонажа: модель WC3 или процедурный герой (Инвокер, Павший Рыцарь)
     keyFor(c, live) {
         if (live && c.key === 'saber' && player.saberAlter) return 'mdx:saber_alter';
+        if (live && c.key === 'atalanta' && player.ataForm === 'beast') return 'mdx:atalanta_alter';
         return c.model ? 'mdx:' + c.model : 'hero:' + c.key + ':' + c.id;
     },
     actorFor(c, live) {
@@ -83,8 +84,9 @@ const Portraits = {
             // Одинаковые окошки (например, два портрета героя в HUD) — один рендер на кадр
             if (!done.has(k)) { this.renderSlot(s, c, now); done.set(k, true); }
             s.last = now;
-            const w = s.cv.width, h = s.cv.height;
-            s.ctx.clearRect(0, 0, w, h); s.ctx.drawImage(this.r.domElement, 0, 0, w, h);
+            // Квадратный рендер обрезается по центру под пропорции окошка (готическая арка выше, чем шире)
+            const w = s.cv.width, h = s.cv.height, S = this.S, sw = w < h ? S * w / h : S, sh = h < w ? S * h / w : S;
+            s.ctx.clearRect(0, 0, w, h); s.ctx.drawImage(this.r.domElement, (S - sw) / 2, (S - sh) / 2, sw, sh, 0, 0, w, h);
         }
     },
     renderSlot(s, c, now) {
@@ -100,7 +102,7 @@ const Portraits = {
         a.base.scale.set(1, 1 + Math.sin(now / 560) * 0.006, 1);   // дыхание
         a.flash = Math.max(0, (a.flash || 0) - dt * 4);
         // Кадр: по грудь (HUD) или в полный рост (карточки)
-        const top = e.top, full = s.framing === 'full', visH = full ? top * 1.12 : top * 0.5, ty = full ? top * 0.5 : top * 0.8 - my * 0.05;
+        const top = e.top, full = s.framing === 'full', visH = full ? top * 1.12 : top * 0.56, ty = full ? top * 0.5 : top * 0.78 - my * 0.05;
         const d = (visH / 2) / Math.tan(THREE.MathUtils.degToRad(this.cam.fov / 2));
         const shake = live ? this.react.hit * 0.03 : 0;
         this.cam.position.set(Math.sin(-mx * 0.5) * 0.15 + (Math.random() - 0.5) * shake, ty + 0.03 + (Math.random() - 0.5) * shake, d);
@@ -137,26 +139,20 @@ const Portraits = {
     },
     // ---------- окошки в интерфейсе ----------
     frameHTML(cls, c) { return `<div class="pt-frame ${cls}" data-hero="${c ? c.id : ''}"><canvas width="${this.S}" height="${this.S}"></canvas><i class="pt-corner tl"></i><i class="pt-corner tr"></i><i class="pt-corner bl"></i><i class="pt-corner br"></i></div>`; },
-    // HUD: портрет в верхней панели героя (вместо плоской картинки) и «кубик» рядом с шаром здоровья
+    // HUD: готическое окошко с героем строго между шарами здоровья и маны; под ним — уровень и опыт
     mountHud() {
         if (!this.init()) return;
-        const top = document.getElementById('portraitCanvas');
-        if (top && !top.dataset.pt) {
-            top.dataset.pt = '1'; top.width = top.height = 160;
-            top.parentElement.classList.add('pt-frame', 'pt-live', 'pt-top');
-            this.add(top, { live: true, char: () => playerChar(), fps: 30, framing: 'bust' });
-        }
         if (!document.getElementById('ptHud')) {
-            const hp = document.getElementById('orb_hp'); if (!hp) return;
-            hp.insertAdjacentHTML('afterend', `<div id="ptHud" class="pt-frame pt-live pt-hud"><canvas width="200" height="200"></canvas><i class="pt-corner tl"></i><i class="pt-corner tr"></i><i class="pt-corner bl"></i><i class="pt-corner br"></i><span id="ptHudLvl" class="pt-lvl">1</span></div>`);
+            const box = document.getElementById('svPortrait'); if (!box) return;
+            box.insertAdjacentHTML('afterbegin', `<div id="ptHud" class="pt-frame pt-live pt-hud"><canvas width="208" height="236"></canvas><i class="pt-corner tl"></i><i class="pt-corner tr"></i><i class="pt-corner bl"></i><i class="pt-corner br"></i><i class="pt-crest"></i></div>`);
             this.add(document.querySelector('#ptHud canvas'), { live: true, char: () => playerChar(), fps: 30, framing: 'bust' });
         }
         this.syncHud();
     },
     syncHud() {
         const c = typeof playerChar === 'function' ? playerChar() : null; if (!c) return;
-        document.querySelectorAll('.pt-frame.pt-live').forEach(f => { f.dataset.hero = c.id; f.style.setProperty('--hero-glow', c.glow); });
-        const l = document.getElementById('ptHudLvl'); if (l) l.textContent = player.level;
+        document.querySelectorAll('.pt-frame.pt-live').forEach(f => { f.dataset.hero = c.id; f.style.setProperty('--hero-glow', c.glow); f.title = typeof heroDisplayName === 'function' ? heroDisplayName() : c.name; });
+        const l = document.getElementById('hudLevel'); if (l) l.textContent = player.level;
     },
     // Карточки персонажей: квадратное окно с моделью в полный рост справа на карточке
     mountHeroCards() {

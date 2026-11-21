@@ -180,6 +180,9 @@ const Engine3D = {
         if (typeof Eliza3D !== 'undefined') Eliza3D.update(dt);
         if (typeof Frank3D !== 'undefined') Frank3D.update(dt);
         if (typeof Medea3D !== 'undefined') Medea3D.update(dt);
+        if (typeof Gil3D !== 'undefined') Gil3D.update(dt);
+        if (typeof Ata3D !== 'undefined') Ata3D.update(dt);
+        if (typeof Asto3D !== 'undefined') Asto3D.update(dt);
         Weather3D.update(dt, w, tgt);
         AnimFX.update(dt);
         // Ближайшие источники огня получают настоящие точечные огни

@@ -67,6 +67,17 @@ const FX3D = {
                 const gl = B.glow(c || 0xfde68a, 0.35); g.add(gl); break;
             }
             case 'ubw_blade': { const s = B.sword(0xffd0d0, 0x8a1a1a, 0.5, { emissive: 0xff6060, emissiveIntensity: 0.6 }); s.rotation.set(0, 0, 0); s.position.set(0, 0, 0); g.add(s); g.add(B.glow(0xff8080, 0.6)); break; }
+            case 'ata': {
+                // Стрела Тавропола: древко, наконечник и звёздное свечение
+                g.add(new THREE.Mesh(G.arrow, G3.mat(0xe8dcb0))); g.add(new THREE.Mesh(G.arrowHead, G3.mat(0xf4f7ff, { emissive: 0xd9f99d, emissiveIntensity: 0.8 })));
+                g.add(B.glow(c || 0xd9f99d, src.big ? 1.1 : 0.55)); if (src.big) g.scale.setScalar(1.35); break;
+            }
+            case 'gob': {
+                // Фантазм из Врат Вавилона: клинок, копьё, секира или большой меч в золоте, остриём вперёд
+                const w = (src.wtype || 0) % 4;
+                const m = w === 1 ? Gil3D.spear(1.05) : w === 2 ? B.axe(0xe8c860) : B.sword(0xf4f1e6, 0xd4a020, w === 3 ? 0.95 : 0.7, { emissive: 0xffb020, emissiveIntensity: 0.5 });
+                m.scale.multiplyScalar(src.big ? 1.6 : 1.15); g.add(m); g.add(B.glow(0xffc84a, src.big ? 1.3 : 0.75)); break;
+            }
             case 'saber_wave': { const m = new THREE.Mesh(G.crescent, this.basic(c)); m.scale.set(1.4, 1, 1.4); g.add(m); g.add(B.glow(c, 1.4)); break; }
             case 'orb': default: {
                 const m = new THREE.Mesh(G.orb, new THREE.MeshBasicMaterial({ color: c })); m.scale.setScalar(0.12); g.add(m);
@@ -264,18 +275,21 @@ const FX3D = {
         // ---------- снаряды ----------
         for (const p of projectiles) {
             if (!near(p.x, p.y)) continue;
-            const kind = p.kind === 'arrow' ? 'arrow' : (p.kind === 'ubw_blade' ? 'ubw_blade' : (p.kind === 'saber_wave' ? 'saber_wave' : 'orb'));
+            const kind = p.kind === 'arrow' ? 'arrow' : (p.kind === 'ubw_blade' ? 'ubw_blade' : (p.kind === 'saber_wave' ? 'saber_wave' : (p.kind === 'gob' ? 'gob' : (p.kind === 'ata' ? 'ata' : 'orb'))));
             const o = this.get(p, kind);
             const ang = Math.atan2(p.vx, p.vy);
-            const h = kind === 'arrow' ? 0.7 + (p.z || 0) / T * 1.2 : (kind === 'saber_wave' ? 0.4 : 0.8);
+            const gk = kind === 'gob' ? Math.min(1, (p.life0 - p.life) / 0.2) : 0;   // Фантазм вылетает из портала в воздухе и снижается к линии огня
+            const h = kind === 'arrow' ? 0.7 + (p.z || 0) / T * 1.2 : (kind === 'saber_wave' ? 0.4 : (kind === 'gob' ? (p.h0 / T * 1.2) * (1 - gk) + 0.85 * gk : 0.8));
             o.position.set(p.x / T, h, p.y / T);
             if (kind === 'arrow') { o.rotation.set(0, ang, 0); const vz = (p.vz !== undefined ? -p.vz : 0); o.rotation.x = vz / 800; }
             else if (kind === 'ubw_blade') { o.rotation.set(t * 18, ang, 0); }
             else if (kind === 'saber_wave') { o.rotation.set(0, ang + Math.PI / 2, 0); }
+            else if (kind === 'ata') { o.rotation.set(0, ang, 0); }
+            else if (kind === 'gob') { o.rotation.set(gk < 1 ? (p.h0 / T * 1.2 - 0.85) * 0.5 * (1 - gk) : 0, ang, 0); }
             else { const s = 0.9 + Math.sin(t * 20 + (p.x % 7)) * 0.1; o.scale.setScalar(Math.max(0.6, (p.radius || 7) / 9) * s); if (!p.fromPlayer || p.element === 'e') this.lights.push({ x: p.x / T, z: p.y / T, h: 0.9, c: col3(p.color) }); }
             // Шлейф за снарядом и искры при попадании
             const dir = new THREE.Vector3(p.vx, 0, p.vy).normalize(), pc = col3(p.color);
-            const tc = kind === 'arrow' ? 0xffe8a0 : (kind === 'ubw_blade' ? 0xff3040 : pc);
+            const tc = kind === 'arrow' ? 0xffe8a0 : (kind === 'ubw_blade' ? 0xff3040 : (kind === 'gob' ? 0xffd04a : (kind === 'ata' ? 0xecfccb : pc)));
             const head = o.position.clone(), tail = head.clone().addScaledVector(dir, -0.25);
             AnimFX.trail(p, tail.clone().add(new THREE.Vector3(0, -0.035, 0)), head.clone().add(new THREE.Vector3(0, 0.035, 0)), tc, { always: true, life: kind === 'orb' ? 0.22 : 0.14, len: 16, core: 0.4 });
             if (kind === 'orb' && Math.random() < 0.5) AnimFX.emit({ x: head.x, y: head.y, z: head.z, n: 1, color: [pc, 0xffffff], speed: 0.3, life: 0.35, size: 0.08, grav: 0, drag: 2 });
@@ -485,6 +499,9 @@ const FX3D = {
         if (typeof Eliza3D !== 'undefined') Eliza3D.fxRunes();
         if (typeof Frank3D !== 'undefined') Frank3D.fxRunes();
         if (typeof Medea3D !== 'undefined') Medea3D.fxRunes();
+        if (typeof Gil3D !== 'undefined') Gil3D.fxRunes();
+        if (typeof Ata3D !== 'undefined') Ata3D.fxRunes();
+        if (typeof Asto3D !== 'undefined') Asto3D.fxRunes();
         if (typeof Cinema !== 'undefined') Cinema.fxRunes();
         for (const [src, o] of this.live) {
             if (!this.seen.has(src)) { this.kill(src, o); continue; }

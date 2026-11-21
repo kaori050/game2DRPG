@@ -1252,7 +1252,7 @@ function updateDockHud(dt) {
     // Доступность навыков по мане
     const h = player.heroType;
     if (h !== 'invoker') {
-        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : (h === 'frankenstein' ? 'Frank' : (h === 'medea' ? 'Medea' : 'Saber')))), SK = heroSkillSet();
+        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : (h === 'frankenstein' ? 'Frank' : (h === 'medea' ? 'Medea' : (h === 'gilgamesh' ? 'Gil' : (h === 'atalanta' ? 'Ata' : (h === 'astolfo' ? 'Asto' : 'Saber'))))))), SK = heroSkillSet();
         ['q', 'w', 'e', 'r'].forEach(k => { const el = document.getElementById(`cd${P}${k.toUpperCase()}`); if (el && el.parentElement) el.parentElement.classList.toggle('no-mana', player.mp < SK[k].manaCost); });
     } else {
         [['cdSpellD', 0], ['cdSpellF', 1]].forEach(([id, slot]) => {
@@ -2302,7 +2302,7 @@ function updateGame(dt) {
     // Регенерация в безопасных зонах (Святилище или Королевство Камелот)
     const safeZ = playerZone();
     const inSanctuary = safeZ === 'sanctuary' || safeZ === 'camelot';
-    Knight.update(dt); Eliza.update(dt); Frank.update(dt); Medea.update(dt);
+    Knight.update(dt); Eliza.update(dt); Frank.update(dt); Medea.update(dt); Gil.update(dt); Ata.update(dt); Asto.update(dt);
     player.hp = Math.min(player.maxHp, player.hp + (player.hpRegen + (inSanctuary ? 5 : 0)) * dt);
     player.mp = Math.min(player.maxMp, player.mp + (player.mpRegen + (inSanctuary ? 6 : 0)) * dt);
 
@@ -4650,7 +4650,7 @@ function renderSpellSlotUI(slotIdx, iconId, costId, nameId) {
 }
 
 function updateHudUI() {
-    document.getElementById('hudLevel').textContent = player.level;
+    { const l = document.getElementById('hudLevel'); if (l) l.textContent = player.level; }
     document.getElementById('hudGold').textContent = player.gold;
 
     const isSaber = player.heroType === 'saber';
@@ -4674,13 +4674,21 @@ function updateHudUI() {
     document.getElementById('vitalMp').title = `Мана: ${Math.ceil(player.mp)} / ${player.maxMp}, восстановление +${player.mpRegen}/с`;
 
     document.getElementById('barXp').style.width = `${(player.xp / player.xpNext) * 100}%`;
+    {   // Опыт под портретом: сколько осталось до следующего уровня
+        const xt = document.getElementById('ptXpTxt'), need = Math.max(0, Math.ceil(player.xpNext - player.xp));
+        if (xt) xt.textContent = `${need} XP до ур. ${player.level + 1}`;
+        const xw = document.getElementById('ptXp'); if (xw) xw.title = `Опыт: ${Math.floor(player.xp)} / ${player.xpNext} • до уровня ${player.level + 1} осталось ${need}`;
+    }
 
     document.getElementById('hudOrbBuffs').textContent = heroStatLine();
 
     if (player.heroType !== 'invoker') {
-        const cdP = player.heroType === 'archer' ? 'cdArcher' : (player.heroType === 'knight' ? 'cdKnight' : (player.heroType === 'elizabeth' ? 'cdEliza' : (player.heroType === 'frankenstein' ? 'cdFrank' : (player.heroType === 'medea' ? 'cdMedea' : 'cdSaber'))));
+        const cdP = player.heroType === 'archer' ? 'cdArcher' : (player.heroType === 'knight' ? 'cdKnight' : (player.heroType === 'elizabeth' ? 'cdEliza' : (player.heroType === 'frankenstein' ? 'cdFrank' : (player.heroType === 'medea' ? 'cdMedea' : (player.heroType === 'gilgamesh' ? 'cdGil' : (player.heroType === 'atalanta' ? 'cdAta' : (player.heroType === 'astolfo' ? 'cdAsto' : 'cdSaber')))))));
         if (player.heroType === 'frankenstein') Frank.refreshBar();
         if (player.heroType === 'medea') Medea.refreshBar();
+        if (player.heroType === 'gilgamesh') Gil.refreshBar();
+        if (player.heroType === 'atalanta') Ata.refreshBar();
+        if (player.heroType === 'astolfo') Asto.refreshBar();
         if (player.heroType === 'elizabeth') { updateCooldownBadge('cdElizaD', player.saberCooldowns.d || 0); Eliza.refreshBar(); }
         if (player.heroType === 'knight') { updateCooldownBadge('cdKnightD', player.saberCooldowns.d || 0); Knight.refreshBar(); }
         updateCooldownBadge(cdP + 'Q', player.saberCooldowns.q || 0);
@@ -4730,10 +4738,10 @@ function renderSpellbookModal() {
     document.getElementById('spellbookFilterTabs').classList.toggle('hidden', isSaber);
 
     if (isSaber) {
-        document.getElementById('spellbookTitle').textContent = player.heroType === 'medea' ? '📜 Кодекс Ведьмы Предательства: Магия Эпохи Богов' : player.heroType === 'frankenstein' ? '⚡ Кодекс Берсерка: Булава и Гром' : player.heroType === 'elizabeth' ? '🌑 Кодекс Падшей Богини: Магия Пустоты' : player.heroType === 'knight' ? '🩸 Кодекс Павшего Рыцаря: Магия Крови' : isArcherBook
+        document.getElementById('spellbookTitle').textContent = player.heroType === 'astolfo' ? '🦅 Кодекс Райдера: Сокровища Астольфо' : player.heroType === 'atalanta' ? (player.ataForm === 'beast' ? '🌑 Кодекс Агреи: Когти Калидонского Вепря' : '🏹 Кодекс Охотницы Аркадии: Лук Тавропол') : player.heroType === 'gilgamesh' ? '👑 Сокровищница Короля Героев: Врата Вавилона и Эа' : player.heroType === 'medea' ? '📜 Кодекс Ведьмы Предательства: Магия Эпохи Богов' : player.heroType === 'frankenstein' ? '⚡ Кодекс Берсерка: Булава и Гром' : player.heroType === 'elizabeth' ? '🌑 Кодекс Падшей Богини: Магия Пустоты' : player.heroType === 'knight' ? '🩸 Кодекс Павшего Рыцаря: Магия Крови' : isArcherBook
             ? '🏹 Кодекс Следопыта: Способности Арчер (кастомки Warcraft 3)'
             : '⚔️ Кодекс Короля Рыцарей: Способности Сейбер (Fate / Warcraft 3)';
-        document.getElementById('spellbookSubtitle').textContent = player.heroType === 'medea' ? 'Хрупкая, но смертоносная: мало здоровья, много маны и урона, сверхбыстрые касты. Воины Драконьих Зубов отвлекают рядовых врагов, Rule Breaker ломает чужую магию.' : player.heroType === 'frankenstein' ? 'Безумие берсерка: навыки быстро наполняют шкалу (Q и W +10%, E +30%, R +80%), она медленно спадает. На 100% героиня теряет контроль и носится, отскакивая от препятствий.' : player.heroType === 'elizabeth' ? 'Каждое попадание навыком даёт стак «Скверны» (до 10, +3% к силе навыков за стак). Проклятые враги получают на 25% больше урона и лечат Элизабет.' : player.heroType === 'knight' ? 'Маны нет: каждый навык платит процентом ТЕКУЩЕГО здоровья и никогда не убивает. Чем сильнее ранен — тем быстрее регенерация. Меч — трофей с убитого мечника, он ломается; без него рыцарь рвёт врагов когтями.' : isArcherBook
+        document.getElementById('spellbookSubtitle').textContent = player.heroType === 'astolfo' ? 'Самый быстрый герой: выпады, рог и рывки. Ломает защиту врагов, сбивает их атаки и уходит до ответного удара — в лоб размениваться не стоит.' : player.heroType === 'atalanta' ? 'Две формы на одном уровне: D переключает лучницу и звериную Альтер. Ранги навыков общие, у каждой формы свои Q/W/E и своя ульта (с 6-го уровня). Здесь — навыки текущей формы.' : player.heroType === 'gilgamesh' ? 'Стрелок без лука: каждый выстрел — Фантазм из золотого портала. Хрупкий, но с огромной огневой мощью издалека. Энкиду сковывает и сбивает касты, Эа сметает всё на линии.' : player.heroType === 'medea' ? 'Хрупкая, но смертоносная: мало здоровья, много маны и урона, сверхбыстрые касты. Воины Драконьих Зубов отвлекают рядовых врагов, Rule Breaker ломает чужую магию.' : player.heroType === 'frankenstein' ? 'Безумие берсерка: навыки быстро наполняют шкалу (Q и W +10%, E +30%, R +80%), она медленно спадает. На 100% героиня теряет контроль и носится, отскакивая от препятствий.' : player.heroType === 'elizabeth' ? 'Каждое попадание навыком даёт стак «Скверны» (до 10, +3% к силе навыков за стак). Проклятые враги получают на 25% больше урона и лечат Элизабет.' : player.heroType === 'knight' ? 'Маны нет: каждый навык платит процентом ТЕКУЩЕГО здоровья и никогда не убивает. Чем сильнее ранен — тем быстрее регенерация. Меч — трофей с убитого мечника, он ломается; без него рыцарь рвёт врагов когтями.' : isArcherBook
             ? 'Стрелы летят по баллистической дуге. Издалека урон выше (до +30%), ближе 90px — ниже на 25%. Крит зависит от уровня и ультимейта.'
             : 'Все навыки Сейбер — ближний бой. Они усиливаются от очков мастерства и экипировки Камелота.';
 
@@ -6171,6 +6179,12 @@ const HERO_DEFS = {
                hello: '🏰 Сейбер прибыла в Королевство Камелот!' },
     archer:  { title: 'Арчер • Страж Клинков', short: 'Арчер', home: { x: 14, y: 18.5 }, equip: { weapon: 'hunter_bow', armor: 'ranger_leather', ring: null },
                hello: '🏹 Арчер явился в Руины Святилища. Trace on.' },
+    astolfo: { title: 'Астольфо • Рыцарь Карла Великого', short: 'Астольфо', home: { x: 57.5, y: 16.5 }, equip: { weapon: null, armor: null, ring: null },
+               hello: '🦅 Астольфо из Двенадцати Паладинов прибыл в Камелот! Гиппогриф где-то рядом.' },
+    atalanta: { title: 'Аталанта • Охотница Аркадии', short: 'Аталанта', home: { x: 14, y: 18 }, equip: { weapon: null, armor: null, ring: null },
+               hello: '🏹 Аталанта, Охотница Аркадии, натягивает Тавропол. Звёзды на её стороне.' },
+    gilgamesh: { title: 'Гильгамеш • Король Героев', short: 'Гильгамеш', home: { x: 14, y: 17.5 }, equip: { weapon: null, armor: null, ring: null },
+               hello: '👑 Король Героев снизошёл до Руин Святилища. Врата Вавилона открыты.' },
     medea: { title: 'Медея • Ведьма Предательства', short: 'Медея', home: { x: 14, y: 16.5 }, equip: { weapon: null, armor: null, ring: null } },
     frankenstein: { title: 'Франкенштейн • Берсерк Грозы', short: 'Франкенштейн', home: { x: 57.5, y: 16 }, equip: { weapon: null, armor: null, ring: null } },
     elizabeth: { title: 'Элизабет Альтер • Падшая Богиня', short: 'Элизабет', home: { x: 14, y: 16 }, equip: { weapon: null, armor: null, ring: null },
@@ -6195,6 +6209,9 @@ function heroDisplayName() {
 function heroStatLine() {
     if (player.heroType === 'invoker') return `Мощь: +${player.spellAmp}% | Скор: ${player.moveSpeed} | Сниж.КД: ${player.cdrPct}%`;
     if (player.heroType === 'archer') return `Атака: ${player.handDmg} | Крит: ${player.critChance}% | Дальность: ${player.attackRange}`;
+    if (player.heroType === 'astolfo') return `Атака: ${player.handDmg} | Скор: ${player.moveSpeed} | Крит: ${player.critChance}%`;
+    if (player.heroType === 'atalanta') return player.ataForm === 'beast' ? `Когти: ${player.handDmg} | Броня: ${player.armor} | Скор: ${player.moveSpeed}` : `Атака: ${player.handDmg} | Крит: ${player.critChance}% | Дальность: ${player.attackRange}`;
+    if (player.heroType === 'gilgamesh') return `Урон: ${player.handDmg} | Мощь: +${player.spellAmp}% | Дальность: ${player.attackRange}`;
     if (player.heroType === 'medea') return `Мощь: +${player.spellAmp}% | Воинов: ${(player.medeaWarriors || []).length} | Скор: ${player.moveSpeed}`;
     if (player.heroType === 'frankenstein') return `Урон: ${player.handDmg} | Безумие: ${Math.round(player.madness || 0)}% | Броня: ${player.armor}`;
     if (player.heroType === 'elizabeth') return `Мощь: +${player.spellAmp}% | Скверна: ${player.elizaStacks || 0}/10 | Скор: ${player.moveSpeed}`;
@@ -6257,6 +6274,12 @@ function recalcPlayerStats() {
         Knight.stats(L, q, w, e, r, eq);
     } else if (player.heroType === 'frankenstein') {
         Frank.stats(L, q, w, e, r, eq);
+    } else if (player.heroType === 'astolfo') {
+        Asto.stats(L, q, w, e, r, eq);
+    } else if (player.heroType === 'atalanta') {
+        Ata.stats(L, q, w, e, r, eq);
+    } else if (player.heroType === 'gilgamesh') {
+        Gil.stats(L, q, w, e, r, eq);
     } else if (player.heroType === 'medea') {
         Medea.stats(L, q, w, e, r, eq);
     } else if (player.heroType === 'elizabeth') {
@@ -6359,7 +6382,7 @@ function performMageBasicAttack() {
         return;
     }
     if (player.basicAttackCd > 0) return;
-    if (player.heroType === 'knight') Knight.attack(); else if (player.heroType === 'frankenstein') Frank.attack(); else if (player.heroType === 'medea') Medea.attack(); else if (player.heroType === 'elizabeth') Eliza.attack(); else if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
+    if (player.heroType === 'knight') Knight.attack(); else if (player.heroType === 'frankenstein') Frank.attack(); else if (player.heroType === 'medea') Medea.attack(); else if (player.heroType === 'gilgamesh') Gil.attack(); else if (player.heroType === 'atalanta') Ata.attack(); else if (player.heroType === 'astolfo') Asto.attack(); else if (player.heroType === 'elizabeth') Eliza.attack(); else if (player.heroType === 'saber') saberBasicAttack(); else if (player.archerStance === 'blades') archerBladeAttack(); else archerBasicAttack();
 }
 
 // Цепочка автоатак: 1 → 2 → 3 → 4 → снова 1 (сбрасывается, если пауза между ударами дольше 1.3 с)
@@ -6584,10 +6607,13 @@ function castHeroSkill(key) {
     else if (player.heroType === 'elizabeth') Eliza.cast(key);
     else if (player.heroType === 'frankenstein') Frank.cast(key);
     else if (player.heroType === 'medea') Medea.cast(key);
+    else if (player.heroType === 'gilgamesh') Gil.cast(key);
+    else if (player.heroType === 'atalanta') Ata.cast(key);
+    else if (player.heroType === 'astolfo') Asto.cast(key);
 }
 function castSaberSkill(key) { castHeroSkill(key); }
 // Набор навыков текущего героя (для Кодекса, панели и прокачки)
-function heroSkillSet() { return player.heroType === 'archer' ? ARCHER_SKILLS : (player.heroType === 'knight' ? KNIGHT_SKILLS : (player.heroType === 'elizabeth' ? ELIZA_SKILLS : (player.heroType === 'frankenstein' ? FRANK_SKILLS : (player.heroType === 'medea' ? MEDEA_SKILLS : SABER_SKILLS)))); } // совместимость со старыми кнопками панели
+function heroSkillSet() { return player.heroType === 'archer' ? ARCHER_SKILLS : (player.heroType === 'knight' ? KNIGHT_SKILLS : (player.heroType === 'elizabeth' ? ELIZA_SKILLS : (player.heroType === 'frankenstein' ? FRANK_SKILLS : (player.heroType === 'medea' ? MEDEA_SKILLS : (player.heroType === 'gilgamesh' ? GIL_SKILLS : (player.heroType === 'atalanta' ? Ata.skills() : (player.heroType === 'astolfo' ? ASTO_SKILLS : SABER_SKILLS))))))); } // совместимость со старыми кнопками панели
 
 function beginSkill(skill, key, deferCd) {
     if (player.controlLock) return 0;
@@ -7712,7 +7738,7 @@ function damagePlayer(rawDmg, kind = 'phys') {
     let mult = armorMult(arm);
     if (player.ultCast) mult *= SABER_ULT.castDamageTaken;
     if (player.heroType === 'knight' && Knight.inLake()) mult *= 0.75;
-    mult *= Eliza.damageMult() * Frank.damageMult();   // Элизабет в полёте ульты получает вдвое меньше урона   // в озере крови рыцарь получает меньше урона
+    mult *= Eliza.damageMult() * Frank.damageMult() * Ata.damageMult();   // Элизабет в полёте ульты получает вдвое меньше урона   // в озере крови рыцарь получает меньше урона
     let mitigated = Math.max(1, Math.round(rawDmg * mult));
     if (player.heroType === 'knight') { mitigated = Knight.absorb(mitigated); if (mitigated <= 0) { player.invulnTime = 0.3; spawnFloatingText(player.x, player.y - 24, 'щит', '#fca5a5'); return; } }
     player.hp -= mitigated;
@@ -7731,7 +7757,7 @@ function damagePlayer(rawDmg, kind = 'phys') {
 
     if (player.hp <= 0) {
         player.ultCast = null;
-        player.knightRend = null; player.bloodLake = null; player.elizaUlt = null; player.elizaChannel = null; player.elizaRunes = null; Frank.reset(); Medea.reset(); player.bloodShield = 0; player.knightBleed = 0; player.controlLock = false;
+        player.knightRend = null; player.bloodLake = null; player.elizaUlt = null; player.elizaChannel = null; player.elizaRunes = null; Frank.reset(); Medea.reset(); Gil.reset(); Ata.reset(); Asto.reset(); player.bloodShield = 0; player.knightBleed = 0; player.controlLock = false;
         player.excaliburChargeTime = 0;
         player.avalonBuffTimer = 0; player.saberHasteTimer = 0; player.alacrityTimer = 0; player.ghostWalkTimer = 0; player.lightningShieldTimer = 0;
         recalcPlayerStats();
@@ -8039,7 +8065,7 @@ function updateEnemies25(dt) {
         if (en.type === 'saber_shadow') { updateShadowSaber(en, dt, dist); continue; }
 
         // Невидимого Инвокера (Ghost Walk) обычные враги не видят
-        if (player.ghostWalkTimer > 0) continue;
+        if (player.ghostWalkTimer > 0 || player.astoVanish > 0) continue;   // невидимого героя враги не видят (Призрачный Шаг, Книга Исчезновения)
 
         if (dist <= en.aggroRange || en.aggro > 0) {
             const spd = en.speed * (en.slowTimer > 0 ? en.slowMult : 1);
@@ -8159,6 +8185,8 @@ function isShotBlocked(p) {
 }
 
 function onPlayerProjectileHit(p, en) {
+    if (p.kind === 'gob') return Gil.onHit(p, en);
+    if (p.kind === 'ata') return Ata.onHit(p, en);   // стрела Тавропола   // Фантазм из Врат Вавилона
     let dmg = p.dmg;
     if (p.kind === 'arrow') {
         const d = Math.hypot(en.x - p.sx, en.y - p.sy);
@@ -8302,7 +8330,7 @@ function preUpdate25(dt) {
         if (zt.t >= zt.dur) zoneTransition = null;
     }
     updateSaberUlt(dt);
-    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend || player.elizaUlt || Frank.locked() || Medea.locked() || Cinema.active);
+    player.controlLock = !!(zoneTransition || player.ultCast || player.knightRend || player.elizaUlt || Frank.locked() || Medea.locked() || Gil.locked() || Ata.locked() || Asto.locked() || Cinema.active);
 
     if (player.heroType === 'invoker' && player.attackTarget) {
         // Инвокер не умеет атаковать с руки: ПКМ по врагу лишь разворачивает мага к цели
@@ -8570,7 +8598,13 @@ function updateInvokerBarUI() {
     Eliza.buildBar(); show('elizaTopPill', h === 'elizabeth'); show('elizaActionBar', h === 'elizabeth');
     Frank.buildBar(); show('frankTopPill', h === 'frankenstein'); show('frankActionBar', h === 'frankenstein');
     Medea.buildBar(); show('medeaTopPill', h === 'medea'); show('medeaActionBar', h === 'medea');
+    Gil.buildBar(); show('gilTopPill', h === 'gilgamesh'); show('gilActionBar', h === 'gilgamesh');
     if (h === 'medea') Medea.refreshBar();
+    if (h === 'gilgamesh') Gil.refreshBar();
+    Ata.buildBar(); show('ataTopPill', h === 'atalanta'); show('ataActionBar', h === 'atalanta');
+    if (h === 'atalanta') Ata.refreshBar();
+    Asto.buildBar(); show('astoTopPill', h === 'astolfo'); show('astoActionBar', h === 'astolfo');
+    if (h === 'astolfo') Asto.refreshBar();
     if (h === 'frankenstein') Frank.refreshBar();
     if (h === 'elizabeth') Eliza.refreshBar();
     document.getElementById('btnGrimoireLabel').textContent = h === 'invoker' ? 'Гримуар 27 (B)' : 'Кодекс (B)';
@@ -8580,7 +8614,7 @@ function updateInvokerBarUI() {
     document.getElementById('hudSkillPoints').textContent = player.skillPoints;
 
     if (h !== 'invoker') {
-        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : (h === 'frankenstein' ? 'Frank' : (h === 'medea' ? 'Medea' : 'Saber'))));
+        const P = h === 'archer' ? 'Archer' : (h === 'knight' ? 'Knight' : (h === 'elizabeth' ? 'Eliza' : (h === 'frankenstein' ? 'Frank' : (h === 'medea' ? 'Medea' : (h === 'gilgamesh' ? 'Gil' : (h === 'atalanta' ? 'Ata' : (h === 'astolfo' ? 'Asto' : 'Saber')))))));
         [['Q', 'q', 7, 'active-q'], ['W', 'w', 7, 'active-w'], ['E', 'e', 7, 'active-e'], ['R', 'r', 4, 'active-r']].forEach(([K, k, max, cls]) => {
             const btn = document.getElementById(`btn${P}Lvl${K}`);
             if (btn) btn.classList.toggle('hidden', !(hasPts && player.orbLevels[k] < max && canLearnSkill(k)));
@@ -8651,7 +8685,7 @@ function startNewGameFromMenu() {
         invokeCd: 0, basicAttackCd: 0,
         poiFound: {}, cachesOpened: {}, puzzlesSolved: {}, explored: '', lastWaypoint: null, stamina: 100, exhausted: false, shrineBuff: null,
         refine: {}, saberAlter: false, shadowDuel: null,
-        archerStance: 'bow', ubwCharges: 0, comboStep: 0, comboTimer: 0, knightSword: null, knightBleed: 0, bloodShield: 0, bloodShieldMax: 0, bloodShieldT: 0, bloodLake: null, knightRend: null, knightAnim: null, bladeComboStep: 0, bladeSwing: 0, ubwSky: 0,
+        archerStance: 'bow', ataForm: 'bow', ubwCharges: 0, comboStep: 0, comboTimer: 0, knightSword: null, knightBleed: 0, bloodShield: 0, bloodShieldMax: 0, bloodShieldT: 0, bloodLake: null, knightRend: null, knightAnim: null, bladeComboStep: 0, bladeSwing: 0, ubwSky: 0,
         moveTargetX: null, moveTargetY: null, attackTarget: null, interactTargetGoal: null,
         questStage: 0, questKills: 0, bossKilled: false, draculaKilled: false, hellLordKilled: false,
         portalAnim: 0, checkpointZone: null, ultCast: null, runeFx: null, controlLock: false,
@@ -9043,6 +9077,8 @@ function buildArcherSprite() {
 function heroSpriteCanvas() {
     if (player.heroType === 'knight') return saberAlterSpriteCanvas || (saberAlterSpriteCanvas = buildSaberAlterSprite());
     if (player.heroType === 'elizabeth' || player.heroType === 'frankenstein' || player.heroType === 'medea') return invokerSpriteCanvas;
+    if (player.heroType === 'gilgamesh' || player.heroType === 'atalanta') return archerSpriteCanvas;
+    if (player.heroType === 'astolfo') return saberSpriteCanvas;
     if (player.heroType === 'saber') return player.saberAlter && saberAlterSpriteCanvas ? saberAlterSpriteCanvas : saberSpriteCanvas;
     if (player.heroType === 'archer') return archerSpriteCanvas;
     return player.orbLevels?.r >= 4 ? goldenInvokerSpriteCanvas : invokerSpriteCanvas;
@@ -10539,7 +10575,8 @@ const EMOJI_ART = {
     '🌲': 'herb', '🗺': 'map', '🪨': 'gem', '🦷': 'bone', '🫀': 'heart', '🕸': 'rune', '🐏': 'bone', '🔶': 'gem', '♨': 'fire', '🦯': 'staff', '🌕': 'moon', '🥷': 'cloak',
     '🧣': 'cloak', '👁': 'eye', '💨': 'tornado', '🌱': 'herb', '🌺': 'herb', '🦪': 'gem', '🖋': 'staff', '🧉': 'potion', '🥤': 'potion', '🫖': 'potion', '📿': 'ring',
     '🌅': 'sun', '📗': 'book', '📙': 'book', '📓': 'book', '🛤': 'dash', '🪽': 'dash', '🟣': 'orb', '🔆': 'beam', '🧭': 'compass', '⚒': 'gear', '⛰': 'tower',
-    '🌑': 'moon', '🪦': 'tower', '🎯': 'eye', '☠': 'skull', '❤': 'heart', '❓': 'question', '🐙': 'orb', '🧔': 'staff', '🧝': 'bow', '🤺': 'sword', '🕵': 'eye'
+    '🌑': 'moon', '🪦': 'tower', '🎯': 'eye', '☠': 'skull', '❤': 'heart', '❓': 'question', '🐙': 'orb', '🧔': 'staff', '🧝': 'bow', '🤺': 'sword', '🕵': 'eye',
+    '🔨': 'hammer', '🦅': 'wing', '🐾': 'claw', '🐆': 'wolf', '🐗': 'fire', '🦌': 'dash', '📯': 'sound', '🎶': 'sound', '🌌': 'rift', '👺': 'skull', '👿': 'skull', '😈': 'skull', '🧟': 'skull', '🏃': 'dash'
 };
 // ---------- Иконки-мини-арты: вектор с объёмом и бликами → микро-символьный шейдер → картинка ----------
 // Каждая иконка рисуется в 128×128 (свет сверху-слева, градиенты, блики, мягкая тень, тёмный контур),
@@ -10660,6 +10697,13 @@ ICON_PAINT.ring = g => { g.lineWidth = 16; g.strokeStyle = '#050407'; g.beginPat
     g.save(); g.translate(64, 36); g.scale(0.4, 0.4); g.translate(-64, -64); ICON_PAINT.gem(g, ['#fce7f3', '#db2777', '#500724']); g.restore(); };
 ICON_PAINT.beam = g => { g.fillStyle = IP.lin(g, 0, 36, 0, 92, [[0, 'rgba(245,158,11,0)'], [0.3, '#fde047'], [0.5, '#ffffff'], [0.7, '#fde047'], [1, 'rgba(245,158,11,0)']]); g.fillRect(4, 36, 120, 56);
     g.save(); g.translate(64, 64); g.scale(0.8, 0.8); g.translate(-64, -64); ICON_PAINT.sword(g); g.restore(); };
+// Молот берсерка, крыло Гиппогрифа, когти Агреи
+ICON_PAINT.hammer = g => { g.save(); g.translate(64, 64); g.rotate(-0.6); g.fillStyle = IP.lin(g, -6, 0, 6, 0, [[0, '#7c4a1e'], [1, '#3b2210']]); g.fillRect(-6, -10, 12, 62); g.strokeStyle = '#050407'; g.lineWidth = 4; g.strokeRect(-6, -10, 12, 62);
+    g.fillStyle = IP.lin(g, 0, -46, 0, -10, [[0, '#f5f5f4'], [0.5, '#a8a29e'], [1, '#44403c']]); g.fillRect(-34, -46, 68, 36); g.strokeRect(-34, -46, 68, 36); g.fillStyle = '#fde047'; g.fillRect(-34, -30, 68, 4); g.restore(); };
+ICON_PAINT.wing = g => { g.beginPath(); g.moveTo(20, 104); g.bezierCurveTo(30, 40, 70, 16, 116, 14); g.bezierCurveTo(100, 34, 104, 44, 92, 54); g.bezierCurveTo(100, 60, 96, 70, 84, 74); g.bezierCurveTo(88, 82, 80, 90, 66, 92); g.bezierCurveTo(60, 100, 44, 104, 20, 104);
+    g.fillStyle = IP.lin(g, 20, 104, 116, 14, [[0, '#fbcfe8'], [0.5, '#f5f5f4'], [1, '#fde68a']]); g.fill(); IP.out(g, 4);
+    g.strokeStyle = 'rgba(190,24,93,0.55)'; g.lineWidth = 3; [[34, 96, 92, 30], [44, 98, 88, 56], [54, 98, 80, 76]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); }); };
+ICON_PAINT.claw = g => { [0, 1, 2].forEach(i => { g.beginPath(); g.moveTo(26 + i * 24, 18); g.quadraticCurveTo(58 + i * 22, 64, 30 + i * 26, 112); g.lineWidth = 15; g.strokeStyle = '#050407'; g.stroke(); g.lineWidth = 8; g.strokeStyle = IP.lin(g, 0, 18, 0, 112, [[0, '#fecdd3'], [0.5, '#e11d48'], [1, '#581c87']]); g.stroke(); }); };
 ICON_PAINT.gacha_saber = ICON_PAINT.sword; ICON_PAINT.gacha_archer = ICON_PAINT.bow; ICON_PAINT.gacha_invoker = ICON_PAINT.book;
 
 // Иконки предметов: векторная живопись на холсте → картинка (один раз при загрузке)

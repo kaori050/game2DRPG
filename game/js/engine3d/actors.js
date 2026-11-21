@@ -265,7 +265,7 @@ const Actors3D = {
         const o = Math.sin(j.t * 70) * Math.exp(-j.t * 16) * 0.07 * j.k + Math.exp(-j.t * 10) * 0.05 * j.k;
         a.base.position.x += j.dx * o; a.base.position.z += j.dz * o;
     },
-    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; if (ht === 'elizabeth') return 0xe879f9; if (ht === 'frankenstein') return 0xfde047; if (ht === 'medea') return 0xa78bfa; return ht === 'saber' ? (saberRed() ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
+    heroColor() { const ht = player.heroType; if (ht === 'knight') return 0xdc1020; if (ht === 'elizabeth') return 0xe879f9; if (ht === 'frankenstein') return 0xfde047; if (ht === 'medea') return 0xa78bfa; if (ht === 'gilgamesh') return 0xfbbf24; if (ht === 'astolfo') return 0xf472b6; if (ht === 'atalanta') return player.ataForm === 'beast' ? 0xc026d3 : 0xbef264; return ht === 'saber' ? (saberRed() ? 0xff2a3a : 0x9fd0ff) : (ht === 'archer' ? 0xff3a4a : ({ q: 0x38bdf8, w: 0xc084fc, e: 0xfb923c }[(player.activeOrbs || [])[2]] || 0xc084fc)); },
     animate(a, dt, x, z, opts) {
         const t = Engine3D.t;
         if (a.lx === null) { a.lx = x; a.lz = z; }
@@ -418,10 +418,10 @@ const Actors3D = {
         const ht = player.heroType || 'invoker';
         const gold = ht === 'invoker' && player.orbLevels && player.orbLevels.r >= 4;
         const ch = typeof playerChar === 'function' ? playerChar() : null;
-        const key = ht + (player.saberAlter ? 'A' : '') + (player.archerStance === 'blades' ? 'B' : '') + (gold ? 'G' : '') + (ch ? ch.id : '') + (ht === 'knight' ? (player.knightSword ? player.knightSword.type : '-claw') : '');
+        const key = ht + (player.saberAlter ? 'A' : '') + (player.archerStance === 'blades' ? 'B' : '') + (gold ? 'G' : '') + (ch ? ch.id : '') + (ht === 'knight' ? (player.knightSword ? player.knightSword.type : '-claw') : '') + (ht === 'atalanta' ? player.ataForm || 'bow' : '');
         if (key !== this.playerKey) {
             if (this.player) this.drop(this.player);
-            const mname = ht === 'saber' && player.saberAlter && ch && (ch.id === 'saber' || ch.id === 'saber_alter') ? 'saber_alter' : (ch && ch.model);
+            const mname = ht === 'atalanta' && player.ataForm === 'beast' ? 'atalanta_alter' : ht === 'saber' && player.saberAlter && ch && (ch.id === 'saber' || ch.id === 'saber_alter') ? 'saber_alter' : (ch && ch.model);
             const mx = mname && typeof MDX3D !== 'undefined' ? MDX3D.create(mname, { height: 1.25 }) : null;
             if (mx) this.prepMdx(mx, mname);
             this.player = this.make(mx ? { root: mx.root, rig: { kind: 'mdx', mdx: mx, body: mx.root } } : Models3D.hero(ht, { alter: player.saberAlter, stance: player.archerStance, gold, pal: ch && ch.pal, sword: player.knightSword }), null);
@@ -440,6 +440,8 @@ const Actors3D = {
             if (ht === 'saber' && player.ultCast && player.ultCast.swing) { style = 'heavy'; dur = 0.6; }
             else if (ht === 'saber') { const k = (player.comboStep || 1) - 1; style = ['thrust', 'cross', 'spin', 'overhead'][k]; dur = [0.34, 0.4, 0.52, 0.62][k]; }
             else if (ht === 'archer') { const k = (player.bladeComboStep || 1) - 1; style = ['slash', 'slashL', 'twin', 'twinSpin'][k]; dur = [0.32, 0.32, 0.42, 0.56][k]; }
+            else if (ht === 'astolfo') { const k = (player.comboStep || 1) - 1; style = ['slash', 'cross'][k] || 'slash'; dur = [0.3, 0.34][k] || 0.3; }
+            else if (ht === 'atalanta') { const k = (player.comboStep || 1) - 1; style = ['slash', 'cross'][k] || 'slash'; dur = [0.3, 0.34][k] || 0.3; }
             else if (ht === 'frankenstein') { const k = (player.comboStep || 1) - 1; style = ['slash', 'cross'][k] || 'slash'; dur = [0.55, 0.62][k] || 0.55; }
             else if (ht === 'knight') { const k = (player.comboStep || 1) - 1; if (player.knightSword) { style = ['thrust', 'cross', 'spin', 'overhead'][k]; dur = [0.36, 0.42, 0.54, 0.64][k]; } else { style = ['clawR', 'clawL', 'clawX', 'clawRend'][k]; dur = [0.26, 0.26, 0.34, 0.48][k]; } }
             this.attack(P, style, dur);
@@ -459,12 +461,12 @@ const Actors3D = {
         if (player.knightAnim && player.knightAnim !== P.kAnim) { P.kAnim = player.knightAnim; this.attack(P, player.knightAnim.kind, player.knightAnim.t); }
         const cine = typeof Cinema !== 'undefined' ? Cinema.heroPose() : null;
         // Масса героя: рыцарь в доспехах тяжелее всех, маги легче
-        P.weight = { knight: 1.35, saber: player.charId === 'mordred' ? 1.2 : 1.1, archer: 0.9, elizabeth: 0.75, frankenstein: 1.45, medea: 0.7 }[ht] || 0.8;
-        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: cine ? cine.hold : (charging ? 'raise' : (player.knightRend ? 'rend' : (player.elizaUlt || player.frankUlt ? 'ultcast' : (player.elizaChannel ? 'channel' : null)))), alt: player.charId === 'mordred' && (player.avalonBuffTimer || 0) > 0, bigBlade: ht === 'saber' && (player.avalonBuffTimer || 0) > 0 ? 0.9 : (charging ? 0.35 : 0),
+        P.weight = { knight: 1.35, saber: player.charId === 'mordred' ? 1.2 : 1.1, archer: 0.9, elizabeth: 0.75, frankenstein: 1.45, medea: 0.7, gilgamesh: 0.95, astolfo: 0.75, atalanta: player.ataForm === 'beast' ? 0.85 : 0.7 }[ht] || 0.8;
+        this.animate(P, dt, px, pz, { face: Math.PI / 2 - player.facingAngle, hold: cine ? cine.hold : (charging ? 'raise' : (player.knightRend ? 'rend' : (player.astoUlt && player.astoUlt.charging && !player.astoUlt.done) ? 'ride' : (player.gilUlt ? (player.gilUlt.fired ? 'ultcast' : 'eaSpin') : player.elizaUlt || player.frankUlt ? 'ultcast' : (player.elizaChannel ? 'channel' : null)))), alt: player.charId === 'mordred' && (player.avalonBuffTimer || 0) > 0, bigBlade: ht === 'saber' && (player.avalonBuffTimer || 0) > 0 ? 0.9 : (charging ? 0.35 : 0),
             vis: P.rig.kind === 'mdx' && P.rig.mdx.modelName === 'archer' ? (player.archerStance === 'blades' ? { 1: true, 2: false } : { 1: false, 2: true })
                 : (P.rig.kind === 'mdx' && P.rig.mdx.modelName === 'frankenstein' && player.frankMace ? { [P.rig.mdx.maceGeoset || 0]: false } : null) });
         // Ульта рыцаря: левитация и судороги, пока он разрывает себя
-        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : player.elizaUlt ? this.spring(P, 'cineY', 0.9 + Math.sin(Engine3D.t * 3) * 0.08, dt, 4) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : (P.bobY || 0));
+        P.root.position.y = cine ? this.spring(P, 'cineY', cine.y, dt, 6) : player.ataLeap ? Math.sin(Math.min(1, player.ataLeap.t / player.ataLeap.dur) * Math.PI) * 1.4 : player.elizaUlt ? this.spring(P, 'cineY', 0.9 + Math.sin(Engine3D.t * 3) * 0.08, dt, 4) : (player.knightRend ? Math.min(0.7, player.knightRend.t * 0.3) + Math.sin(Engine3D.t * 37) * 0.02 : (P.bobY || 0));
         // Переход формы/стойки: импульс масштаба, оружие «проявляется»
         let wScale = 1;
         if (P.trans > 0) {

@@ -112,7 +112,17 @@ M.textures = M.textures.map(tx => {
     const f = path.join(texDir, path.basename(tx.file.replace(/\\/g, '/')));
     // Встроенные текстуры Warcraft 3 (их нет в архиве модели) — помечаем, движок подставит цветное свечение
     if (!fs.existsSync(f)) { console.error('нет текстуры (встроенная в WC3?):', tx.file); return { file: path.basename(f), missing: true }; }
-    const img = decodeBLP(fs.readFileSync(f));
+    let img = decodeBLP(fs.readFileSync(f));
+    // MAXTEX=N — уменьшить слишком большие текстуры (усреднение блоков 2×2), чтобы JS-файл модели не раздувался
+    const MAX = +(process.env.MAXTEX || 0);
+    while (MAX && Math.max(img.w, img.h) > MAX) {
+        const w = img.w >> 1, h = img.h >> 1, o = new Uint8Array(w * h * 4), s = img.rgba, W = img.w;
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) for (let c = 0; c < 4; c++) {
+            const a = ((2 * y) * W + 2 * x) * 4 + c;
+            o[(y * w + x) * 4 + c] = (s[a] + s[a + 4] + s[a + W * 4] + s[a + W * 4 + 4] + 2) >> 2;
+        }
+        img = { w, h, rgba: o };
+    }
     return { file: path.basename(f), w: img.w, h: img.h, png: 'data:image/png;base64,' + png(img.w, img.h, img.rgba).toString('base64') };
 });
 // Лишние поля нод — компактнее

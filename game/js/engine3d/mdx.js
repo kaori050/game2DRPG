@@ -18,7 +18,24 @@ const MDX3D = {
         frankenstein: { idle: 'Stand 1', walk: 'Walk 1', slash: 'Attack 1', cross: 'Attack 2', thrust: 'Attack 1', slashB: 'Attack 2', spin: 'Attack 2', overhead: 'Spell 1', heavy: 'Spell 1',
             slam: 'Spell 1', slam2: 'Spell 2', throw: 'Throw 1', pull: 'Recall', ultcast: 'Spell 4', cast: 'Spell 2', castR: 'Attack 1', castL: 'Attack 2', castBig: 'Spell 1',
             raise: 'Spell 4', kneel: 'Stand 2', rise: 'Stand 3', plunge: 'Spell 1', stance: 'Stand 3', pray: 'Stand 2', craft: 'Attack 1', death: 'Death' },
+        astolfo: { idle: 'stand', walk: 'walk fast', stance: 'stand ready', slash: 'attack 1', slashB: 'attack 2', cross: 'attack 2', thrust: 'attack 2', spin: 'attack slam', overhead: 'attack slam', heavy: 'attack slam',
+            horn: 'spell two', dash: 'spell', summon: 'spell channel one', ride: 'spell channel', land: 'spell three', cast: 'spell two', castR: 'attack 1', castL: 'attack 2', castBig: 'spell two',
+            raise: 'spell two', kneel: 'stand ready', rise: 'stand ready', plunge: 'attack slam', pray: 'stand 2', craft: 'attack 1', death: 'death' },
+        atalanta: { idle: 'stand', walk: 'walk', stance: 'walk fast', castR: 'attack 1', castL: 'attack slam', cast: 'attack 1', castBig: 'attack 2', hunt: 'spell three', dash: 'spell Thirteen', volley: 'spell Six', sky: 'spell Twelve',
+            slash: 'attack 1', thrust: 'attack 1', cross: 'attack 2', spin: 'spell Seven', overhead: 'spell Four', heavy: 'spell Four', raise: 'spell Four', kneel: 'stand', rise: 'stand', plunge: 'attack 2', pray: 'spell Nine', craft: 'attack 1', death: 'death' },
+        atalanta_alter: { idle: 'Stand', walk: 'Walk', stance: 'Stand Ready', slash: 'attack', slashB: 'Attack 2', cross: 'Attack 2', thrust: 'attack', spin: 'Spell Two', rend: 'Spell Two', leap: 'Attack Slam', roar: 'Spell One', skia: 'Spell Three', ultcast: 'Spell One',
+            overhead: 'Attack Slam', heavy: 'Attack Slam', cast: 'Spell One', castR: 'attack', castL: 'Attack 2', castBig: 'Spell One', raise: 'Spell One', kneel: 'Stand Ready', rise: 'Stand Ready', plunge: 'Attack Slam', pray: 'Stand Ready', craft: 'attack', death: 'Death' },
+        gilgamesh: { idle: 'Stand', walk: 'Walk', stance: 'Stand Ready', slash: 'Attack 1', slashB: 'Attack 3', cross: 'Attack 2', thrust: 'Attack 2', spin: 'Attack 4', overhead: 'Attack 5', heavy: 'Attack 5',
+            cast: 'spell', castR: 'spell', castL: '4', castBig: 'spell', gate: 'spell', gateR: '4', chains: '4', treasury: 'Animation Earth_SS', lunge: '2', leap: '5',
+            eaDraw: '6', eaSpin: '7', ultcast: '8', raise: 'spell', kneel: 'Stand Ready', rise: 'Stand Ready', plunge: 'Attack 5', pray: 'spell', craft: 'Attack 1', death: 'Death' },
         archer: { idle: 'Stand', walk: 'Walk', bow: 'Spell Throw', bow2: 'Spell Throw', bowPower: 'Spell Throw', slash: 'Attack 1', slashL: 'Attack 2', twin: 'Attack Slam', twinSpin: 'Spell Slam', cast: 'Spell Two', throw: 'Spell Throw', raise: 'Spell Gold', kneel: 'Stand', rise: 'Stand', bowUp: 'Spell Gold', stance: 'Stand', death: 'Death' }
+    },
+    // Правки отдельных моделей: hide — геосеты, которые не создаются; missing — цвет частей со встроенными текстурами WC3
+    TWEAK: {
+        atalanta: { tint: 0xb4aca0, env: 0.4 },
+        astolfo: { hide: [0], h: 165, tint: 0xb8b0b4, env: 0.4 },   // в габаритах стойки — Гиппогриф, рост задаём вручную
+        atalanta_alter: { hide: [0, 2, 3, 4, 5, 6, 7, 8], tint: 0xa89ca8, env: 0.4 },   // ореолы и «встроенные» текстуры WC3: эффекты рисуем сами
+        gilgamesh: { hide: [19, 20], missing: 0xd4a020, tint: 0x9a8a78, env: 0.35 }   // флипбук золотой ряби рисуем своими порталами; «чужое» оружие — золотое
     },
     // Матрица перехода из осей WC3 (X — вперёд, Y — влево, Z — вверх) в оси движка (Y — вверх, Z — вперёд)
     AXES: null,
@@ -27,7 +44,7 @@ const MDX3D = {
         if (!this.AXES) this.AXES = new THREE.Matrix4().set(0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1);
         const root = new THREE.Group(), axes = new THREE.Group(); axes.matrixAutoUpdate = false; axes.matrix.copy(this.AXES);
         // Рост модели берём из габаритов стойки: приводим к ~1.15 тайла
-        const ext = D.sequences[0].extent, height = Math.max(50, ext[6] - ext[3]);
+        const ext = D.sequences[0].extent, height = (this.TWEAK[name] || {}).h || Math.max(50, ext[6] - ext[3]);   // h — рост вручную, если в габариты попал скакун/эффекты
         const sc = (opts.height || 1.2) / height; axes.matrix.premultiply(new THREE.Matrix4().makeScale(sc, sc, sc));
         root.add(axes);
         const inst = { sc, modelName: name, D, root, axes, meshes: [], world: [], seq: 0, time: D.sequences[0].start, gtime: 0, rate: 1, loop: true, done: false, mats: [] };
@@ -39,7 +56,9 @@ const MDX3D = {
             return (this.texCache[key] = tx);
         });
         const team = opts.team || 0xb01020;
+        const TW = this.TWEAK[name] || {};
         D.geosets.forEach((G, gi) => {
+            if (TW.hide && TW.hide.includes(gi)) return;   // части, которые движок рисует сам (например, флипбук-порталы без анимации UV)
             const n = G.pos.length / 3, g = new THREE.BufferGeometry();
             g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(G.pos), 3).setUsage(THREE.DynamicDrawUsage));
             g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(G.nrm), 3).setUsage(THREE.DynamicDrawUsage));
@@ -50,7 +69,8 @@ const MDX3D = {
             const p = { roughness: 0.62, metalness: 0.25, envMapIntensity: 0.6, side: THREE.DoubleSide };
             const T = D.textures[L.tex] || {};
             // Нет текстуры: цвет команды или «свечение» по имени встроенной текстуры WC3
-            if (map) p.map = map; else p.color = new THREE.Color(T.missing ? (/purple/i.test(T.file) ? 0x9a3aff : /red/i.test(T.file) ? 0xff2a2a : /blue/i.test(T.file) ? 0x3a8aff : 0xffffff) : team);
+            if (map) { p.map = map; if (TW.tint) p.color = new THREE.Color(TW.tint); if (TW.env !== undefined) p.envMapIntensity = TW.env; } else p.color = new THREE.Color(T.missing ? (TW.missing || (/purple/i.test(T.file) ? 0x9a3aff : /red/i.test(T.file) ? 0xff2a2a : /blue/i.test(T.file) ? 0x3a8aff : 0xffffff)) : team);
+            if (!map && T.missing && TW.missing) { p.metalness = 0.85; p.roughness = 0.28; p.envMapIntensity = 1.2; }
             if (L.filter === 1) { p.alphaTest = 0.5; p.transparent = false; }
             else if (L.filter >= 2) { p.transparent = true; p.depthWrite = false; if (L.filter === 3 || L.filter === 4) p.blending = THREE.AdditiveBlending; }
             const m = new THREE.MeshStandardMaterial(p);
